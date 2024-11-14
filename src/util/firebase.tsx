@@ -19,3 +19,7 @@ export function InitFirebase(){
       return {app, analytics};
 }
 
+export async function CheckSecretCode() : Promise<boolean>{
+  await setTimeout(()=>{}, 1000);
+  return true;
+}
