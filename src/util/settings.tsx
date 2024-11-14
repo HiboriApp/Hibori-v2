@@ -28,3 +28,4 @@ export async function SetPallate(pallate: Pallate){
 export async function GetPallate() : Promise<Pallate> {
     return DefaultPallate();
 }
+
