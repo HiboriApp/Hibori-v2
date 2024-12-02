@@ -8,6 +8,7 @@ type Message = {
   content: string
   target: string
   timestamp: string
+  image?: string
 }
 
 type Post = {
@@ -118,8 +119,7 @@ export default function Home() {
               <div key={item.id} className={`p-4 bg-${pl.secondary} shadow rounded-lg`}>
                 <p className="font-semibold">{item.target}</p>
                 <p>{item.content}</p>
-                {('image' in item && item.image) ? (
-                    //@ts-expect-error item.image could be undefined
+                {!!item.image ? (
                   <img src={item.image} alt="תמונת פוסט" className="mt-2 rounded-lg max-w-full h-auto" />
                 ) : null}
                 <p className={`text-sm text-${pl.background}`}>{item.timestamp}</p>

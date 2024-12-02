@@ -15,7 +15,7 @@ export function DefaultPallate() : Pallate{
         primary: 'green-700',
         secondary: 'green-500',
         tertiary: 'emerald-800',
-        text: 'white',
+        text: 'black',
         background: 'emerald-100',
         special: 'teal-900'
     }
