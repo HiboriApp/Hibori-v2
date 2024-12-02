@@ -22,6 +22,7 @@ export function DefaultPallate() : Pallate{
 }
 
 export async function SetPallate(pallate: Pallate){
+    
     return pallate;
 }
 
