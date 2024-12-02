@@ -15,7 +15,7 @@ export default function SignUp(){
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen justify-center bg-white" dir="rtl">
+    <div className="flex flex-col md:flex-row justify-center bg-white" dir="rtl">
     {/* Mobile and Tablet View */}
     <div className="w-full md:w-1/2 flex flex-col items-center justify-center  px-4">
       {/* Wave design for mobile */}
@@ -97,7 +97,7 @@ export default function SignUp(){
         </div>
       </div>
 
-      <div className="hidden md:flex w-full md:w-1/2 items-center justify-center relative overflow-hidden h-screen">
+      <div className="hidden md:flex w-full md:w-1/2 items-center justify-center relative overflow-hidden h-auto">
         <img
           src="/skibidi.png"
           alt="Background"
