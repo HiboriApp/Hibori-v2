@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DefaultPallate, GetPallate, Pallate } from "../util/settings";
+import { DefaultPallate, GetPallate, Pallate } from "../api/settings";
 
 export function Signup() {
     const [pallate, setPallate] = useState<Pallate>(DefaultPallate());
