@@ -11,7 +11,7 @@ import './App.css';
 const router = createBrowserRouter([
   ...loginRoutes(), ...mainRoutes()
 ]);
-
+console.log(router.routes)
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <RouterProvider router={router} />
