@@ -70,7 +70,7 @@ const LoginForm: React.FC = () => {
       </div>
 
       {/* Desktop View */}
-      <div className="hidden md:flex w-full md:w-1/2 items-center justify-center relative overflow-hidden h-screen">
+      <div className="hidden md:flex w-full md:w-1/2 items-center justify-center relative overflow-hidden">
         {/* Image Background */}
         <img
           src="/skibidi.png"
