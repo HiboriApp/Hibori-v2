@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
+import { Login } from '../api/auth';
+import { useNavigate } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../api/firebase';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  onAuthStateChanged(auth, (user) => {
+    if (user){navigate('/home');}
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempted with:', email, password);
+    const res = await Login(email, password);
+    if (res) {
+      navigate('/home')
+    }
   };
 
   return (
