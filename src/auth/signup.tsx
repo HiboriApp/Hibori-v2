@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { DefaultPallate } from '../api/settings';
 
 export default function SignUp(){
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const pl = DefaultPallate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
