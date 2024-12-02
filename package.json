@@ -14,6 +14,7 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-shell": "^2",
     "firebase": "^11.0.1",
+    "framer-motion": "^11.12.0",
     "i18next": "^23.16.5",
     "lucide-react": "^0.462.0",
     "react": "^18.2.0",
