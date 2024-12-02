@@ -4,7 +4,9 @@ import { DefaultPallate, GetPallate, Pallate } from '../api/settings';
 
 // Routes
 const routes = [
-  { name: 'Home', path: '/' },
+  { name: 'עמוד ראשי', path: '/home' },
+  { name: 'החברים שלך', path: '/connections' },
+  { name: 'הודעות', path: '/messages' },
 ];
 
 function UserProfile({ palette }: { palette: Pallate }) {
