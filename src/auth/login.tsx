@@ -11,25 +11,20 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-white" dir="rtl">
+    <div className="flex flex-col md:flex-row min-h-screen justify-center bg-white" dir="rtl">
       {/* Mobile and Tablet View */}
-      <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative px-4">
+      <div className="w-full md:w-1/2 flex flex-col items-center justify-center  px-4">
         {/* Wave design for mobile */}
-        <div className="md:hidden w-full overflow-hidden absolute top-0 left-0">
+        <div className="md:hidden w-full h-full overflow-hidden absolute top-0 left-0">
           <svg className="w-full h-auto" viewBox="0 0 500 150" preserveAspectRatio="none">
             <path d="M0,0 C150,100 350,0 500,100 L500,0 L0,0 Z" fill="#06AA06"></path>
           </svg>
         </div>
 
-        {/* Mobile welcome text */}
-        <div className="md:hidden text-white z-10 p-6 mt-16">
-          <h3 className="text-2xl font-bold mb-2">ברוכים הבאים בחזרה!</h3>
-          <p>התחבר כדי לגשת לחשבון שלך</p>
-        </div>
-
+     
         {/* Login form - Centered on mobile and desktop */}
-        <div className="w-full max-w-md mx-auto p-6 md:p-8 bg-white md:bg-transparent rounded-t-3xl md:rounded-none z-20 flex flex-col justify-center md:mt-0">
-          <h2 className="text-3xl font-bold text-[#06AA06] mb-6">התחברות</h2>
+        <div className="w-full max-w-md mx-auto p-6 md:p-8 md:bg-transparent rounded-t-3xl md:rounded-none z-20 flex flex-col justify-center md:mt-0">
+          <h2 className="text-3xl font-bold text-[#06AA06] mb-6 text-center md:text-start">התחברות</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-[#115614] mb-1">
