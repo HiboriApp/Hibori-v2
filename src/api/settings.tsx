@@ -12,12 +12,12 @@ export interface Pallate{
 
 export function DefaultPallate() : Pallate{
     return {
-        primary: 'emerald-700',
-        secondary: 'emerald-500',
+        primary: 'green-700',
+        secondary: 'green-500',
         tertiary: 'emerald-800',
         text: 'white',
-        background: 'emerald-900',
-        special: 'emerald-300'
+        background: 'emerald-100',
+        special: 'teal-900'
     }
 }
 
