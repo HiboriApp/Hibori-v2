@@ -3,6 +3,7 @@ import { auth, db } from "./firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { setUser, UserData } from "./db";
 import { DefaultPallate } from "./settings";
+import { GenerateIcons } from "./icons";
 
 
 export async function SignUp(email: string, password: string, name: string) {
@@ -12,7 +13,10 @@ export async function SignUp(email: string, password: string, name: string) {
         id: user.user.uid,
         name: name,
         pallate: DefaultPallate(),
-        icon: 
+        icon: await GenerateIcons(user.user.uid),
+        bio: "",
+        lastSeen: new Date().toString(),
+        email: email
     };
     await setUser(data);
     return true;

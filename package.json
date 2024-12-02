@@ -11,6 +11,8 @@
     "android": "tauri android"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.2",
+    "@dicebear/core": "^9.2.2",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-shell": "^2",
     "firebase": "^11.0.1",

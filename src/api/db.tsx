@@ -5,6 +5,11 @@ import { auth, db } from "./firebase";
 export interface UserData{
     id: string,
     pallate: Pallate
+    icon: string
+    name: string
+    lastSeen: string
+    bio: string
+    email: string
 }
 
 export async function updatePallate(user: UserData, newPallate: Pallate){

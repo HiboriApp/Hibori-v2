@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle, Plus } from 'lucide-react'
 import { GetPallate, Pallate } from '../api/settings'
+import { getUser, UserData } from '../api/db'
+import { signOut } from 'firebase/auth'
+import { auth } from '../api/firebase'
 
 // Routes
 const routes = [
@@ -18,19 +21,19 @@ const pageTransition = {
 }
 
 // UserProfile Component
-function UserProfile({ palette }: { palette: Pallate }) {
+function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
       <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`}>
         <img
-          src="/avatars/01.png"
-          alt="ג'ון דו"
+          src={user.icon}
+          alt={user.id}
           className="w-full h-full object-cover"
         />
       </div>
       <div>
-        <p className={`text-sm font-semibold text-${palette.text}`}>ג'ון דו</p>
-        <p className={`text-xs text-${palette.special}`}>john@example.com</p>
+        <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
+        <p className={`text-xs text-${palette.special}`}>{user.email}</p>
       </div>
     </div>
   )
@@ -61,7 +64,7 @@ function NotificationBell({ palette }: { palette: Pallate }) {
 }
 
 // Sidebar Component
-function Sidebar({ palette }: { palette: Pallate }) {
+function Sidebar({ palette, user }: { palette: Pallate, user: UserData }) {
   const location = useLocation()
 
   return (
@@ -90,7 +93,7 @@ function Sidebar({ palette }: { palette: Pallate }) {
         })}
       </nav>
       <div className={`p-4 border-t border-${palette.secondary}`}>
-        <UserProfile palette={palette} />
+        <UserProfile user={user} palette={palette} />
       </div>
     </aside>
   )
@@ -173,16 +176,21 @@ function MainContent({ children, palette }: { children: React.ReactNode; palette
 // Layout Component
 export function Layout({ children }: { children: React.ReactNode }) {
   const [palette, setPalette] = useState<Pallate | null>(null)
+  const [user, setUser] = useState<UserData | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchPalette() {
       const newPalette = await GetPallate()
       setPalette(newPalette)
+      const userData = await getUser();
+      if (!userData){await signOut(auth);navigate('/');return;}
+      setUser(userData);
     }
     fetchPalette()
   }, [])
 
-  if (!palette) {
+  if (!palette || !user) {
     return <div>Loading...</div>
   }
 
@@ -190,7 +198,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className={`flex flex-col h-screen bg-${palette.background}`} dir="rtl">
       <Header palette={palette} />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar palette={palette} />
+        <Sidebar palette={palette} user={user} />
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="p-4 md:hidden">
             <SearchBar palette={palette} />
