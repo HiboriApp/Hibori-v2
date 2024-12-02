@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { DefaultPallate } from '../api/settings';
 
-const SignupForm: React.FC = () => {
+export default function SignUp(){
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const pl = DefaultPallate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,7 +15,7 @@ const SignupForm: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-white" dir="rtl">
+    <div className={`flex flex-col md:flex-row min-h-screen bg-${pl.background}`} dir="rtl">
       <div className="w-full md:w-1/2 flex flex-col justify-between md:justify-center relative">
         {/* Wave design for mobile */}
         <div className="md:hidden w-full overflow-hidden">
@@ -115,6 +117,4 @@ const SignupForm: React.FC = () => {
     </div>
   );
 };
-
-export default SignupForm;
 

@@ -1,6 +1,6 @@
 import { RouteObject } from "react-router-dom"
 import Login from "./auth/login";
-import { Signup } from "./auth/signup";
+import Signup  from "./auth/signup";
 
 export default function Routes() : RouteObject[]{
   return [
