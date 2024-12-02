@@ -24,12 +24,7 @@ const pageTransition = {
 function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
-      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`}>
-        <img
-          src={user.icon}
-          alt={user.id}
-          className="w-full h-full object-cover"
-        />
+      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`} dangerouslySetInnerHTML={{ __html: user.icon }}>
       </div>
       <div>
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
