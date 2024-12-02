@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { DefaultPallate, Pallate } from "./settings";
+import { Pallate } from "./settings";
 import { auth, db } from "./firebase";
 
 export interface UserData{
