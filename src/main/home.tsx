@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { DefaultPallate, GetPallate, Pallate } from '../api/settings'
+import { Layout } from './layout'
 
 type Message = {
   id: string
@@ -102,7 +103,7 @@ export default function Home() {
   useEffect(() => {GetPallate().then((pl) => setPalette(pl))}, []);
 
   return (
-    <div dir="rtl" className={`container mx-auto px-4 py-8 bg-${pl.background} text-${pl.text}`}>
+    <Layout children={<div dir="rtl" className={`container mx-auto px-4 py-8 bg-${pl.background} text-${pl.text}`}>
       <h1 className={`text-3xl font-bold mb-6 text-${pl.primary}`}>הודעות ופוסטים</h1>
       <div className="mb-8">
         <h2 className={`text-2xl font-semibold mb-4 text-${pl.tertiary}`}>תוכן חדש</h2>
@@ -126,7 +127,7 @@ export default function Home() {
             ))}
         </div>
       </div>
-    </div>
+    </div>}></Layout>
   )
 }
 
