@@ -1,25 +1,13 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "./firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { setUser, UserData } from "./db";
-import { DefaultPallate } from "./settings";
-import { GenerateIcons } from "./icons";
+import { doc, getDoc } from "firebase/firestore";
+import { CreateUser } from "./db";
 
 
 export async function SignUp(email: string, password: string, name: string) {
     try{
     const user = await createUserWithEmailAndPassword(auth, email, password);
-    const data: UserData = {
-        id: user.user.uid,
-        name: name,
-        pallate: DefaultPallate(),
-        icon: await GenerateIcons(user.user.uid),
-        bio: "",
-        lastSeen: new Date().toString(),
-        email: email
-    };
-    await setUser(data);
-    return true;
+    CreateUser(name, user.user, email);
     } catch(e){
         console.log(e);
         return false;
