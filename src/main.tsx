@@ -2,6 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import loginRoutes from './authRoutes';
 import mainRoutes from './mainRoutes';
+import userRoutes from './userRoutes';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -9,7 +10,7 @@ import {
 import './App.css';
 
 const router = createBrowserRouter([
-  ...loginRoutes(), ...mainRoutes()
+  ...loginRoutes(), ...mainRoutes(), ...userRoutes(),
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

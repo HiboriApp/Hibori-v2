@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Loader2, Heart, Share2, ArrowRight } from 'lucide-react'
-import { Layout } from './layout'
+import { Layout } from '../components/layout'
 
 type ContentItem = {
   id: string
