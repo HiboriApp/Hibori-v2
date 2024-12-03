@@ -3,6 +3,7 @@ import { Loader2, Heart, Share2, ArrowRight, Bell, MessageSquare, User, Send, Us
 import { Layout } from '../components/layout'
 import { getUsersById, getUser, UserData, Message } from '../api/db'
 import { useNavigate } from 'react-router-dom'
+import { userListener } from '../api/listeners'
 
 type ContentItem = {
   id: string
@@ -258,6 +259,17 @@ function App() {
         return {...message, ...data}}).filter((message) => !!message));
     };
     fetchData();
+    
+    return userListener(async (user) => {
+      setUser(user);
+      const friendsData = await getUsersById(user.friends);
+      setFriends(friendsData);
+      const messages = await getUsersById(user.messages.map(message => message.id));
+      setMessages(user.messages.map(message => {
+        const data = messages.find(m => m.id === message.id);
+        if (!data) return null;
+        return {...message, ...data}}).filter((message) => !!message));
+    })
   }, [])
   return (
     <Layout>
