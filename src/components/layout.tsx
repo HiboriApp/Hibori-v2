@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MessageSquare, Home, Bell, Search, User, HelpCircle, X, Settings } from 'lucide-react'
 import { GetPallate, Pallate } from '../api/settings'
 import { getUser, UserData } from '../api/db'
+import Loading from './Loading';
 
 // Routes
 const routes = [
@@ -244,7 +245,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [])
 
   if (!palette || !user) {
-    return <div>טוען...</div>
+    return <Loading></Loading>
   }
 
   return (
