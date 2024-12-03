@@ -27,7 +27,6 @@ function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
       </div>
       <div>
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
-        <p className={`text-xs text-${palette.special}`}>{user.email}</p>
       </div>
       <Link
             to={'/settings'}
