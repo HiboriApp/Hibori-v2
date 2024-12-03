@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle, X } from 'lucide-react'
+import { MessageSquare, Home, Bell, Search, User, HelpCircle, X, Settings } from 'lucide-react'
 import { GetPallate, Pallate } from '../api/settings'
 import { getUser, UserData } from '../api/db'
 
@@ -28,6 +28,13 @@ function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
         <p className={`text-xs text-${palette.special}`}>{user.email}</p>
       </div>
+      <Link
+            to={'/settings'}
+            className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
+          >
+            <Settings className={`h-6 w-6 text-${palette.text}`} />
+            <span className="sr-only">Settings</span>
+          </Link>
     </div>
   )
 }
@@ -150,15 +157,19 @@ function Sidebar({ palette, user }: { palette: Pallate, user: UserData }) {
   )
 }
 
-// Header Component
 function Header({ palette, user }: { palette: Pallate, user: UserData }) {
+  const navigate = useNavigate();
+
   return (
     <header className={`bg-white border-b border-${palette.secondary} px-4 py-2 flex items-center justify-between`}>
       <div className="flex items-center space-x-4 space-x-reverse">
-        <button className={`md:hidden p-2 rounded-md hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}>
-          <Menu className={`h-6 w-6 text-${palette.text}`} />
-        </button>
-        <img src="/logo.svg" alt="לוגו" className="h-8 w-auto md:hidden" />
+        <div 
+          className="w-10 h-10 rounded-full overflow-hidden cursor-pointer"
+          onClick={() => navigate('/settings')}
+        >
+          <div className='rounded h-10' dangerouslySetInnerHTML={{ __html: user.icon }}></div>
+        </div>
+        <img src="/logo.png" alt="לוגו" className="h-8 w-auto md:hidden" />
       </div>
       <div className="flex items-center space-x-4 space-x-reverse">
         <NotificationBell palette={palette} user={user} />
