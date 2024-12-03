@@ -13,6 +13,7 @@ export interface UserData{
     bio: string
     email: string
     messages: {message: string, date: Timestamp}[]
+    friends: string[]
 }
 
 export async function updatePallate(user: UserData, newPallate: Pallate){
@@ -24,6 +25,22 @@ export async function getUser(){
     if (!auth.currentUser) return;
     const user = await getDoc(doc(db, "users", auth.currentUser.uid));
     return user.data() as UserData;
+}
+
+export async function getUserById(id: string){
+    const user = await getDoc(doc(db, "users", id));
+    if (!user.exists()) return null;
+    return user.data() as UserData;
+}
+
+export async function getFriends(friends: string[]){
+    const users: UserData[] = [];
+    for (let i = 0; i < friends.length; i++){
+        const user = await getUserById(friends[i]);
+        if (!user) continue;
+        users.push(user);
+    }
+    return users;
 }
 
 export async function setUser(user: UserData){
@@ -43,6 +60,7 @@ export async function CreateUser(name: string, user: User, email: string){
         lastSeen: new Date().toString(),
         email: email,
         messages: [],
+        friends: [],
     };
     await setUser(data);
     return true;
