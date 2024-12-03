@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, Home, Bell, Search, User, HelpCircle, X, Settings } from 'lucide-react'
+import { MessageSquare, Home, Bell, Search, User, HelpCircle, Settings } from 'lucide-react'
 import { GetPallate, Pallate } from '../api/settings'
 import { getUser, UserData } from '../api/db'
 import Loading from './Loading';
@@ -66,12 +66,12 @@ function SearchBar({ palette }: { palette: Pallate }) {
 
 // NotificationBell Component
 function NotificationBell({ palette, user }: { palette: Pallate, user: UserData }) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const navigate = useNavigate();
 
   return (
     <div className="relative">
       <button 
-        onClick={() => setIsModalOpen(!isModalOpen)}
+        onClick={() => navigate('/messages')}
         className={`relative p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
       >
         <Bell className={`h-6 w-6 text-${palette.text}`} />
@@ -79,45 +79,6 @@ function NotificationBell({ palette, user }: { palette: Pallate, user: UserData 
           <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full"></span>
         )}
       </button>
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className={`fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0`}
-          >
-            <div 
-              className="absolute inset-0 bg-black bg-opacity-50"
-              onClick={() => setIsModalOpen(false)}
-            ></div>
-            <div className={`relative w-full max-w-md bg-white rounded-lg shadow-lg border border-${palette.secondary} z-50`}>
-              <div className={`p-4 border-b border-${palette.secondary} flex justify-between items-center`}>
-                <h3 className={`text-lg md:text-xl font-semibold text-${palette.text}`}>התראות</h3>
-                <button onClick={() => setIsModalOpen(false)} className={`text-${palette.text} hover:text-${palette.primary}`}>
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-              <ul className="py-4">
-                {user.messages.map((message, index) => (
-                  <li key={index} className={`px-6 py-4 hover:bg-${palette.background}`}>
-                    <p className={`text-base md:text-lg text-${palette.text}`}>{message.message}</p>
-                    <p className={`text-sm md:text-base text-${palette.special} mt-2`}>
-                      {message.date.toDate().toLocaleString('he-IL')}
-                    </p>
-                  </li>
-                ))}
-                {user.messages.length === 0 && (
-                  <li className={`px-6 py-4 text-center text-${palette.text}`}>
-                    אין הודעות חדשות
-                  </li>
-                )}
-              </ul>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
