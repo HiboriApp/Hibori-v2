@@ -173,7 +173,7 @@ function Header({ palette, user }: { palette: Pallate, user: UserData }) {
       </div>
       <div className="flex items-center space-x-4 space-x-reverse">
         <NotificationBell palette={palette} user={user} />
-        <button className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}>
+        <button className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`} onClick={() => navigate('/qna')}>
           <HelpCircle className={`h-6 w-6 text-${palette.text}`} />
         </button>
       </div>
