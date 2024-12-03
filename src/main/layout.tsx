@@ -179,7 +179,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       const newPalette = await GetPallate()
       setPalette(newPalette)
       const userData = await getUser();
-      if (!userData){await signOut(auth);navigate('/');return;}
+      if (!userData){navigate('/');return;}
       setUser(userData);
     }
     fetchPalette()
