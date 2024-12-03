@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle, Plus } from 'lucide-react'
+import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle } from 'lucide-react'
 import { GetPallate, Pallate } from '../api/settings'
 import { getUser, UserData } from '../api/db'
-import { signOut } from 'firebase/auth'
-import { auth } from '../api/firebase'
 
 // Routes
 const routes = [
