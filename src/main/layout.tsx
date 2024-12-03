@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, Home, Bell, Search, User, HelpCircle, Settings } from 'lucide-react'
+import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle, Plus } from 'lucide-react'
 import { GetPallate, Pallate } from '../api/settings'
 import { getUser, UserData } from '../api/db'
-import Loading from './Loading';
+import { signOut } from 'firebase/auth'
+import { auth } from '../api/firebase'
 
 // Routes
 const routes = [
@@ -23,19 +24,12 @@ const pageTransition = {
 function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
-      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`} dangerouslySetInnerHTML={{ __html: user.icon }}>
+      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500`} dangerouslySetInnerHTML={{ __html: user.icon }}>
       </div>
       <div>
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
         <p className={`text-xs text-${palette.special}`}>{user.email}</p>
       </div>
-      <Link
-            to={'/settings'}
-            className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
-          >
-            <Settings className={`h-6 w-6 text-${palette.text}`} />
-            <span className="sr-only">Settings</span>
-          </Link>
     </div>
   )
 }
@@ -65,21 +59,12 @@ function SearchBar({ palette }: { palette: Pallate }) {
 }
 
 // NotificationBell Component
-function NotificationBell({ palette, user }: { palette: Pallate, user: UserData }) {
-  const navigate = useNavigate();
-
+function NotificationBell({ palette }: { palette: Pallate }) {
   return (
-    <div className="relative">
-      <button 
-        onClick={() => navigate('/messages')}
-        className={`relative p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
-      >
-        <Bell className={`h-6 w-6 text-${palette.text}`} />
-        {user.messages.length > 0 && (
-          <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full"></span>
-        )}
-      </button>
-    </div>
+    <button className={`relative p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}>
+      <Bell className={`h-6 w-6 text-${palette.text}`} />
+      <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full"></span>
+    </button>
   )
 }
 
@@ -88,9 +73,9 @@ function Sidebar({ palette, user }: { palette: Pallate, user: UserData }) {
   const location = useLocation()
 
   return (
-    <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-${palette.secondary}`}>
+    <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-green-500`}>
       <div className="p-4">
-        <img src="/logo.svg" alt="לוגו" className="h-8 w-auto" />
+        <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
       </div>
       <nav className="flex-1 px-2 py-4 space-y-2">
         {routes.map((route) => {
@@ -119,23 +104,19 @@ function Sidebar({ palette, user }: { palette: Pallate, user: UserData }) {
   )
 }
 
-function Header({ palette, user }: { palette: Pallate, user: UserData }) {
-  const navigate = useNavigate();
-
+// Header Component
+function Header({ palette }: { palette: Pallate }) {
   return (
     <header className={`bg-white border-b border-${palette.secondary} px-4 py-2 flex items-center justify-between`}>
       <div className="flex items-center space-x-4 space-x-reverse">
-        <div 
-          className="w-10 h-10 rounded-full overflow-hidden cursor-pointer"
-          onClick={() => navigate('/settings')}
-        >
-          <div className='rounded h-10' dangerouslySetInnerHTML={{ __html: user.icon }}></div>
-        </div>
-        <img src="/logo.png" alt="לוגו" className="h-8 w-auto md:hidden" />
+        <button className={`md:hidden p-2 rounded-md hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}>
+          <Menu className={`h-6 w-6 text-${palette.text}`} />
+        </button>
+        <img src="/logo.svg" alt="Logo" className="h-8 w-auto md:hidden" />
       </div>
       <div className="flex items-center space-x-4 space-x-reverse">
-        <NotificationBell palette={palette} user={user} />
-        <button className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`} onClick={() => navigate('/qna')}>
+        <NotificationBell palette={palette} />
+        <button className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}>
           <HelpCircle className={`h-6 w-6 text-${palette.text}`} />
         </button>
       </div>
@@ -168,6 +149,8 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
     </nav>
   )
 }
+
+
 
 // Main Content Component
 function MainContent({ children, palette }: { children: React.ReactNode; palette: Pallate }) {
@@ -206,12 +189,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [])
 
   if (!palette || !user) {
-    return <Loading></Loading>
+    return <div>Loading...</div>
   }
 
   return (
     <div className={`flex flex-col h-screen bg-${palette.background}`} dir="rtl">
-      <Header palette={palette} user={user} />
+      <Header palette={palette} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar palette={palette} user={user} />
         <div className="flex-1 flex flex-col overflow-hidden">
