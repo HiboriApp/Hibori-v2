@@ -24,7 +24,7 @@ const pageTransition = {
 function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
-      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`} dangerouslySetInnerHTML={{ __html: user.icon }}>
+      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500`} dangerouslySetInnerHTML={{ __html: user.icon }}>
       </div>
       <div>
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
@@ -38,12 +38,22 @@ function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
 function SearchBar({ palette }: { palette: Pallate }) {
   return (
     <div className="relative">
+      <div className="absolute inset-0 rounded-lg overflow-hidden">
+        <div className="absolute -left-1 -top-1 w-1/3 h-1/3 bg-gradient-to-br from-green-500 via-green-300 to-green-500" />
+      </div>
       <input
         type="text"
         placeholder="חיפוש..."
-        className={`w-full py-2 pr-10 pl-4 rounded-lg bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
+        className={`
+          w-full py-2 pr-10 pl-4 rounded-lg 
+          bg-white
+          border border-gray-200
+          focus:outline-none focus:ring-2 focus:ring-${palette.secondary}
+          relative z-10
+          text-gray-800 placeholder-gray-400
+        `}
       />
-      <Search className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-${palette.special}`} />
+      <Search className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-${palette.special} z-20`} />
     </div>
   )
 }
@@ -63,7 +73,7 @@ function Sidebar({ palette, user }: { palette: Pallate, user: UserData }) {
   const location = useLocation()
 
   return (
-    <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-${palette.secondary}`}>
+    <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-green-500`}>
       <div className="p-4">
         <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
       </div>
@@ -81,7 +91,7 @@ function Sidebar({ palette, user }: { palette: Pallate, user: UserData }) {
                   : `text-${palette.text} hover:bg-${palette.background}`
               }`}
             >
-              <Icon className="mr-3 h-5 w-5" />
+              <Icon className="ml-2 h-5 w-5" />
               {route.name}
             </Link>
           )
@@ -99,14 +109,14 @@ function Header({ palette }: { palette: Pallate }) {
   return (
     <header className={`bg-white border-b border-${palette.secondary} px-4 py-2 flex items-center justify-between`}>
       <div className="flex items-center space-x-4 space-x-reverse">
-        <button className={`md:hidden p-2 rounded-md hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}>
+        <button className={`md:hidden p-2 rounded-md hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}>
           <Menu className={`h-6 w-6 text-${palette.text}`} />
         </button>
         <img src="/logo.svg" alt="Logo" className="h-8 w-auto md:hidden" />
       </div>
       <div className="flex items-center space-x-4 space-x-reverse">
         <NotificationBell palette={palette} />
-        <button className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}>
+        <button className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}>
           <HelpCircle className={`h-6 w-6 text-${palette.text}`} />
         </button>
       </div>
@@ -140,14 +150,7 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
   )
 }
 
-// FloatingActionButton Component
-function FloatingActionButton({ palette }: { palette: Pallate }) {
-  return (
-    <button className={`md:hidden fixed bottom-20 right-4 w-14 h-14 rounded-full bg-${palette.primary} text-white shadow-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${palette.secondary}`}>
-      <Plus className="h-6 w-6" />
-    </button>
-  )
-}
+
 
 // Main Content Component
 function MainContent({ children, palette }: { children: React.ReactNode; palette: Pallate }) {
@@ -202,7 +205,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <MobileBottomNav palette={palette} />
-      <FloatingActionButton palette={palette} />
     </div>
   )
 }

@@ -1,64 +1,135 @@
-import { useState, useEffect } from 'react'
-import { Loader2 } from 'lucide-react'
-import { DefaultPallate, GetPallate, Pallate } from '../api/settings'
+import React, { useState, useEffect } from 'react'
+import { Loader2, Heart, Share2, ArrowRight } from 'lucide-react'
 import { Layout } from './layout'
 
-type Message = {
+type ContentItem = {
   id: string
   content: string
   target: string
   timestamp: string
   image?: string
+  likes: number
 }
 
-type Post = {
-  id: string
-  content: string
-  target: string
-  timestamp: string
-  image?: string
-}
-
-// Simulated data
-const simulatedNewMessages: Message[] = [
-  { id: 'm1', content: 'שלום!', target: 'אליס', timestamp: new Date().toISOString() },
-  { id: 'm2', content: 'מה שלומך?', target: 'בוב', timestamp: new Date().toISOString() },
-]
-
-const simulatedNewPosts: Post[] = [
-  { id: 'p1', content: 'תראו את התמונה המגניבה הזו!', target: 'צ׳רלי', timestamp: new Date().toISOString(), image: 'https://picsum.photos/200/300' },
-  { id: 'p2', content: 'סתם פוסט טקסט', target: 'דוד', timestamp: new Date().toISOString() },
-]
-
-const simulatedMessages: Message[] = [
-  { id: 'm3', content: 'היי שם!', target: 'חוה', timestamp: '2023-05-01T10:00:00Z' },
-  { id: 'm4', content: 'מה קורה?', target: 'פרנק', timestamp: '2023-05-01T09:30:00Z' },
-]
-
-const simulatedPosts: Post[] = [
-  { id: 'p3', content: 'יום יפה!', target: 'גרייס', timestamp: '2023-05-01T11:00:00Z', image: 'https://picsum.photos/200/300?random=1' },
-  { id: 'p4', content: 'סיימתי עכשיו ספר מעולה', target: 'הנרי', timestamp: '2023-05-01T08:45:00Z' },
-]
-
-function LoadingSpinner({pallate}: {pallate: Pallate}) {
+function LoadingSpinner() {
   return (
     <div className="flex justify-center items-center h-24">
-      <Loader2 className={`h-8 w-8 animate-spin text-${pallate.text}`} />
+      <Loader2 className="h-8 w-8 animate-spin text-green-500" />
     </div>
   )
 }
 
-function NewContentFeed({pl}: {pl: Pallate}) {
+const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
+  const [isLiked, setIsLiked] = useState(false)
+  const [likes, setLikes] = useState(item.likes)
+
+  const handleLike = () => {
+    setIsLiked(!isLiked)
+    setLikes(isLiked ? likes - 1 : likes + 1)
+  }
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `פוסט מאת ${item.target}`,
+        text: item.content,
+        url: window.location.href,
+      }).then(() => {
+        console.log('Successfully shared')
+      }).catch((error) => {
+        console.log('Error sharing:', error)
+      })
+    } else {
+      alert('שיתוף לא נתמך בדפדפן זה')
+    }
+  }
+
+  const handleForward = () => {
+    // Placeholder for future functionality
+    console.log('Forward button clicked')
+  }
+
+  return (
+    <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="p-4">
+        <div className="flex items-center mb-4">
+          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg ml-3">
+            {item.target[0]}
+          </div>
+          <div>
+            <p className="font-semibold text-base text-gray-800">{item.target}</p>
+            <p className="text-xs text-gray-500">{new Date(item.timestamp).toLocaleString()}</p>
+          </div>
+        </div>
+        <p className="text-sm text-gray-700 mb-4">{item.content}</p>
+        {item.image && (
+          <img src={item.image} alt="תמונת פוסט" className="rounded-lg w-full object-cover max-h-64 mb-4" />
+        )}
+        <div className="flex justify-between items-center text-gray-500">
+   
+         
+          <button 
+            className="flex items-center hover:text-green-500 transition-colors duration-200"
+            onClick={handleForward}
+          >
+            <ArrowRight size={18} className="ml-1" />
+            <span className="text-sm">העבר</span>
+          </button>
+          <button 
+            className={`flex items-center transition-colors duration-200 ${isLiked ? 'text-green-500' : 'hover:text-green-500'}`}
+            onClick={handleLike}
+          >
+            <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} className="ml-1" />
+            <span className="text-sm">{likes}</span>
+          </button>
+          <button 
+            className="flex items-center hover:text-green-500 transition-colors duration-200"
+            onClick={handleShare}
+          >
+            <Share2 size={18} className="ml-1" />
+            <span className="text-sm">שתף</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const simulatedContent: ContentItem[] = [
+  {
+    id: 'p1',
+    content: 'תראו את התמונה המגניבה הזו!',
+    target: 'צ׳רלי',
+    timestamp: new Date().toISOString(),
+    image: 'https://picsum.photos/800/600',
+    likes: 24,
+  },
+  {
+    id: 'p2',
+    content: 'סתם פוסט טקסט',
+    target: 'דוד',
+    timestamp: new Date().toISOString(),
+    likes: 15,
+  },
+  {
+    id: 'p3',
+    content: 'יום יפה!',
+    target: 'גרייס',
+    timestamp: new Date().toISOString(),
+    image: 'https://picsum.photos/800/600?random=1',
+    likes: 42,
+  },
+]
+
+function NewContentFeed() {
   const [loading, setLoading] = useState(true)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [posts, setPosts] = useState<Post[]>([])
+  const [content, setContent] = useState<ContentItem[]>([])
 
   useEffect(() => {
     const fetchNewContent = () => {
       setLoading(true)
       setTimeout(() => {
-        setMessages(prevMessages => [...simulatedNewMessages, ...prevMessages])
-        setPosts(prevPosts => [...simulatedNewPosts, ...prevPosts])
+        setContent(prevContent => [...simulatedContent, ...prevContent])
         setLoading(false)
       }, 1500)
     }
@@ -69,65 +140,33 @@ function NewContentFeed({pl}: {pl: Pallate}) {
     return () => clearInterval(interval)
   }, [])
 
-  if (loading && messages.length === 0 && posts.length === 0) {
-    return <LoadingSpinner pallate={pl} />
+  if (loading && content.length === 0) {
+    return <LoadingSpinner />
   }
 
   return (
     <div className="space-y-4">
-      {loading && <LoadingSpinner pallate={pl} />}
-      {messages.map(message => (
-        <div key={message.id} className={`p-4 bg-${pl.secondary} text-${pl.text} shadow rounded-lg`}>
-          <p className="font-semibold">{message.target}</p>
-          <p>{message.content}</p>
-          <p className={`text-sm text-${pl.background}`}>{message.timestamp}</p>
-        </div>
-      ))}
-      {posts.map(post => (
-        <div key={post.id} className={`p-4 bg-${pl.secondary} text-${pl.text} shadow rounded-lg`}>
-          <p className="font-semibold">{post.target}</p>
-          <p>{post.content}</p>
-          {post.image && (
-            <img src={post.image} alt="תמונת פוסט" className="mt-2 rounded-lg max-w-full h-auto" />
-          )}
-          <p className={`text-sm text-${pl.background}`}>{post.timestamp}</p>
-        </div>
+      {loading && <LoadingSpinner />}
+      {content.map(item => (
+        <ContentCard key={item.id} item={item} />
       ))}
     </div>
   )
 }
 
 export default function Home() {
-  const { messages, posts } = { messages: simulatedMessages, posts: simulatedPosts }
-  const [pl, setPalette] = useState<Pallate>(DefaultPallate());
-
-  useEffect(() => {GetPallate().then((pl) => setPalette(pl))}, []);
-
   return (
-    <Layout children={<div dir="rtl" className={`container mx-auto px-4 py-8 bg-${pl.background} text-${pl.text}`}>
-      <h1 className={`text-3xl font-bold mb-6 text-${pl.primary}`}>הודעות ופוסטים</h1>
-      <div className="mb-8">
-        <h2 className={`text-2xl font-semibold mb-4 text-${pl.tertiary}`}>תוכן חדש</h2>
-        <NewContentFeed pl={pl}/>
-      </div>
-      <div>
-        <h2 className={`text-2xl font-semibold mb-4 text-${pl.tertiary}`}>כל התוכן</h2>
-        <div className="space-y-4">
-          {[...messages, ...posts]
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-            .map(item => (
-              <div key={item.id} className={`p-4 bg-${pl.secondary} shadow rounded-lg`}>
-                <p className="font-semibold">{item.target}</p>
-                <p>{item.content}</p>
-                {!!item.image ? (
-                  <img src={item.image} alt="תמונת פוסט" className="mt-2 rounded-lg max-w-full h-auto" />
-                ) : null}
-                <p className={`text-sm text-${pl.background}`}>{item.timestamp}</p>
-              </div>
-            ))}
+    <Layout>
+      <div dir="rtl" className=" min-h-screen">
+        <div className="max-w-3xl mx-auto px-4 py-6">
+          <h1 className="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-green-400 pb-2">הודעות ופוסטים</h1>
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-3 text-gray-700">תוכן</h2>
+            <NewContentFeed />
+          </div>
         </div>
       </div>
-    </div>}></Layout>
+    </Layout>
   )
 }
 
