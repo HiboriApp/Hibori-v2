@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Loader2, Heart, Share2, ArrowRight, Bell, MessageSquare, User, Send, Users } from 'lucide-react'
 import { Layout } from '../components/layout'
+import { getFriends, getUser, UserData } from '../api/db'
+import { useNavigate } from 'react-router-dom'
 
 type ContentItem = {
   id: string
@@ -9,13 +11,6 @@ type ContentItem = {
   timestamp: string
   image?: string
   likes: number
-}
-
-type Friend = {
-  id: string
-  name: string
-  online: boolean
-  avatar: string
 }
 
 type Message = {
@@ -175,15 +170,6 @@ function NewContentFeed() {
   )
 }
 
-const friends: Friend[] = [
-  { id: '1', name: 'אבי', online: true, avatar: 'https://picsum.photos/100/100?random=1' },
-  { id: '2', name: 'שרה', online: false, avatar: 'https://picsum.photos/100/100?random=2' },
-  { id: '3', name: 'יוסי', online: true, avatar: 'https://picsum.photos/100/100?random=3' },
-  { id: '4', name: 'רחל', online: true, avatar: 'https://picsum.photos/100/100?random=4' },
-  { id: '5', name: 'דן', online: false, avatar: 'https://picsum.photos/100/100?random=5' },
-  { id: '6', name: 'מיכל', online: true, avatar: 'https://picsum.photos/100/100?random=6' },
-]
-
 const messages: Message[] = [
   { id: '1', sender: 'אבי', avatar: 'https://picsum.photos/100/100?random=1', content: 'היי, מה שלומך?', timestamp: '10:30' },
   { id: '2', sender: 'שרה', avatar: 'https://picsum.photos/100/100?random=2', content: 'תודה על העזרה אתמול!', timestamp: '09:15' },
@@ -196,7 +182,7 @@ const notifications: Notification[] = [
   { id: '3', content: 'שלח לך הודעה', timestamp: '11:45', type: 'message', userAvatar: 'https://picsum.photos/100/100?random=3', userName: 'יוסי' },
 ]
 
-function LeftPanel() {
+function LeftPanel({friends} : {friends: UserData[]}) {
   return (
     <>
       <div className="bg-white rounded-xl p-6 mb-6">
@@ -208,12 +194,8 @@ function LeftPanel() {
           {friends.map((friend) => (
             <div key={friend.id} className="flex flex-col items-center">
               <div className="relative">
-                <img
-                  src={friend.avatar}
-                  alt={friend.name}
-                  className="w-12 h-12 rounded-full"
-                />
-                <div className={`absolute bottom-0 left-0 w-3 h-3 rounded-full border-2 border-white ${friend.online ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                <div className='h-12 w-12 rounded' dangerouslySetInnerHTML={{ __html: friend.icon }}></div>
+                <div className={`absolute bottom-0 left-0 w-3 h-3 rounded-full border-2 border-white ${friend.isOnline ? 'bg-green-500' : 'bg-gray-300'}`}></div>
               </div>
               <span className="mt-1 text-xs text-gray-700 text-center">{friend.name}</span>
             </div>
@@ -273,6 +255,19 @@ function LeftPanel() {
 }
 
 function App() {
+  const [user, setUser] = useState<UserData | null>(null);
+  const [friends, setFriends] = useState<UserData[]>([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchData = async () => {
+      const userData = await getUser();
+      if (!userData){navigate('/');return;}
+      setUser(userData);
+      const friendsData = await getFriends(userData.friends);
+      setFriends(friendsData);
+    };
+    fetchData();
+  }, [])
   return (
     <Layout>
       <div className="min-h-screen ">
@@ -287,7 +282,7 @@ function App() {
               <div className="sticky top-6">
                 {/* Apply dir="rtl" to the left panel container */}
                 <div className="bg-white shadow-lg rounded-xl p-4" dir="rtl">
-                  <LeftPanel />
+                  <LeftPanel friends={friends}/>
                 </div>
               </div>
             </div>

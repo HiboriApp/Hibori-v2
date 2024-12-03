@@ -14,6 +14,8 @@ export interface UserData{
     email: string
     messages: {message: string, date: Timestamp}[]
     friends: string[]
+    isOnline: boolean
+    lastOnline: Timestamp
 }
 
 export async function updatePallate(user: UserData, newPallate: Pallate){
@@ -61,6 +63,8 @@ export async function CreateUser(name: string, user: User, email: string){
         email: email,
         messages: [],
         friends: [],
+        isOnline: true,
+        lastOnline: Timestamp.fromDate(new Date()),
     };
     await setUser(data);
     return true;
