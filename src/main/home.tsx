@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Loader2, Heart, Share2, ArrowRight, Bell, MessageSquare, User, Send, Users } from 'lucide-react'
 import { Layout } from '../components/layout'
-import { getFriends, getUser, UserData } from '../api/db'
+import { getUsersById, getUser, UserData, Message } from '../api/db'
 import { useNavigate } from 'react-router-dom'
 
 type ContentItem = {
@@ -12,15 +12,6 @@ type ContentItem = {
   image?: string
   likes: number
 }
-
-type Message = {
-  id: string
-  sender: string
-  avatar: string
-  content: string
-  timestamp: string
-}
-
 type Notification = {
   id: string
   content: string
@@ -170,19 +161,13 @@ function NewContentFeed() {
   )
 }
 
-const messages: Message[] = [
-  { id: '1', sender: 'אבי', avatar: 'https://picsum.photos/100/100?random=1', content: 'היי, מה שלומך?', timestamp: '10:30' },
-  { id: '2', sender: 'שרה', avatar: 'https://picsum.photos/100/100?random=2', content: 'תודה על העזרה אתמול!', timestamp: '09:15' },
-  { id: '3', sender: 'יוסי', avatar: 'https://picsum.photos/100/100?random=3', content: 'מתי נפגשים?', timestamp: '11:45' },
-]
-
 const notifications: Notification[] = [
   { id: '1', content: 'אהב את הפוסט שלך', timestamp: '10:30', type: 'like', userAvatar: 'https://picsum.photos/100/100?random=1', userName: 'אבי' },
   { id: '2', content: 'הגיב על התמונה שלך', timestamp: '09:15', type: 'comment', userAvatar: 'https://picsum.photos/100/100?random=2', userName: 'שרה' },
   { id: '3', content: 'שלח לך הודעה', timestamp: '11:45', type: 'message', userAvatar: 'https://picsum.photos/100/100?random=3', userName: 'יוסי' },
 ]
 
-function LeftPanel({friends} : {friends: UserData[]}) {
+function LeftPanel({friends, messages} : {friends: UserData[], messages: (Message & UserData)[]}) {
   return (
     <>
       <div className="bg-white rounded-xl p-6 mb-6">
@@ -211,11 +196,11 @@ function LeftPanel({friends} : {friends: UserData[]}) {
           {messages.map((message) => (
             <li key={message.id} className="flex items-center justify-between">
               <div className="flex items-center">
-                <img src={message.avatar} alt={message.sender} className="w-10 h-10 rounded-full ml-3" />
+                <img src={message.icon} alt={message.date.toString() + message.name} className="w-10 h-10 rounded-full ml-3" />
                 <div>
-                  <p className="font-medium text-sm">{message.sender}</p>
-                  <p className="text-xs text-gray-600 truncate">{message.content}</p>
-                  <span className="text-xs text-gray-400">{message.timestamp}</span>
+                  <p className="font-medium text-sm">{message.name}</p>
+                  <p className="text-xs text-gray-600 truncate">{message.content.length > 20 ? message.content.substring(0, 20) + '...' : message.content}</p>
+                  <span className="text-xs text-gray-400">{message.date.toDate().toLocaleString()}</span>
                 </div>
               </div>
               <button className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
@@ -255,16 +240,22 @@ function LeftPanel({friends} : {friends: UserData[]}) {
 }
 
 function App() {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [_user, setUser] = useState<UserData | null>(null);
   const [friends, setFriends] = useState<UserData[]>([]);
+  const [messages, setMessages] = useState<(Message & UserData)[]>([]);
   const navigate = useNavigate();
   useEffect(() => {
     const fetchData = async () => {
       const userData = await getUser();
       if (!userData){navigate('/');return;}
       setUser(userData);
-      const friendsData = await getFriends(userData.friends);
+      const friendsData = await getUsersById(userData.friends);
       setFriends(friendsData);
+      const messages = await getUsersById(userData.messages.map(message => message.id));
+      setMessages(userData.messages.map(message => {
+        const data = messages.find(m => m.id === message.id);
+        if (!data) return null;
+        return {...message, ...data}}).filter((message) => !!message));
     };
     fetchData();
   }, [])
@@ -282,7 +273,7 @@ function App() {
               <div className="sticky top-6">
                 {/* Apply dir="rtl" to the left panel container */}
                 <div className="bg-white shadow-lg rounded-xl p-4" dir="rtl">
-                  <LeftPanel friends={friends}/>
+                  <LeftPanel friends={friends} messages={messages}/>
                 </div>
               </div>
             </div>

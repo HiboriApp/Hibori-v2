@@ -4,6 +4,12 @@ import { auth, db } from "./firebase";
 import { User } from "firebase/auth";
 import { GenerateIcons } from "./icons";
 
+export interface Message{
+    id: string,
+    content: string,
+    date: Timestamp,
+}
+
 export interface UserData{
     id: string,
     pallate: Pallate
@@ -12,7 +18,7 @@ export interface UserData{
     lastSeen: string
     bio: string
     email: string
-    messages: {message: string, date: Timestamp}[]
+    messages: Message[]
     friends: string[]
     isOnline: boolean
     lastOnline: Timestamp
@@ -29,20 +35,13 @@ export async function getUser(){
     return user.data() as UserData;
 }
 
-export async function getUserById(id: string){
-    const user = await getDoc(doc(db, "users", id));
-    if (!user.exists()) return null;
-    return user.data() as UserData;
-}
-
-export async function getFriends(friends: string[]){
-    const users: UserData[] = [];
-    for (let i = 0; i < friends.length; i++){
-        const user = await getUserById(friends[i]);
-        if (!user) continue;
-        users.push(user);
+export async function getUsersById(ids: string[]){
+    let result = [];
+    for (let i = 0; i < ids.length; i++){
+        const user = await getDoc(doc(db, "users", ids[i]));
+        if (!!user.exists()) result.push(user.data() as UserData);
     }
-    return users;
+    return result;
 }
 
 export async function setUser(user: UserData){
