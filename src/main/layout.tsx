@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle, Plus } from 'lucide-react'
+import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle, X } from 'lucide-react'
 import { GetPallate, Pallate } from '../api/settings'
 import { getUser, UserData } from '../api/db'
-import { signOut } from 'firebase/auth'
-import { auth } from '../api/firebase'
 
 // Routes
 const routes = [
@@ -24,7 +22,7 @@ const pageTransition = {
 function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
-      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500`} dangerouslySetInnerHTML={{ __html: user.icon }}>
+      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`} dangerouslySetInnerHTML={{ __html: user.icon }}>
       </div>
       <div>
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
@@ -59,12 +57,60 @@ function SearchBar({ palette }: { palette: Pallate }) {
 }
 
 // NotificationBell Component
-function NotificationBell({ palette }: { palette: Pallate }) {
+function NotificationBell({ palette, user }: { palette: Pallate, user: UserData }) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   return (
-    <button className={`relative p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}>
-      <Bell className={`h-6 w-6 text-${palette.text}`} />
-      <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full"></span>
-    </button>
+    <div className="relative">
+      <button 
+        onClick={() => setIsModalOpen(!isModalOpen)}
+        className={`relative p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
+      >
+        <Bell className={`h-6 w-6 text-${palette.text}`} />
+        {user.messages.length > 0 && (
+          <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full"></span>
+        )}
+      </button>
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0`}
+          >
+            <div 
+              className="absolute inset-0 bg-black bg-opacity-50"
+              onClick={() => setIsModalOpen(false)}
+            ></div>
+            <div className={`relative w-full max-w-md bg-white rounded-lg shadow-lg border border-${palette.secondary} z-50`}>
+              <div className={`p-4 border-b border-${palette.secondary} flex justify-between items-center`}>
+                <h3 className={`text-lg md:text-xl font-semibold text-${palette.text}`}>התראות</h3>
+                <button onClick={() => setIsModalOpen(false)} className={`text-${palette.text} hover:text-${palette.primary}`}>
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <ul className="py-4">
+                {user.messages.map((message, index) => (
+                  <li key={index} className={`px-6 py-4 hover:bg-${palette.background}`}>
+                    <p className={`text-base md:text-lg text-${palette.text}`}>{message.message}</p>
+                    <p className={`text-sm md:text-base text-${palette.special} mt-2`}>
+                      {message.date.toDate().toLocaleString('he-IL')}
+                    </p>
+                  </li>
+                ))}
+                {user.messages.length === 0 && (
+                  <li className={`px-6 py-4 text-center text-${palette.text}`}>
+                    אין הודעות חדשות
+                  </li>
+                )}
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
@@ -73,9 +119,9 @@ function Sidebar({ palette, user }: { palette: Pallate, user: UserData }) {
   const location = useLocation()
 
   return (
-    <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-green-500`}>
+    <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-${palette.secondary}`}>
       <div className="p-4">
-        <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
+        <img src="/logo.svg" alt="לוגו" className="h-8 w-auto" />
       </div>
       <nav className="flex-1 px-2 py-4 space-y-2">
         {routes.map((route) => {
@@ -105,18 +151,18 @@ function Sidebar({ palette, user }: { palette: Pallate, user: UserData }) {
 }
 
 // Header Component
-function Header({ palette }: { palette: Pallate }) {
+function Header({ palette, user }: { palette: Pallate, user: UserData }) {
   return (
     <header className={`bg-white border-b border-${palette.secondary} px-4 py-2 flex items-center justify-between`}>
       <div className="flex items-center space-x-4 space-x-reverse">
-        <button className={`md:hidden p-2 rounded-md hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}>
+        <button className={`md:hidden p-2 rounded-md hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}>
           <Menu className={`h-6 w-6 text-${palette.text}`} />
         </button>
-        <img src="/logo.svg" alt="Logo" className="h-8 w-auto md:hidden" />
+        <img src="/logo.svg" alt="לוגו" className="h-8 w-auto md:hidden" />
       </div>
       <div className="flex items-center space-x-4 space-x-reverse">
-        <NotificationBell palette={palette} />
-        <button className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}>
+        <NotificationBell palette={palette} user={user} />
+        <button className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}>
           <HelpCircle className={`h-6 w-6 text-${palette.text}`} />
         </button>
       </div>
@@ -149,8 +195,6 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
     </nav>
   )
 }
-
-
 
 // Main Content Component
 function MainContent({ children, palette }: { children: React.ReactNode; palette: Pallate }) {
@@ -189,12 +233,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [])
 
   if (!palette || !user) {
-    return <div>Loading...</div>
+    return <div>טוען...</div>
   }
 
   return (
     <div className={`flex flex-col h-screen bg-${palette.background}`} dir="rtl">
-      <Header palette={palette} />
+      <Header palette={palette} user={user} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar palette={palette} user={user} />
         <div className="flex-1 flex flex-col overflow-hidden">

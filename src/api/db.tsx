@@ -1,6 +1,8 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { Pallate } from "./settings";
+import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import { DefaultPallate, Pallate } from "./settings";
 import { auth, db } from "./firebase";
+import { User } from "firebase/auth";
+import { GenerateIcons } from "./icons";
 
 export interface UserData{
     id: string,
@@ -10,6 +12,7 @@ export interface UserData{
     lastSeen: string
     bio: string
     email: string
+    messages: {message: string, date: Timestamp}[]
 }
 
 export async function updatePallate(user: UserData, newPallate: Pallate){
@@ -27,4 +30,20 @@ export async function setUser(user: UserData){
     if (!auth.currentUser) return;
     await setDoc(doc(db, "users", user.id), user);
     return user;
+}
+
+
+export async function CreateUser(name: string, user: User, email: string){
+    const data: UserData = {
+        id: user.uid,
+        name: name,
+        pallate: DefaultPallate(),
+        icon: await GenerateIcons(user.uid),
+        bio: "",
+        lastSeen: new Date().toString(),
+        email: email,
+        messages: [],
+    };
+    await setUser(data);
+    return true;
 }
