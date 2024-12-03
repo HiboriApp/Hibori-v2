@@ -126,7 +126,7 @@ function Header({ palette, user }: { palette: Pallate, user: UserData }) {
     <header className={`bg-white border-b border-${palette.secondary} px-4 py-2 flex items-center justify-between`}>
       <div className="flex items-center space-x-4 space-x-reverse">
         <div 
-          className="w-10 h-10 rounded-full overflow-hidden cursor-pointer"
+          className="w-10 h-10 rounded-full overflow-hidden cursor-pointer sm:hidden"
           onClick={() => navigate('/settings')}
         >
           <div className='rounded h-10' dangerouslySetInnerHTML={{ __html: user.icon }}></div>
