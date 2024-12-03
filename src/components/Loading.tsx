@@ -3,7 +3,7 @@ import { Cloud, Sun, Leaf, Wind } from 'lucide-react'
 
 function FallingLeaf() {
   const randomLeft = `${Math.random() * 100}%`
-  const randomDelay = Math.random() * 5
+  const randomDelay = Math.random() * 2
   const randomDuration = 3 + Math.random() * 2
 
   return (
@@ -116,7 +116,7 @@ export default function Page() {
             <Grass />
 
             {[...Array(3)].map((_, index) => (
-              <FloatingCloud key={index} left={`${index * 30 + 10}%`} delay={index * 2} />
+              <FloatingCloud key={index} left={`${index * 30 + 10}%`} delay={index} />
             ))}
 
             {[...Array(20)].map((_, index) => (
