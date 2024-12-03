@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle } from 'lucide-react';
+import { Menu, MessageSquare, Home, Bell, Search, User, HelpCircle, Settings } from 'lucide-react';
 import { GetPallate, Pallate } from '../api/settings';
 import { getUser, UserData } from '../api/db';
 
@@ -19,15 +19,24 @@ const pageTransition = {
 };
 
 // UserProfile Component
-function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
+function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
+      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`} dangerouslySetInnerHTML={{ __html: user.icon }}>
+      </div>
       <div>
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
         <p className={`text-xs text-${palette.special}`}>{user.email}</p>
       </div>
+      <Link
+            to={'/settings'}
+            className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
+          >
+            <Settings className={`h-6 w-6 text-${palette.text}`} />
+            <span className="sr-only">Settings</span>
+          </Link>
     </div>
-  );
+  )
 }
 
 // SearchBar Component
