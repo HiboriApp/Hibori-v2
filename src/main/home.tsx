@@ -196,10 +196,10 @@ function LeftPanel({friends, messages} : {friends: UserData[], messages: (Messag
           {messages.map((message) => (
             <li key={message.id} className="flex items-center justify-between">
               <div className="flex items-center">
-                <img src={message.icon} alt={message.date.toString() + message.name} className="w-10 h-10 rounded-full ml-3" />
+                <div className="w-10 h-10 rounded-full ml-3" dangerouslySetInnerHTML={{ __html: message.icon }} />
                 <div>
                   <p className="font-medium text-sm">{message.name}</p>
-                  <p className="text-xs text-gray-600 truncate">{message.content.length > 20 ? message.content.substring(0, 20) + '...' : message.content}</p>
+                  <p className="text-md text-gray-600 truncate">{message.content.length > 20 ? message.content.substring(0, 20) + '...' : message.content}</p>
                   <span className="text-xs text-gray-400">{message.date.toDate().toLocaleString()}</span>
                 </div>
               </div>
