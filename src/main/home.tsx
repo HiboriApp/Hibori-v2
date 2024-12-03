@@ -293,9 +293,7 @@ function App() {
                   הודעות ופוסטים
                 </h1>
                 <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-                    תוכן
-                  </h2>
+               
                   <NewContentFeed />
                 </div>
               </div>
