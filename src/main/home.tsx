@@ -13,6 +13,7 @@ import {
   Video,
   Smile,
   X,
+  Plus,
 } from 'lucide-react';
 import { Layout } from '../components/layout';
 import { getUsersById, getUser, UserData, Message } from '../api/db';
@@ -395,8 +396,9 @@ const CreatePost = ({
           </div>
           <button
             type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition-colors duration-200"
+            className="bg-green-500 flex text-white px-4 py-2 rounded-xl hover:bg-green-600 transition-colors duration-200"
           >
+            <Plus className='ml-1'/>
             פרסם
           </button>
         </div>
