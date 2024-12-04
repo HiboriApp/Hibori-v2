@@ -3,20 +3,20 @@
 import React, { useEffect, useState } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 
-const SuperEnhancedLoading = () => {
+const SuperSillyLoading = () => {
   const [time, setTime] = useState(0)
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTime((prevTime) => (prevTime + 1) % 24)
+      setTime((prevTime) => (prevTime + 1) % 240)
     }, 1000)
     return () => clearInterval(timer)
   }, [])
 
-  const skyColor = `hsl(${200 + time * 10}, 70%, ${70 - time * 2}%)`
+  const skyColor = `hsl(${200 + time}, 70%, ${70 - time / 8}%)`
 
   return (
-    <div className="w-full h-screen overflow-hidden relative" style={{ background: skyColor }}>
+    <div className="w-full h-screen overflow-hidden relative" style={{ background: skyColor, transition: 'background 1s' }}>
       <style jsx global>{`
         @keyframes sway {
           0% { transform: rotate(0deg); }
@@ -36,13 +36,18 @@ const SuperEnhancedLoading = () => {
       <Sun time={time} />
       <Moon time={time} />
       <Stars time={time} />
-      <Mountains />
-      <Flowers />
       <Clouds />
       <Rainbow />
       <Rain time={time} />
+      <Mountains />
+      <Buildings />
+      <AngryOldMen />
+      <Boats />
       <Trampoline />
       <Kids />
+      <Pets />
+      <FlyingCards />
+      <Planes />
       <FallingLeaves />
       <Butterflies />
       <LoadingText />
@@ -63,7 +68,7 @@ const Sun = ({ time }) => (
     }}
     transition={{
       repeat: Infinity,
-      duration: 24,
+      duration: 240,
       ease: 'linear',
     }}
   />
@@ -82,7 +87,7 @@ const Moon = ({ time }) => (
     }}
     transition={{
       repeat: Infinity,
-      duration: 24,
+      duration: 240,
       ease: 'linear',
     }}
   />
@@ -99,7 +104,7 @@ const Stars = ({ time }) => (
           left: `${Math.random() * 100}%`,
         }}
         animate={{
-          opacity: time > 18 || time < 6 ? [0, 1] : 0,
+          opacity: time > 180 || time < 60 ? [0, 1] : 0,
           scale: [1, 1.5, 1],
         }}
         transition={{
@@ -110,45 +115,6 @@ const Stars = ({ time }) => (
       />
     ))}
   </>
-)
-
-const Mountains = () => (
-  <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
-    <path fill="#4CAF50" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,149.3C1248,171,1344,213,1392,234.7L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-    <path fill="#2E7D32" d="M0,192L48,181.3C96,171,192,149,288,154.7C384,160,480,192,576,192C672,192,768,160,864,154.7C960,149,1056,171,1152,186.7C1248,203,1344,213,1392,218.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-  </svg>
-)
-
-const Flowers = () => (
-  <div className="absolute bottom-0 left-0 w-full h-32 overflow-hidden">
-    {[...Array(30)].map((_, i) => (
-      <motion.div
-        key={i}
-        className="absolute bottom-0 w-4 h-16"
-        style={{
-          left: `${Math.random() * 100}%`,
-        }}
-        animate={{
-          y: [0, -5, 0],
-        }}
-        transition={{
-          duration: 2 + Math.random() * 2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      >
-        <div
-          className="w-4 h-16 rounded-full"
-          style={{
-            background: `linear-gradient(to top, ${['#FF69B4', '#FF1493', '#FF00FF', '#BA55D3'][Math.floor(Math.random() * 4)]}, #4CAF50)`,
-            animation: `sway ${2 + Math.random()}s ease-in-out infinite alternate`,
-          }}
-        >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-8 bg-yellow-300 rounded-full"></div>
-        </div>
-      </motion.div>
-    ))}
-  </div>
 )
 
 const Clouds = () => (
@@ -198,7 +164,7 @@ const Rainbow = () => (
 
 const Rain = ({ time }) => (
   <>
-    {time > 18 || time < 6 ? (
+    {time > 180 || time < 60 ? (
       [...Array(50)].map((_, i) => (
         <motion.div
           key={i}
@@ -218,6 +184,129 @@ const Rain = ({ time }) => (
         />
       ))
     ) : null}
+  </>
+)
+
+const Mountains = () => (
+  <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#4CAF50" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,149.3C1248,171,1344,213,1392,234.7L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+    <path fill="#2E7D32" d="M0,192L48,181.3C96,171,192,149,288,154.7C384,160,480,192,576,192C672,192,768,160,864,154.7C960,149,1056,171,1152,186.7C1248,203,1344,213,1392,218.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+  </svg>
+)
+
+const Buildings = () => (
+  <div className="absolute bottom-0 left-0 w-full">
+    {[...Array(10)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute bottom-0 w-16 bg-gray-800"
+        style={{
+          height: `${100 + Math.random() * 100}px`,
+          left: `${i * 10}%`,
+        }}
+        animate={{
+          y: [0, -10, 0],
+        }}
+        transition={{
+          duration: 2 + Math.random() * 2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      >
+        {[...Array(10)].map((_, j) => (
+          <div
+            key={j}
+            className="w-4 h-4 bg-yellow-300 m-1"
+            style={{
+              opacity: Math.random() > 0.5 ? 1 : 0,
+            }}
+          ></div>
+        ))}
+      </motion.div>
+    ))}
+  </div>
+)
+
+const AngryOldMen = () => (
+  <>
+    {[...Array(3)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute bottom-20 w-12 h-16"
+        style={{
+          left: `${20 + i * 30}%`,
+        }}
+        animate={{
+          y: [0, -5, 0],
+          rotate: [-5, 5, -5],
+        }}
+        transition={{
+          duration: 0.5,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      >
+        <div className="w-8 h-8 bg-pink-300 rounded-full"></div>
+        <div className="w-12 h-8 bg-gray-700"></div>
+        <motion.div
+          className="absolute top-6 left-2 w-4 h-2 bg-red-500"
+          animate={{
+            scaleY: [1, 0.5, 1],
+          }}
+          transition={{
+            duration: 0.5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        ></motion.div>
+        <motion.div
+          className="absolute top-2 left-1 text-xs"
+          animate={{
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: 0.5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        >
+          😠
+        </motion.div>
+      </motion.div>
+    ))}
+  </>
+)
+
+const Boats = () => (
+  <>
+    {[...Array(3)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute bottom-10 w-20 h-10"
+        style={{
+          left: `${i * 30}%`,
+        }}
+        animate={{
+          x: ['0%', '100%'],
+          y: [0, -5, 0],
+        }}
+        transition={{
+          x: {
+            duration: 20 + i * 5,
+            repeat: Infinity,
+            ease: 'linear',
+          },
+          y: {
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          },
+        }}
+      >
+        <div className="w-20 h-5 bg-blue-500 rounded-b-full"></div>
+        <div className="absolute top-0 left-8 w-0 h-0 border-l-[20px] border-l-transparent border-b-[40px] border-b-red-500 border-r-[20px] border-r-transparent"></div>
+      </motion.div>
+    ))}
   </>
 )
 
@@ -264,6 +353,96 @@ const Kids = () => (
           style={{ background: ['#FF69B4', '#FF6347', '#4169E1', '#32CD32', '#FFD700'][i] }}
         ></div>
         <div className="w-8 h-4 bg-blue-500"></div>
+      </motion.div>
+    ))}
+  </>
+)
+
+const Pets = () => (
+  <>
+    {[...Array(3)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute bottom-10 w-8 h-6"
+        style={{
+          left: `${10 + i * 30}%`,
+        }}
+        animate={{
+          x: [0, 100, 0],
+        }}
+        transition={{
+          duration: 5 + i,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      >
+        <div className="w-6 h-6 bg-brown-500 rounded-full"></div>
+        <div className="w-4 h-2 bg-brown-700 rounded-full"></div>
+        <motion.div
+          className="absolute top-1 w-4 h-2 bg-brown-300"
+          animate={{
+            rotateZ: [0, 45, 0],
+          }}
+          transition={{
+            duration: 0.5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        ></motion.div>
+      </motion.div>
+    ))}
+  </>
+)
+
+const FlyingCards = () => (
+  <>
+    {[...Array(10)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-8 h-12 bg-white rounded-md flex items-center justify-center text-2xl"
+        style={{
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+        }}
+        animate={{
+          x: [0, Math.random() * 200 - 100],
+          y: [0, Math.random() * 200 - 100],
+          rotate: [0, 360],
+        }}
+        transition={{
+          duration: 10 + Math.random() * 5,
+          repeat: Infinity,
+          ease: 'linear',
+        }}
+      >
+        {['♠', '♥', '♦', '♣'][Math.floor(Math.random() * 4)]}
+      </motion.div>
+    ))}
+  </>
+)
+
+const Planes = () => (
+  <>
+    {[...Array(3)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-16 h-8"
+        style={{
+          top: `${10 + i * 20}%`,
+        }}
+        animate={{
+          x: ['100%', '-100%'],
+        }}
+        transition={{
+          duration: 15 + i * 5,
+          repeat: Infinity,
+          ease: 'linear',
+        }}
+      >
+        <div className="w-16 h-4 bg-gray-300"></div>
+        <div className="w-8 h-2 bg-gray-400 mx-auto"></div>
+        <div className="w-4 h-4 bg-gray-300 rounded-full absolute -top-2 left-6"></div>
       </motion.div>
     ))}
   </>
@@ -336,12 +515,12 @@ const Butterflies = () => (
 const LoadingText = () => (
   <motion.div
     className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-4xl font-bold text-white"
-    animate={{ scale: [1, 1.1, 1] }}
+    animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
     transition={{ duration: 2, repeat: Infinity }}
   >
-    Loading...
+    Loading... Hang tight!
   </motion.div>
 )
 
-export default SuperEnhancedLoading
+export default SuperSillyLoading
 
