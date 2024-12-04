@@ -55,6 +55,7 @@ export async function getUsersById(ids: string[]){
 }
 
 export async function findNonFriends(user: UserData, friends: number){
+    if (user.friends.length === 0) return (await getDocs(query(collection(db, "users"), limit(friends)))).docs.map((doc) => doc.data() as UserData);
     return (await getDocs(query(collection(db, "users"), where("id", "not-in", user.friends), limit(friends)))).docs.map((doc) => doc.data() as UserData);
 }
 

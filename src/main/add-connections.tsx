@@ -43,8 +43,8 @@ const AddFriendsPage: React.FC = () => {
         return;
       }
       setUser(userData);
-      const users = await findNonFriends(userData, 10);
-      setUsers(users);
+      const users = await findNonFriends(userData, 20);
+      setUsers(users.filter(u => u.id !== userData.id));
     };
     fetchUsers();
   })
