@@ -1,39 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, MessageSquare, UserPlus, UserMinus, ChevronDown, ChevronUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout';
+import { getUser, getUsersById, UserData } from '../api/db';
+import SuperSillyLoading from '../components/Loading';
 
-// Types
-type Friend = {
-  id: number;
-  name: string;
-  avatar: string;
-  status: 'online' | 'offline';
-  mutualFriends: number;
-};
-
-// Components
-const Avatar: React.FC<{ src: string; alt: string; status: 'online' | 'offline' }> = ({ src, alt, status }) => (
+const Avatar: React.FC<{ src: string; alt: string; status: 'online' | 'offline' }> = ({ src, status }) => (
   <div className="relative">
-    <img src={src} alt={alt} className="w-12 h-12 rounded-full object-cover" />
+    <div className="w-12 h-12 rounded-full object-cover" dangerouslySetInnerHTML={{ __html: src }} />
     <div className={`absolute bottom-0 left-0 w-3 h-3 rounded-full border-2 border-white ${status === 'online' ? 'bg-green-500' : 'bg-gray-500'}`}></div>
   </div>
 );
 
 const FriendCard: React.FC<{ 
-  friend: Friend; 
-  onMessage: (id: number) => void; 
-  onRemove: (id: number) => void;
-}> = ({ friend, onMessage, onRemove }) => (
-  <div className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
+  friend: UserData; 
+  user: UserData;
+  onMessage: (id: string) => void; 
+  onRemove: (id: string) => void;
+}> = ({ friend, onMessage, user, onRemove }) => {
+  const mutualFriends = user.friends.filter(f => friend.friends.includes(f)).length;
+  return <div className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
     <div className="flex items-center space-x-4 gap-3">
-      <Avatar src={friend.avatar} alt={friend.name} status={friend.status} />
+      <Avatar src={friend.icon} alt={friend.name} status={friend.isOnline ? 'online' : 'offline'} />
       <div className="ml-4">
         <h3 className="font-semibold text-lg">{friend.name}</h3>
         <p className="text-sm text-gray-500">
-          {friend.status === 'online' ? 'מחובר' : 'לא מחובר'}
+          {friend.isOnline ? 'מחובר' : 'לא מחובר'}
         </p>
-        <p className="text-xs text-gray-400">{friend.mutualFriends} חברים משותפים</p>
+        <p className="text-xs text-gray-400">{mutualFriends} חברים משותפים</p>
       </div>
     </div>
     <div className="flex items-center space-x-2">
@@ -45,14 +39,11 @@ const FriendCard: React.FC<{
       </button>
     </div>
   </div>
-);
+};
 
-const RecommendedFriends: React.FC = () => {
+const RecommendedFriends = ({user} : {user: UserData}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const recommendedFriends: Friend[] = [
-    { id: 5, name: 'שירה לוי', avatar: 'https://i.pravatar.cc/150?img=5', status: 'online', mutualFriends: 8 },
-    { id: 6, name: 'יוסי כהן', avatar: 'https://i.pravatar.cc/150?img=6', status: 'offline', mutualFriends: 6 },
-  ];
+  const recommendedFriends: never[] = [];;
 
   return (
     <div className=" rounded-lg shadow-md overflow-hidden">
@@ -67,7 +58,8 @@ const RecommendedFriends: React.FC = () => {
         <div className="p-4 space-y-4">
           {recommendedFriends.map(friend => (
             <FriendCard
-              key={friend.id}
+              key={friend}
+              user={user}
               friend={friend}
               onMessage={() => {}}
               onRemove={() => {}}
@@ -107,26 +99,36 @@ const ConfirmationPopup: React.FC<{
 
 // Main Component
 const FriendsPage: React.FC = () => {
-  const [friends, setFriends] = useState<Friend[]>([
-    { id: 1, name: 'יעל כהן', avatar: 'https://i.pravatar.cc/150?img=1', status: 'online', mutualFriends: 5 },
-    { id: 2, name: 'דני לוי', avatar: 'https://i.pravatar.cc/150?img=2', status: 'offline', mutualFriends: 3 },
-    { id: 3, name: 'מיכל גולן', avatar: 'https://i.pravatar.cc/150?img=3', status: 'online', mutualFriends: 7 },
-    { id: 4, name: 'אבי ישראלי', avatar: 'https://i.pravatar.cc/150?img=4', status: 'offline', mutualFriends: 2 },
-  ]);
-
+  const [user, setUser] = useState<UserData | null>(null);
+  const [friends, setFriends] = useState<UserData[]>();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetcData= async () => {
+      const userData = await getUser();
+      if (!userData) {
+        navigate('/'); // Redirect to login page
+        return;
+      }
+      setUser(userData);
+      setFriends(await getUsersById(userData.friends));
+    }
+    fetcData();
+  }, [])
   const [searchTerm, setSearchTerm] = useState('');
-  const [confirmRemove, setConfirmRemove] = useState<{ isOpen: boolean; friendId: number | null; friendName: string }>({
+  const [confirmRemove, setConfirmRemove] = useState<{ isOpen: boolean; friendId: string | null; friendName: string }>({
     isOpen: false,
     friendId: null,
     friendName: '',
   });
 
-  const handleMessage = (id: number) => {
+  const handleMessage = (id: string) => {
     console.log(`Messaging friend with id: ${id}`);
     // Implement messaging logic here
   };
-
-  const handleRemoveFriend = (id: number) => {
+  if (!user || !friends) {
+    return <SuperSillyLoading></SuperSillyLoading>;
+  }
+  const handleRemoveFriend = (id: string) => {
     const friendToRemove = friends.find(friend => friend.id === id);
     if (friendToRemove) {
       setConfirmRemove({ isOpen: true, friendId: id, friendName: friendToRemove.name });
@@ -172,6 +174,7 @@ const FriendsPage: React.FC = () => {
             <FriendCard
               key={friend.id}
               friend={friend}
+              user={user}
               onMessage={handleMessage}
               onRemove={handleRemoveFriend}
             />
@@ -179,7 +182,7 @@ const FriendsPage: React.FC = () => {
         </div>
 
         <div className="mt-8">
-          <RecommendedFriends />
+          <RecommendedFriends user={user}/>
         </div>
       </div>
 

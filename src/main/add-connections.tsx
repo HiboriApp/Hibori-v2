@@ -1,55 +1,60 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Search, UserPlus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import SuperSillyLoading from '../components/Loading';
+import { findNonFriends, getUser, UserData } from '../api/db';
 
-type User = {
-  id: number;
-  name: string;
-  avatar: string;
-  mutualFriends: number;
-};
-
-const Avatar: React.FC<{ src: string; alt: string }> = ({ src, alt }) => (
-  <img src={src} alt={alt} className="w-12 h-12 rounded-full object-cover" />
+const Avatar: React.FC<{ src: string }> = ({ src }) => (
+  <div dangerouslySetInnerHTML={{ __html: src }} className="w-12 h-12 rounded-full object-cover" />
 );
 
 const UserCard: React.FC<{ 
-  user: User; 
-  onAddFriend: (id: number) => void;
-}> = ({ user, onAddFriend }) => (
-  <div className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
+  otherUser: UserData; 
+  user: UserData;
+  onAddFriend: (id: string) => void;
+}> = ({ otherUser: otherUser, onAddFriend, user }) => {
+  const mutualFriends = user.friends.filter(f => otherUser.friends.includes(f)).length;
+  return <div className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
     <div className="flex items-center space-x-4 gap-4">
-      <Avatar src={user.avatar} alt={user.name} />
+      <Avatar src={otherUser.icon} />
       <div className="mr-4">
-        <h3 className="font-semibold text-lg">{user.name}</h3>
-        <p className="text-xs text-gray-400">{user.mutualFriends} חברים משותפים</p>
+        <h3 className="font-semibold text-lg">{otherUser.name}</h3>
+        <p className="text-xs text-gray-400">{mutualFriends} חברים משותפים</p>
       </div>
     </div>
-    <button onClick={() => onAddFriend(user.id)} className="p-2 text-green-500 hover:bg-green-100 rounded-full">
+    <button onClick={() => onAddFriend(otherUser.id)} className="p-2 text-green-500 hover:bg-green-100 rounded-full">
       <UserPlus size={20} />
     </button>
   </div>
-);
+};
 
 const AddFriendsPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([
-    { id: 1, name: 'רונית כהן', avatar: 'https://i.pravatar.cc/150?img=1', mutualFriends: 12 },
-    { id: 2, name: 'אלון לוי', avatar: 'https://i.pravatar.cc/150?img=2', mutualFriends: 8 },
-    { id: 3, name: 'שירה גולן', avatar: 'https://i.pravatar.cc/150?img=3', mutualFriends: 6 },
-    { id: 4, name: 'יובל כהן', avatar: 'https://i.pravatar.cc/150?img=4', mutualFriends: 4 },
-    { id: 5, name: 'נועה שמיר', avatar: 'https://i.pravatar.cc/150?img=5', mutualFriends: 3 },
-  ]);
+  const [users, setUsers] = useState<UserData[] | undefined>();
+  const [user, setUser] = useState<UserData | undefined>();
+  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
-
-  const handleAddFriend = (id: number) => {
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const userData = await getUser();
+      if (!userData) {
+        navigate('/');
+        return;
+      }
+      setUser(userData);
+      const users = await findNonFriends(userData, 10);
+      setUsers(users);
+    };
+    fetchUsers();
+  })
+  const handleAddFriend = (id: string) => {
     console.log(`Adding friend with id: ${id}`);
     // Implement add friend logic here
   };
-
+  if (!users || !user) return <SuperSillyLoading></SuperSillyLoading>;
   const filteredUsers = users
     .filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => b.mutualFriends - a.mutualFriends);
+    .sort((a, b) => b.friends.filter(f => a.friends.includes(f)).length - a.friends.filter(f => b.friends.includes(f)).length);
 
   return (
     <div className="min-h-screen  p-8 rtl" dir="rtl">
@@ -74,9 +79,10 @@ const AddFriendsPage: React.FC = () => {
         </div>
 
         <div className="space-y-4">
-          {filteredUsers.map(user => (
+          {filteredUsers.map(otherUser => (
             <UserCard
-              key={user.id}
+              key={otherUser.id}
+              otherUser={otherUser}
               user={user}
               onAddFriend={handleAddFriend}
             />

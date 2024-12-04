@@ -17,7 +17,8 @@ const SuperSillyLoading = () => {
 
   return (
     <div className="w-full h-screen overflow-hidden relative" style={{ background: skyColor, transition: 'background 1s' }}>
-      <style jsx global>{`
+      {/*//@ts-expect-error*/}
+      <style jsx={true} global>{`
         @keyframes sway {
           0% { transform: rotate(0deg); }
           50% { transform: rotate(5deg); }
@@ -55,7 +56,7 @@ const SuperSillyLoading = () => {
   )
 }
 
-const Sun = ({ time }) => (
+const Sun = ({ time } : { time: number }) => (
   <motion.div
     className="absolute w-20 h-20 bg-yellow-400 rounded-full"
     style={{
@@ -74,7 +75,7 @@ const Sun = ({ time }) => (
   />
 )
 
-const Moon = ({ time }) => (
+const Moon = ({ time } : { time: number }) => (
   <motion.div
     className="absolute w-16 h-16 bg-gray-200 rounded-full"
     style={{
@@ -93,7 +94,7 @@ const Moon = ({ time }) => (
   />
 )
 
-const Stars = ({ time }) => (
+const Stars = ({ time } : { time: number }) => (
   <>
     {[...Array(50)].map((_, i) => (
       <motion.div
@@ -162,7 +163,7 @@ const Rainbow = () => (
   />
 )
 
-const Rain = ({ time }) => (
+const Rain = ({ time } : { time: number }) => (
   <>
     {time > 180 || time < 60 ? (
       [...Array(50)].map((_, i) => (

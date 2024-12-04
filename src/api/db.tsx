@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, limit, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { DefaultPallate, Pallate } from "./settings";
 import { auth, db } from "./firebase";
 import { User } from "firebase/auth";
@@ -42,6 +42,10 @@ export async function getUsersById(ids: string[]){
         if (!!user.exists()) result.push(user.data() as UserData);
     }
     return result;
+}
+
+export async function findNonFriends(user: UserData, friends: number){
+    return (await getDocs(query(collection(db, "users"), where("id", "not-in", user.friends), where("id", "!=", user.id), limit(friends)))).docs.map((doc) => doc.data() as UserData);
 }
 
 export async function setUser(user: UserData){

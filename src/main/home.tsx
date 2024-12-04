@@ -268,7 +268,7 @@ function LeftPanel({
                       : message.content}
                   </p>
                   <span className="text-xs text-gray-400">
-                    {new Date(message.date).toLocaleString()}
+                    {message.date.toDate().toLocaleString()}
                   </span>
                 </div>
               </div>
