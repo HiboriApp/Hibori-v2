@@ -20,29 +20,31 @@ const pageTransition = {
 };
 
 // UserProfile Component
-function UserProfile({ palette, user }: { palette: Pallate, user: UserData }) {
+function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
-      <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`} dangerouslySetInnerHTML={{ __html: user.icon }}>
-      </div>
+      <div
+        className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`}
+        dangerouslySetInnerHTML={{ __html: user.icon }}
+      ></div>
       <div>
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
       </div>
       <Link
-            to={'/settings'}
-            className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
-          >
-            <Settings className={`h-6 w-6 text-${palette.text}`} />
-            <span className="sr-only">Settings</span>
-          </Link>
+        to={'/settings'}
+        className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
+      >
+        <Settings className={`h-6 w-6 text-${palette.text}`} />
+        <span className="sr-only">Settings</span>
+      </Link>
     </div>
-  )
+  );
 }
 
 // SearchBar Component
 function SearchBar({ palette }: { palette: Pallate }) {
   return (
-    <div className="relative">
+    <div className="relative hidden md:block">
       <input
         type="text"
         placeholder="חיפוש..."
@@ -113,11 +115,11 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
 function Header({ palette }: { palette: Pallate }) {
   return (
     <header className={`bg-white border-b border-${palette.secondary} px-4 py-2 flex items-center`}>
-        <button
-          className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}
-        >
-          <HelpCircle className={`h-6 w-6 text-${palette.text}`} />
-        </button>
+      <button
+        className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}
+      >
+        <HelpCircle className={`h-6 w-6 text-${palette.text}`} />
+      </button>
       <div className="flex-1 flex justify-center">
         {/* On desktop, show SearchBar */}
         <div className="hidden md:block w-full max-w-md">
@@ -131,7 +133,6 @@ function Header({ palette }: { palette: Pallate }) {
       {/* Right Section */}
       <div className="flex items-center flex-none space-x-4 space-x-reverse">
         <NotificationBell palette={palette} />
-      
       </div>
     </header>
   );
@@ -194,7 +195,12 @@ function MainContent({
 }
 
 // Layout Component
-export function Layout({ children }: { children: React.ReactNode }) {
+interface LayoutProps {
+  children: React.ReactNode;
+  hideLayoutOnMobile?: boolean; // New prop to control layout visibility
+}
+
+export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
   const [palette, setPalette] = useState<Pallate | null>(null);
   const [user, setUser] = useState<UserData | null>(null);
   const navigate = useNavigate();
@@ -214,23 +220,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [navigate]);
 
   if (!palette || !user) {
-    return <Loading></Loading>
+    return <Loading></Loading>;
   }
 
   return (
     <div className={`flex flex-col h-screen bg-${palette.background}`} dir="rtl">
-      <Header palette={palette} />
+      {!hideLayoutOnMobile && <Header palette={palette} />}
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar palette={palette} user={user} />
+        {!hideLayoutOnMobile && <Sidebar palette={palette} user={user} />}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* On mobile, search bar is displayed here */}
-          <div className="p-4 md:hidden">
-            <SearchBar palette={palette} />
-          </div>
+          {!hideLayoutOnMobile && (
+            <div className="md:hidden">
+              <SearchBar palette={palette} />
+            </div>
+          )}
           <MainContent palette={palette}>{children}</MainContent>
         </div>
       </div>
-      <MobileBottomNav palette={palette} />
+      {!hideLayoutOnMobile && <MobileBottomNav palette={palette} />}
     </div>
   );
 }

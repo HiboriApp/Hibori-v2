@@ -398,7 +398,7 @@ const CreatePost = ({
             type="submit"
             className="bg-green-500 flex text-white px-4 py-2 rounded-xl hover:bg-green-600 transition-colors duration-200"
           >
-            <Plus className='ml-1'/>
+            <Plus className='ml-1S'/>
             פרסם
           </button>
         </div>
