@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, MessageSquare, UserPlus, UserMinus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout';
-import { getUser, getUsersById, UserData } from '../api/db';
+import { getUser, getUsersById, removeFriend, UserData } from '../api/db';
 import SuperSillyLoading from '../components/Loading';
 
 const Avatar: React.FC<{ src: string; alt: string; status: 'online' | 'offline' }> = ({ src, status }) => (
@@ -138,6 +138,7 @@ const FriendsPage: React.FC = () => {
   const confirmRemoveFriend = () => {
     if (confirmRemove.friendId !== null) {
       setFriends(friends.filter(friend => friend.id !== confirmRemove.friendId));
+      removeFriend(user, confirmRemove.friendId);
     }
     setConfirmRemove({ isOpen: false, friendId: null, friendName: '' });
   };

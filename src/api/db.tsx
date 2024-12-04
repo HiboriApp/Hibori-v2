@@ -35,6 +35,16 @@ export async function getUser(){
     return user.data() as UserData;
 }
 
+export async function addFriend(user: UserData, friend: string){
+    if (!user){return;}
+    return setDoc(doc(db, "users", user.id), {friends: [...user.friends, friend]}, {merge: true});
+}
+
+export async function removeFriend(user: UserData, friend: string){
+    if (!user){return;}
+    return setDoc(doc(db, "users", user.id), {friends: user.friends.filter(f => f !== friend)}, {merge: true});
+}
+
 export async function getUsersById(ids: string[]){
     let result = [];
     for (let i = 0; i < ids.length; i++){
@@ -45,7 +55,7 @@ export async function getUsersById(ids: string[]){
 }
 
 export async function findNonFriends(user: UserData, friends: number){
-    return (await getDocs(query(collection(db, "users"), where("id", "not-in", user.friends), where("id", "!=", user.id), limit(friends)))).docs.map((doc) => doc.data() as UserData);
+    return (await getDocs(query(collection(db, "users"), where("id", "not-in", user.friends), limit(friends)))).docs.map((doc) => doc.data() as UserData);
 }
 
 export async function setUser(user: UserData){

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Search, UserPlus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import SuperSillyLoading from '../components/Loading';
-import { findNonFriends, getUser, UserData } from '../api/db';
+import { addFriend, findNonFriends, getUser, UserData } from '../api/db';
 
 const Avatar: React.FC<{ src: string }> = ({ src }) => (
   <div dangerouslySetInnerHTML={{ __html: src }} className="w-12 h-12 rounded-full object-cover" />
@@ -48,8 +48,9 @@ const AddFriendsPage: React.FC = () => {
     fetchUsers();
   })
   const handleAddFriend = (id: string) => {
-    console.log(`Adding friend with id: ${id}`);
-    // Implement add friend logic here
+    if (!user){return;}
+    setUser({ ...user, friends: [...user.friends, id] });
+    addFriend(user, id);
   };
   if (!users || !user) return <SuperSillyLoading></SuperSillyLoading>;
   const filteredUsers = users
