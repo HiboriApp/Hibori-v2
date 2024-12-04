@@ -122,8 +122,7 @@ const FriendsPage: React.FC = () => {
   });
 
   const handleMessage = (id: string) => {
-    console.log(`Messaging friend with id: ${id}`);
-    // Implement messaging logic here
+    navigate('/messages/' + id);
   };
   if (!user || !friends) {
     return <SuperSillyLoading></SuperSillyLoading>;

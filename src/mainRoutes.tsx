@@ -21,6 +21,10 @@ export default function Routes() : RouteObject[]{
     {
       path: '/addfriends',
       element: <AddFriendsPage></AddFriendsPage>
+    },
+    {
+      path: '/messages/:id',
+      element: <Messages></Messages>
     }
 
   ];

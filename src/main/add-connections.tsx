@@ -3,6 +3,7 @@ import { ArrowLeft, Search, UserPlus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import SuperSillyLoading from '../components/Loading';
 import { addFriend, findNonFriends, getUser, UserData } from '../api/db';
+import Layout from '../components/layout';
 
 const Avatar: React.FC<{ src: string }> = ({ src }) => (
   <div dangerouslySetInnerHTML={{ __html: src }} className="w-12 h-12 rounded-full object-cover" />
@@ -58,7 +59,7 @@ const AddFriendsPage: React.FC = () => {
     .sort((a, b) => b.friends.filter(f => a.friends.includes(f)).length - a.friends.filter(f => b.friends.includes(f)).length);
 
   return (
-    <div className="min-h-screen  p-8 rtl" dir="rtl">
+    <Layout><div className="min-h-screen  p-8 rtl" dir="rtl">
       <div className="max-w-3xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">הוסף חברים</h1>
@@ -90,7 +91,7 @@ const AddFriendsPage: React.FC = () => {
           ))}
         </div>
       </div>
-    </div>
+    </div></Layout>
   );
 };
 
