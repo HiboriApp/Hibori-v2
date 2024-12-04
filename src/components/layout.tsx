@@ -5,6 +5,7 @@ import { MessageSquare, Home, Bell, Search, User, HelpCircle, Settings } from 'l
 import { GetPallate, Pallate } from '../api/settings';
 import { getUser, UserData } from '../api/db';
 import Loading from './Loading';
+import { Avatar } from '../api/icons';
 
 // Routes
 const routes = [
@@ -23,10 +24,11 @@ const pageTransition = {
 function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
-      <div
+      <Avatar
         className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`}
-        dangerouslySetInnerHTML={{ __html: user.icon }}
-      ></div>
+        icon={user.icon}
+        isOnline={true}
+      />
       <div>
         <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
       </div>

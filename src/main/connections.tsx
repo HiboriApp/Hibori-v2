@@ -4,13 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout';
 import { getUser, getUsersById, removeFriend, UserData } from '../api/db';
 import SuperSillyLoading from '../components/Loading';
-
-const Avatar: React.FC<{ src: string; alt: string; status: 'online' | 'offline' }> = ({ src, status }) => (
-  <div className="relative">
-    <div className="w-12 h-12 rounded-full object-cover" dangerouslySetInnerHTML={{ __html: src }} />
-    <div className={`absolute bottom-0 left-0 w-3 h-3 rounded-full border-2 border-white ${status === 'online' ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-  </div>
-);
+import { Avatar } from '../api/icons';
 
 const FriendCard: React.FC<{ 
   friend: UserData; 
@@ -21,7 +15,7 @@ const FriendCard: React.FC<{
   const mutualFriends = user.friends.filter(f => friend.friends.includes(f)).length;
   return <div className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
     <div className="flex items-center space-x-4 gap-3">
-      <Avatar src={friend.icon} alt={friend.name} status={friend.isOnline ? 'online' : 'offline'} />
+      <Avatar icon={friend.icon} className={"w-12 h-12 rounded-full object-cover"} />
       <div className="ml-4">
         <h3 className="font-semibold text-lg">{friend.name}</h3>
         <p className="text-sm text-gray-500">

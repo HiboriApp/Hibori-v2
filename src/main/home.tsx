@@ -11,14 +11,15 @@ import {
   Users,
   Image as ImageIcon,
   Video,
-  Smile,
   X,
   Plus,
 } from 'lucide-react';
 import { Layout } from '../components/layout';
-import { getUsersById, getUser, UserData, Message } from '../api/db';
+import { getUsersById, getUser, UserData, Message, Notification } from '../api/db';
 import { useNavigate } from 'react-router-dom';
 import { userListener } from '../api/listeners';
+import SuperSillyLoading from '../components/Loading';
+import { Avatar } from '../api/icons';
 
 // הגדרת סוגים
 type ContentItem = {
@@ -28,15 +29,6 @@ type ContentItem = {
   timestamp: string;
   image?: string;
   likes: number;
-};
-
-type Notification = {
-  id: string;
-  content: string;
-  timestamp: string;
-  type: 'message' | 'like' | 'comment';
-  userAvatar: string;
-  userName: string;
 };
 
 // קומפוננטת טוען
@@ -183,41 +175,14 @@ function NewContentFeed({
   );
 }
 
-// נתוני התראות
-const notifications: Notification[] = [
-  {
-    id: '1',
-    content: 'אהב את הפוסט שלך',
-    timestamp: '10:30',
-    type: 'like',
-    userAvatar: 'https://picsum.photos/100/100?random=1',
-    userName: 'אבי',
-  },
-  {
-    id: '2',
-    content: 'הגיב על התמונה שלך',
-    timestamp: '09:15',
-    type: 'comment',
-    userAvatar: 'https://picsum.photos/100/100?random=2',
-    userName: 'שרה',
-  },
-  {
-    id: '3',
-    content: 'שלח לך הודעה',
-    timestamp: '11:45',
-    type: 'message',
-    userAvatar: 'https://picsum.photos/100/100?random=3',
-    userName: 'יוסי',
-  },
-];
-
-// קומפוננטת פאנל שמאלי
 function LeftPanel({
   friends,
   messages,
+  user
 }: {
   friends: UserData[];
   messages: (Message & UserData)[];
+  user: UserData;
 }) {
   return (
     <>
@@ -286,23 +251,18 @@ function LeftPanel({
           התראות
         </h3>
         <ul className="space-y-3">
-          {notifications.map((notification) => (
+          {user.notifications.map((notification, i) => (
             <li
-              key={notification.id}
+              key={notification.timestamp.toDate().getTime() + i}
               className="flex items-center bg-gray-50 rounded-lg p-3"
             >
-              <img
-                src={notification.userAvatar}
-                alt={notification.userName}
-                className="w-10 h-10 rounded-full ml-3"
-              />
+              <Avatar icon={notification.icon} className='"w-10 h-10 rounded-full ml-3"'></Avatar>
               <div className="flex-grow">
                 <p className="text-sm text-gray-700">
-                  <span className="font-medium">{notification.userName}</span>{' '}
                   {notification.content}
                 </p>
                 <span className="text-xs text-gray-500">
-                  {notification.timestamp}
+                  {notification.timestamp.toDate().toLocaleString()}
                 </span>
               </div>
               <div className="ml-3">
@@ -409,9 +369,9 @@ const CreatePost = ({
 
 // קומפוננטת אפליקציה ראשית
 function App() {
-  const [_user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [friends, setFriends] = useState<UserData[]>([]);
-  const [messages, setMessages] = useState<(Message & UserData)[]>([]);
+  const [messages, _setMessages] = useState<(Message & UserData)[]>([]);
   const [content, setContent] = useState<ContentItem[]>([...simulatedContent]);
 
   const navigate = useNavigate();
@@ -426,18 +386,8 @@ function App() {
       setUser(userData);
       const friendsData = await getUsersById(userData.friends);
       setFriends(friendsData);
-      const messagesData = await getUsersById(
-        userData.messages.map((message) => message.id)
-      );
-      setMessages(
-        userData.messages
-          .map((message) => {
-            const data = messagesData.find((m) => m.id === message.id);
-            if (!data) return null;
-            return { ...message, ...data };
-          })
-          .filter((message): message is Message & UserData => !!message)
-      );
+      
+      
     };
     fetchData();
 
@@ -445,18 +395,6 @@ function App() {
       setUser(user);
       const friendsData = await getUsersById(user.friends);
       setFriends(friendsData);
-      const messagesData = await getUsersById(
-        user.messages.map((message) => message.id)
-      );
-      setMessages(
-        user.messages
-          .map((message) => {
-            const data = messagesData.find((m) => m.id === message.id);
-            if (!data) return null;
-            return { ...message, ...data };
-          })
-          .filter((message): message is Message & UserData => !!message)
-      );
     });
     return unsubscribe;
   }, [navigate]);
@@ -469,7 +407,7 @@ function App() {
       {
         id: `p${prevContent.length + 1}`,
         content: newPost.content,
-        target: _user ? _user.name : 'אנונימי',
+        target: user ? user.name : 'אנונימי',
         timestamp: new Date().toISOString(),
         image: newPost.image || undefined,
         likes: 0,
@@ -477,7 +415,7 @@ function App() {
       ...prevContent,
     ]);
   };
-
+  if (!user) return <SuperSillyLoading></SuperSillyLoading>;
   return (
     <Layout>
       <div className="min-h-screen">
@@ -502,7 +440,7 @@ function App() {
             <div className="hidden lg:block col-span-4">
               <div className="sticky top-6">
                 <div className="space-y-6" dir="rtl">
-                  <LeftPanel friends={friends} messages={messages} />
+                  <LeftPanel user={user} friends={friends} messages={messages} />
                 </div>
               </div>
             </div>

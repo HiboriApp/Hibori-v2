@@ -2,7 +2,7 @@ import { collection, doc, getDoc, getDocs, limit, query, setDoc, Timestamp, wher
 import { DefaultPallate, Pallate } from "./settings";
 import { auth, db } from "./firebase";
 import { User } from "firebase/auth";
-import { GenerateIcons } from "./icons";
+import { GenerateIcons, Icon } from "./icons";
 
 export interface Message{
     id: string,
@@ -10,15 +10,22 @@ export interface Message{
     date: Timestamp,
 }
 
+export type Notification = {
+    content: string;
+    timestamp: Timestamp;
+    type: 'message' | 'like' | 'comment';
+    icon: Icon;
+};
+
 export interface UserData{
     id: string,
     pallate: Pallate
-    icon: string
+    icon: Icon
     name: string
     lastSeen: string
     bio: string
     email: string
-    messages: Message[]
+    notifications: Notification[]
     friends: string[]
     isOnline: boolean
     lastOnline: Timestamp
@@ -75,11 +82,16 @@ export async function CreateUser(name: string, user: User, email: string){
         bio: "",
         lastSeen: new Date().toString(),
         email: email,
-        messages: [],
+        notifications: [],
         friends: [],
         isOnline: true,
         lastOnline: Timestamp.fromDate(new Date()),
     };
     await setUser(data);
     return true;
+}
+
+export async function removeNotification(user: UserData, id: number){
+    if (!user){return;}
+    return setDoc(doc(db, "users", user.id), {notifications: user.notifications.filter((_, i) => i !== id)}, {merge: true});
 }

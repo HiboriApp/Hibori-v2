@@ -4,10 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import SuperSillyLoading from '../components/Loading';
 import { addFriend, findNonFriends, getUser, UserData } from '../api/db';
 import Layout from '../components/layout';
-
-const Avatar: React.FC<{ src: string }> = ({ src }) => (
-  <div dangerouslySetInnerHTML={{ __html: src }} className="w-12 h-12 rounded-full object-cover" />
-);
+import { Avatar } from '../api/icons';
 
 const UserCard: React.FC<{ 
   otherUser: UserData; 
@@ -17,7 +14,7 @@ const UserCard: React.FC<{
   const mutualFriends = user.friends.filter(f => otherUser.friends.includes(f)).length;
   return <div className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
     <div className="flex items-center space-x-4 gap-4">
-      <Avatar src={otherUser.icon} />
+      <Avatar icon={otherUser.icon} className="w-12 h-12 rounded-full object-cover" />
       <div className="mr-4">
         <h3 className="font-semibold text-lg">{otherUser.name}</h3>
         <p className="text-xs text-gray-400">{mutualFriends} חברים משותפים</p>
