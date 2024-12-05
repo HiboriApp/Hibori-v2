@@ -2,8 +2,8 @@ import { createAvatar } from '@dicebear/core';
 import { lorelei } from '@dicebear/collection';
 
 export enum IconType{
-    svg,
-    image
+    svg = "svg",
+    image = "image"
 }
 
 export interface Icon{
