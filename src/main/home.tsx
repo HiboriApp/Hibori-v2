@@ -253,7 +253,7 @@ function LeftPanel({
               key={notification.timestamp.toDate().getTime() + i}
               className="flex items-center bg-gray-50 rounded-lg p-3"
             >
-              <Avatar icon={notification.icon} className='"w-10 h-10 rounded-full ml-3"'></Avatar>
+              <Avatar icon={notification.icon} className='w-10 h-10 rounded-full ml-3'></Avatar>
               <div className="flex-grow">
                 <p className="text-sm text-gray-700">
                   {notification.content}
