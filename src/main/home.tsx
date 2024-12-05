@@ -16,7 +16,7 @@ import {
 import { Layout } from '../components/layout';
 import { getUsersById, getUser, UserData, Chat, Post, getUserById, getPosts, postStuff, FileDisplay, deletePost, UploadedFile, fileType, likePost, Comment, updatePost } from '../api/db';
 import { useNavigate } from 'react-router-dom';
-import { userListener } from '../api/listeners';
+import { postsListener, userListener } from '../api/listeners';
 import SuperSillyLoading from '../components/Loading';
 import { Avatar } from '../api/icons';
 import { Timestamp } from 'firebase/firestore';
@@ -400,6 +400,7 @@ function App() {
   const [friends, setFriends] = useState<UserData[]>([]);
   const [messages, _setMessages] = useState<{chat: Chat, user: UserData}[]>([]);
   const [posts, setPosts] = useState<Post[] | undefined>();
+  const postsLimit = 10;
 
   const navigate = useNavigate();
 
@@ -413,9 +414,9 @@ function App() {
       setUser(userData);
       const friendsData = await getUsersById(userData.friends);
       setFriends(friendsData);
-      const postsData = await getPosts();
+      const postsData = await getPosts(postsLimit);
       setPosts(postsData);
-      
+      return postsListener(setPosts, postsLimit);
     };
     fetchData();
 
