@@ -4,12 +4,6 @@ import { auth, db } from "./firebase";
 import { User } from "firebase/auth";
 import { GenerateIcons, Icon } from "./icons";
 
-export interface Message{
-    id: string,
-    content: string,
-    date: Timestamp,
-}
-
 export type Notification = {
     content: string;
     timestamp: Timestamp;
@@ -52,6 +46,11 @@ export async function removeFriend(user: UserData, friend: string){
     return setDoc(doc(db, "users", user.id), {friends: user.friends.filter(f => f !== friend)}, {merge: true});
 }
 
+export async function getUserById(id: string){
+    const user = await getDoc(doc(db, "users", id));
+    return user.data() as UserData;
+}
+
 export async function getUsersById(ids: string[]){
     let result = [];
     for (let i = 0; i < ids.length; i++){
@@ -64,6 +63,35 @@ export async function getUsersById(ids: string[]){
 export async function findNonFriends(user: UserData, friends: number){
     if (user.friends.length === 0) return (await getDocs(query(collection(db, "users"), limit(friends)))).docs.map((doc) => doc.data() as UserData);
     return (await getDocs(query(collection(db, "users"), where("id", "not-in", user.friends), limit(friends)))).docs.map((doc) => doc.data() as UserData);
+}
+
+export interface Message{
+    timestamp: Timestamp, 
+    content: string, 
+    sender: string
+}
+
+export interface Chat{
+    name?: string,
+    person: string | string[],
+    messages: Message[],
+    lastMessage: string,
+    description?: string,
+    icon: Icon,
+    id: string,
+}
+
+
+
+export async function getChats(){
+    if (!auth.currentUser) return;
+    const chats = await getDocs(query(collection(db, "chats"), where("id", "array-contains", auth.currentUser.uid)));
+    return chats.docs.map((doc) => {return {...doc.data() as Chat, id: doc.id};}) as Chat[];
+}
+
+export async function sendMessage(chat: Chat, message: Message){
+    if (!auth.currentUser) return;
+    return setDoc(doc(db, "chats", chat.id), {messages: [...chat.messages, message]}, {merge: true});
 }
 
 export async function setUser(user: UserData){

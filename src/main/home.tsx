@@ -15,7 +15,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { Layout } from '../components/layout';
-import { getUsersById, getUser, UserData, Message, Notification } from '../api/db';
+import { getUsersById, getUser, UserData, Chat } from '../api/db';
 import { useNavigate } from 'react-router-dom';
 import { userListener } from '../api/listeners';
 import SuperSillyLoading from '../components/Loading';
@@ -181,7 +181,7 @@ function LeftPanel({
   user
 }: {
   friends: UserData[];
-  messages: (Message & UserData)[];
+  messages: {user: UserData, chat: Chat}[];
   user: UserData;
 }) {
   return (
@@ -219,21 +219,18 @@ function LeftPanel({
         </h3>
         <ul className="space-y-3">
           {messages.map((message) => (
-            <li key={message.id} className="flex items-center justify-between">
+            <li key={message.chat.id} className="flex items-center justify-between">
               <div className="flex items-center">
-                <div
-                  className="w-10 h-10 rounded-full ml-3"
-                  dangerouslySetInnerHTML={{ __html: message.icon }}
-                />
+                <Avatar className="w-10 h-10 rounded-full ml-3" icon={message.user.icon}></Avatar>
                 <div>
-                  <p className="font-medium text-sm">{message.name}</p>
+                  <p className="font-medium text-sm">{message.user.name}</p>
                   <p className="text-md text-gray-600 truncate">
-                    {message.content.length > 20
-                      ? message.content.substring(0, 20) + '...'
-                      : message.content}
+                    {message.chat.lastMessage.length > 20
+                      ? message.chat.lastMessage.substring(0, 20) + '...'
+                      : message.chat.lastMessage}
                   </p>
                   <span className="text-xs text-gray-400">
-                    {message.date.toDate().toLocaleString()}
+                    {message.chat.messages[message.chat.messages.length - 1].timestamp.toDate().toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -371,7 +368,7 @@ const CreatePost = ({
 function App() {
   const [user, setUser] = useState<UserData | null>(null);
   const [friends, setFriends] = useState<UserData[]>([]);
-  const [messages, _setMessages] = useState<(Message & UserData)[]>([]);
+  const [messages, _setMessages] = useState<{chat: Chat, user: UserData}[]>([]);
   const [content, setContent] = useState<ContentItem[]>([...simulatedContent]);
 
   const navigate = useNavigate();

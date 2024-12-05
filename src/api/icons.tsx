@@ -33,3 +33,10 @@ export function Avatar({icon, className, isOnline} : {icon: Icon, className?: st
     if (icon.type === IconType.image){return <img src={icon.content} alt="icon" className={className} />;} 
     else {return <div dangerouslySetInnerHTML={{ __html: icon.content }} className={className} />}
 }
+
+export function unknownIcon() : Icon{
+    return {
+        type: IconType.image,
+        content: "https://uxwing.com/wp-content/themes/uxwing/download/communication-chat-call/question-mark-round-icon.png"
+    };
+}
