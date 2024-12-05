@@ -170,7 +170,7 @@ export async function getPosts(count?: number | undefined){
 
 export async function postStuff(post: Post){
     if (!auth.currentUser) return;
-    return setDoc(doc(db, "posts", post.id), {...post, file: post.file || null});
+    return await setDoc(doc(db, "posts", post.id), {...post, file: post.file || null});
 }
 
 export async function deletePost(post: string){
