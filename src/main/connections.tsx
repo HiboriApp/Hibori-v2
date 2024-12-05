@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Search, MessageSquare, UserPlus, UserMinus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout';
-import { getUser, getUsersById, removeFriend, UserData } from '../api/db';
+import { getUser, getUsersById, openChat, removeFriend, UserData } from '../api/db';
 import SuperSillyLoading from '../components/Loading';
 import { Avatar } from '../api/icons';
 
 const FriendCard: React.FC<{ 
   friend: UserData; 
   user: UserData;
-  onMessage: (id: string) => void; 
+  onMessage: (person: UserData) => void; 
   onRemove: (id: string) => void;
 }> = ({ friend, onMessage, user, onRemove }) => {
   const mutualFriends = user.friends.filter(f => friend.friends.includes(f)).length;
@@ -25,7 +25,7 @@ const FriendCard: React.FC<{
       </div>
     </div>
     <div className="flex items-center space-x-2">
-      <button onClick={() => onMessage(friend.id)} className="p-2 text-blue-500 hover:bg-blue-100 rounded-full">
+      <button onClick={() => onMessage(friend)} className="p-2 text-blue-500 hover:bg-blue-100 rounded-full">
         <MessageSquare size={20} />
       </button>
       <button onClick={() => onRemove(friend.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-full">
@@ -115,8 +115,9 @@ const FriendsPage: React.FC = () => {
     friendName: '',
   });
 
-  const handleMessage = (id: string) => {
-    navigate('/messages/' + id);
+  const handleMessage = (person: UserData) => {
+    if (!user){return;}
+    navigate('/messages/' + openChat(user, person));
   };
   if (!user || !friends) {
     return <SuperSillyLoading></SuperSillyLoading>;

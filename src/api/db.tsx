@@ -81,7 +81,11 @@ export interface Chat{
     id: string,
 }
 
-
+export async function openChat(user: UserData, person: UserData){
+    const first = user.id < person.id ? user.id : person.id;
+    const second = user.id > person.id ? user.id : person.id;
+    return first + second;
+}
 
 export async function getChats(){
     if (!auth.currentUser) return;
@@ -122,4 +126,19 @@ export async function CreateUser(name: string, user: User, email: string){
 export async function removeNotification(user: UserData, id: number){
     if (!user){return;}
     return setDoc(doc(db, "users", user.id), {notifications: user.notifications.filter((_, i) => i !== id)}, {merge: true});
+}
+
+export interface Post{
+    id: string,
+    content: string,
+    timestamp: Timestamp,
+    likes: string[],
+    comments: string[],
+    owner: string
+}
+
+export async function getPosts(count: number | undefined){
+    if (!auth.currentUser) return;
+    if (!count){return await getDocs(query(collection(db, "posts")));}
+    else {return await (getDocs(query(collection(db, "posts"), limit(count))));}
 }
