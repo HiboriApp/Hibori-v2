@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, limit, query, setDoc, Timestamp, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, limit, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { DefaultPallate, Pallate } from "./settings";
 import { auth, db } from "./firebase";
 import { User } from "firebase/auth";
@@ -20,6 +20,7 @@ export interface UserData{
     bio: string
     email: string
     notifications: Notification[]
+    likes: string[]
     friends: string[]
     isOnline: boolean
     lastOnline: Timestamp
@@ -115,6 +116,7 @@ export async function CreateUser(name: string, user: User, email: string){
         lastSeen: new Date().toString(),
         email: email,
         notifications: [],
+        likes: [],
         friends: [],
         isOnline: true,
         lastOnline: Timestamp.fromDate(new Date()),
@@ -128,17 +130,63 @@ export async function removeNotification(user: UserData, id: number){
     return setDoc(doc(db, "users", user.id), {notifications: user.notifications.filter((_, i) => i !== id)}, {merge: true});
 }
 
+export enum fileType{
+    image = 'image',
+    video = 'video',
+    document = 'document',
+}
+
+export interface UploadedFile{
+    name: string,
+    type: fileType,
+    content: string,
+}
+
+export function FileDisplay({file, className} : {file: UploadedFile, className?: string}){
+    switch (file.type){
+        case fileType.image: return <img src={file.content} alt={file.name} className={className}/>;
+        case fileType.video: return <video src={file.content} className={className}/>;
+        case fileType.document: return <a href={file.content} download={true} className={className}>{file.name}</a>;
+    }
+}
+
+export interface Comment{name: string, message: string, icon: Icon, timestamp: Timestamp}
+
 export interface Post{
     id: string,
     content: string,
     timestamp: Timestamp,
-    likes: string[],
-    comments: string[],
+    file?: UploadedFile,
+    likes: number,
+    comments: Comment[],
     owner: string
 }
 
-export async function getPosts(count: number | undefined){
+export async function getPosts(count?: number | undefined){
     if (!auth.currentUser) return;
-    if (!count){return await getDocs(query(collection(db, "posts")));}
-    else {return await (getDocs(query(collection(db, "posts"), limit(count))));}
+    if (!count){return (await getDocs(query(collection(db, "posts")))).docs.map((doc) => doc.data() as Post);}
+    else {return (await (getDocs(query(collection(db, "posts"), limit(count))))).docs.map((doc) => doc.data() as Post);}
+}
+
+export async function postStuff(post: Post){
+    if (!auth.currentUser) return;
+    return setDoc(doc(db, "posts", post.id), {...post, file: post.file || null});
+}
+
+export async function deletePost(post: string){
+    if (!auth.currentUser) return;
+    return deleteDoc(doc(db, "posts", post));
+}
+
+export async function updatePost(post: Post){
+    if (!auth.currentUser) return;
+    return setDoc(doc(db, "posts", post.id), post);
+}
+
+export async function likePost(post: Post, user: UserData, like: boolean){
+    if (!auth.currentUser) return;
+    updatePost({...post, likes: like ? post.likes + 1 : post.likes - 1});
+    if (like) user.likes.push(post.id);
+    else user.likes = user.likes.filter((id) => id !== post.id);
+    setUser(user);
 }

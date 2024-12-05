@@ -3,7 +3,6 @@ import {
   Loader2,
   Heart,
   Share2,
-  ArrowRight,
   Bell,
   MessageSquare,
   User,
@@ -15,21 +14,12 @@ import {
   Plus,
 } from 'lucide-react';
 import { Layout } from '../components/layout';
-import { getUsersById, getUser, UserData, Chat } from '../api/db';
+import { getUsersById, getUser, UserData, Chat, Post, getUserById, getPosts, postStuff, FileDisplay, deletePost, UploadedFile, fileType, likePost, Comment, updatePost } from '../api/db';
 import { useNavigate } from 'react-router-dom';
 import { userListener } from '../api/listeners';
 import SuperSillyLoading from '../components/Loading';
 import { Avatar } from '../api/icons';
-
-// הגדרת סוגים
-type ContentItem = {
-  id: string;
-  content: string;
-  target: string;
-  timestamp: string;
-  image?: string;
-  likes: number;
-};
+import { Timestamp } from 'firebase/firestore';
 
 // קומפוננטת טוען
 function LoadingSpinner() {
@@ -40,21 +30,82 @@ function LoadingSpinner() {
   );
 }
 
+interface CommentSectionProps {
+  comments: Comment[];
+  onAddComment: (content: string) => void;
+  currentUser: UserData;
+  canComment: boolean;
+}
+
+export const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddComment, currentUser, canComment }) => {
+  const [newComment, setNewComment] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newComment.trim()) {
+      onAddComment(newComment);
+      setNewComment('');
+    }
+  };
+
+  return (
+    <div className="mt-4">
+      <h3 className="text-lg font-semibold mb-2">תגובות</h3>
+      <div className="space-y-4 mb-4">
+        {comments.map((comment) => (
+          <div key={comment.name + comment.message.slice(0, 10)} className="flex items-start space-x-3 space-x-reverse">
+            <Avatar icon={comment.icon} className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm" />
+            <div className="flex-1">
+              <p className="font-semibold">{comment.name}</p>
+              <p className="text-sm text-gray-600">{comment.message}</p>
+              <p className="text-xs text-gray-400 mt-1">
+                {comment.timestamp.toDate().toLocaleString()}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {canComment && <form onSubmit={handleSubmit} className="flex items-center">
+        <Avatar icon={currentUser.icon} className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm ml-2" />
+        <input
+          type="text"
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="הוסף תגובה..."
+          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        <button
+          type="submit"
+          className="ml-2 text-green-500 hover:text-green-600 transition-colors duration-200"
+        >
+          <Send size={20} />
+        </button>
+      </form>}
+    </div>
+  );
+};
+
 // קומפוננטת כרטיס תוכן
-const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
-  const [isLiked, setIsLiked] = useState(false);
+const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (content: string, post: Post) => void; user: UserData; deletePost: (post: string) => void }> = 
+({ item, deletePost, user, userLiked, handleComment }) => {
+  const [isLiked, setIsLiked] = useState(userLiked);
   const [likes, setLikes] = useState(item.likes);
+  const [poster, setPoster] = useState<UserData | undefined>();
+  const [canComment, setCanComment] = useState(false);
+  useEffect(() => {getUserById(item.owner).then((user) => setPoster(user));}, [])
+  if (!poster){return null;}
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
+    likePost(item, user, !isLiked);
   };
 
   const handleShare = () => {
     if (navigator.share) {
       navigator
         .share({
-          title: `פוסט מאת ${item.target}`,
+          title: `פוסט מאת ${poster.name}`,
           text: item.content,
           url: window.location.href,
         })
@@ -69,39 +120,37 @@ const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
     }
   };
 
-  const handleForward = () => {
-    console.log('Forward button clicked');
-  };
-
   return (
     <div className="bg-white shadow-lg rounded-xl overflow-hidden">
       <div className="p-6">
         <div className="flex items-center mb-4">
-          <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl ml-4">
-            {item.target[0]}
-          </div>
+          <Avatar icon={poster.icon} className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl ml-4" />
           <div>
-            <p className="font-semibold text-lg text-gray-800">{item.target}</p>
+            <p className="font-semibold text-lg text-gray-800">{poster.name}</p>
             <p className="text-sm text-gray-500">
-              {new Date(item.timestamp).toLocaleString()}
+              {item.timestamp.toDate().toLocaleString()}
             </p>
           </div>
+          {item.owner === poster.id && (
+            <button
+              className="mr-auto hover:text-green-500 transition-colors duration-200"
+              onClick={() => deletePost(item.id)}
+            >
+              <X size={24}></X>
+            </button>
+          )}
         </div>
         <p className="text-base text-gray-700 mb-4">{item.content}</p>
-        {item.image && (
-          <img
-            src={item.image}
-            alt="תמונת פוסט"
-            className="rounded-xl w-full object-cover max-h-96 mb-4"
-          />
+        {item.file && (
+          <FileDisplay file={item.file} className="rounded-xl w-full object-cover max-h-96 mb-4"></FileDisplay>
         )}
         <div className="flex justify-between items-center text-gray-500">
           <button
             className="flex items-center hover:text-green-500 transition-colors duration-200"
-            onClick={handleForward}
+            onClick={() => setCanComment(!canComment)}
           >
-            <ArrowRight size={24} className="ml-2" />
-            <span className="text-base">העבר</span>
+            <MessageSquare size={24} className="ml-2" />
+            <span className="text-base">שלח תגובה</span>
           </button>
           <button
             className={`flex items-center transition-colors duration-200 ${
@@ -125,51 +174,30 @@ const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
           </button>
         </div>
       </div>
+      <CommentSection canComment={canComment} comments={item.comments} onAddComment={(c) => handleComment(c, item)} currentUser={user}></CommentSection>
     </div>
   );
 };
 
-// תוכן מדומה
-const simulatedContent: ContentItem[] = [
-  {
-    id: 'p1',
-    content: 'תראו את התמונה המגניבה הזו!',
-    target: 'צ׳רלי',
-    timestamp: new Date().toISOString(),
-    image: 'https://picsum.photos/800/600',
-    likes: 24,
-  },
-  {
-    id: 'p2',
-    content: 'סתם פוסט טקסט',
-    target: 'דוד',
-    timestamp: new Date().toISOString(),
-    likes: 15,
-  },
-  {
-    id: 'p3',
-    content: 'יום יפה!',
-    target: 'גרייס',
-    timestamp: new Date().toISOString(),
-    image: 'https://picsum.photos/800/600?random=1',
-    likes: 42,
-  },
-];
-
 // קומפוננטת תוכן חדש
 function NewContentFeed({
   content,
+  handleDelete,
+  handleComment,
+  user
 }: {
-  content: ContentItem[];
+  content: Post[];
+  user: UserData;
+  handleComment: (content: string, post: Post) => void
+  handleDelete: (post: string) => void
 }) {
   if (content.length === 0) {
     return <LoadingSpinner />;
   }
-
   return (
     <div className="space-y-6">
       {content.map((item) => (
-        <ContentCard key={item.id} item={item} />
+        <ContentCard handleComment={handleComment} user={user} userLiked={user.likes.includes(item.id)} deletePost={handleDelete} key={item.id} item={item} />
       ))}
     </div>
   );
@@ -285,26 +313,28 @@ function LeftPanel({
 const CreatePost = ({
   onPostSubmit,
 }: {
-  onPostSubmit: (newPost: { content: string; image: string | null }) => void;
+  onPostSubmit: (newPost: { content: string; file: UploadedFile | undefined }) => void;
 }) => {
   const [content, setContent] = useState('');
-  const [image, setImage] = useState<string | null>(null);
+  const [file, setFile] = useState<UploadedFile | undefined>();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (content.trim() === '' && !image) return;
+    if (content.trim() === '' && !file) return;
 
-    onPostSubmit({ content, image });
+    onPostSubmit({ content, file });
     setContent('');
-    setImage(null);
+    setFile(undefined);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: fileType) => {
     const file = e.target.files?.[0];
     if (file) {
+      const fileName = file.name;
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result as string);
+        const file = reader.result as string;
+        setFile({type, content: file, name: fileName} as UploadedFile);
       };
       reader.readAsDataURL(file);
     }
@@ -324,17 +354,17 @@ const CreatePost = ({
             onChange={(e) => setContent(e.target.value)}
           ></textarea>
         </div>
-        {image && (
+        {file?.type == fileType.image && (
           <div className="relative mb-4">
             <img
-              src={image}
+              src={file.content}
               alt="Preview"
               className="rounded-xl max-h-64 w-full object-cover"
             />
             <button
               type="button"
               className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
-              onClick={() => setImage(null)}
+              onClick={() => setFile(undefined)}
             >
               <X/>
             </button>
@@ -343,7 +373,7 @@ const CreatePost = ({
         <div className="flex justify-between items-center">
           <div className="flex space-x-4">
             <label className="cursor-pointer text-gray-500 hover:text-green-500 transition-colors duration-200 ml-4">
-              <input type="file" className="hidden" onChange={handleImageUpload} />
+              <input type="file" className="hidden" onChange={(file) => handleImageUpload(file, fileType.image)} />
               <ImageIcon size={24} />
             </label>
             <label className="cursor-pointer text-gray-500 hover:text-green-500 transition-colors duration-200">
@@ -369,7 +399,7 @@ function App() {
   const [user, setUser] = useState<UserData | null>(null);
   const [friends, setFriends] = useState<UserData[]>([]);
   const [messages, _setMessages] = useState<{chat: Chat, user: UserData}[]>([]);
-  const [content, setContent] = useState<ContentItem[]>([...simulatedContent]);
+  const [posts, setPosts] = useState<Post[] | undefined>();
 
   const navigate = useNavigate();
 
@@ -383,7 +413,8 @@ function App() {
       setUser(userData);
       const friendsData = await getUsersById(userData.friends);
       setFriends(friendsData);
-      
+      const postsData = await getPosts();
+      setPosts(postsData);
       
     };
     fetchData();
@@ -396,23 +427,40 @@ function App() {
     return unsubscribe;
   }, [navigate]);
 
+  const handleDelete = (id: string) => {
+    if (!user){return;}
+    deletePost(id);
+    setPosts(posts?.filter((post) => post.id !== id));
+  }
+
   const handlePostSubmit = (newPost: {
     content: string;
-    image: string | null;
+    file: UploadedFile | undefined;
   }) => {
-    setContent((prevContent) => [
-      {
-        id: `p${prevContent.length + 1}`,
-        content: newPost.content,
-        target: user ? user.name : 'אנונימי',
-        timestamp: new Date().toISOString(),
-        image: newPost.image || undefined,
-        likes: 0,
-      },
-      ...prevContent,
-    ]);
+    if (!user){return;}
+    const post: Post = {
+      id: user.id + Date.now(),
+      timestamp: Timestamp.fromDate(new Date()),
+      content: newPost.content,
+      file: newPost.file,
+      likes: 0,
+      comments: [],
+      owner: user.id,
+    }
+    postStuff(post);
+    setPosts([...(posts || []), post]);
   };
-  if (!user) return <SuperSillyLoading></SuperSillyLoading>;
+
+  
+
+  const handleComment = (message: string, post: Post) => {
+    if (!user){return;}
+    const comment: Comment = {
+      message, name: user.name, icon: user.icon, timestamp: Timestamp.now()
+    }
+    updatePost({...post, comments: [...post.comments, comment]});
+  };
+  if (!user || !posts) return <SuperSillyLoading></SuperSillyLoading>;
   return (
     <Layout>
       <div className="min-h-screen">
@@ -429,7 +477,8 @@ function App() {
                 </h1>
                 <div className="mb-8">
                   <CreatePost onPostSubmit={handlePostSubmit} />
-                  <NewContentFeed content={content} />
+                  <NewContentFeed handleComment={handleComment} user={user} handleDelete={handleDelete} content={posts.sort(
+                    (a, b) => a.timestamp.toDate().getTime() > b.timestamp.toDate().getTime() ? 0 : 1)} />
                 </div>
               </div>
             </div>
