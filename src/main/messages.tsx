@@ -9,6 +9,7 @@ import SuperSillyLoading from '../components/Loading'
 import { Chat, getChats, getUser, getUserById, getUsersById, Message, sendMessage, UserData } from '../api/db'
 import { Avatar, unknownIcon } from '../api/icons'
 import { Timestamp } from 'firebase/firestore'
+import { useParams } from 'react-router-dom'
 
 
 const formatTime = (date: Date) => {
@@ -236,8 +237,9 @@ const ChatArea: React.FC<{
 }
 
 const App: React.FC = () => {
+  const {id} = useParams();
   const [chats, setChats] = useState<Chat[] | undefined>();
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(id || null);
   const [showProfile, setShowProfile] = useState<string | undefined>();
   const [user, setUser] = useState<UserData | undefined>();
   const [selectedChatters, setSelectedChatters] = useState<UserData[] | UserData | undefined>()
