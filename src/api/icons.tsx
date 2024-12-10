@@ -1,5 +1,6 @@
 import { createAvatar } from '@dicebear/core';
 import { lorelei } from '@dicebear/collection';
+import { UserData } from './db';
 
 export enum IconType{
     svg = "svg",
@@ -9,6 +10,20 @@ export enum IconType{
 export interface Icon{
     type: IconType,
     content: string,
+}
+
+export function notificationIcon(notification: 'message' | 'like' | 'comment', user: UserData) : Icon{
+    switch (notification){
+        case 'like': {
+            return {type: IconType.image, content: 'https://uxwing.com/wp-content/themes/uxwing/download/relationship-love/red-heart-icon.png'};
+        }
+        case 'comment': {
+            return user.icon;
+        }
+        case 'message': {
+            return user.icon;
+        }
+    }
 }
 
 export async function GenerateIcons(seed: string) : Promise<Icon> {

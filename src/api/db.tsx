@@ -2,14 +2,36 @@ import { collection, deleteDoc, doc, getDoc, getDocs, limit, query, setDoc, Time
 import { DefaultPallate, Pallate } from "./settings";
 import { auth, db } from "./firebase";
 import { User } from "firebase/auth";
-import { GenerateIcons, Icon } from "./icons";
+import { GenerateIcons, Icon, notificationIcon } from "./icons";
 
 export type Notification = {
     content: string;
     timestamp: Timestamp;
     type: 'message' | 'like' | 'comment';
     icon: Icon;
+    senderId: string;
 };
+
+export function NotificationMessage(user: string,notification: 'like' | 'comment' | 'message'){
+    switch(notification){
+        case 'like':
+            return "המשתמש " + user + " אהב את ההודעה שלך";
+        case 'comment':
+            return "המשתמש " + user + " שלך תגובה לפוסט שלך";
+        case 'message':
+            return "המשתמש " + user + " שלח לך הודעה חדשה";
+    }
+}
+
+export function newNotification(user: UserData, action: 'message' | 'like' | 'comment') : Notification{
+    return {
+        content: NotificationMessage(user.name, action), 
+        timestamp: Timestamp.now(), 
+        type: action, 
+        icon: notificationIcon(action, user),
+        senderId: user.id,
+    }
+}
 
 export interface UserData{
     id: string,
@@ -50,6 +72,11 @@ export async function removeFriend(user: UserData, friend: string){
 export async function getUserById(id: string){
     const user = await getDoc(doc(db, "users", id));
     return user.data() as UserData;
+}
+
+export async function addNotification(user: UserData, notification: Notification){
+    if (!user){return;}
+    return setDoc(doc(db, "users", user.id), {notifications: [...user.notifications, notification]}, {merge: true});
 }
 
 export async function getUsersById(ids: string[]){
