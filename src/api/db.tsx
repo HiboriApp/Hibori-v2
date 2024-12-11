@@ -102,23 +102,39 @@ export interface Message{
 export interface Chat{
     name?: string,
     person: string | string[],
+    description: string,
     messages: Message[],
-    lastMessage: string,
-    description?: string,
     icon: Icon,
     id: string,
 }
 
-export async function openChat(user: UserData, person: UserData){
-    const first = user.id < person.id ? user.id : person.id;
-    const second = user.id > person.id ? user.id : person.id;
+export interface ChatWrapper{
+    person: string | string[],
+    name?: string,
+    icon: Icon,
+    lastMessage: Message,
+    lastMessageDate: Timestamp,
+    id: string,
+}
+
+export function openChatName(user: string, person: string){
+    const first = user < person ? user : person;
+    const second = user > person ? user : person;
     return first + second;
 }
 
-export async function getChats(){
-    if (!auth.currentUser) return;
-    const chats = await getDocs(query(collection(db, "chats"), where("id", "array-contains", auth.currentUser.uid)));
-    return chats.docs.map((doc) => {return {...doc.data() as Chat, id: doc.id};}) as Chat[];
+export async function getChats(user: UserData){
+    let chatIds = [];
+    let friends = [];
+    for (const friend of user.friends){chatIds.push(await openChatName(user.id, friend));friends.push(friend);};
+    if (chatIds.length === 0) return {chats: [], friends};
+    const chats = await getDocs(query(collection(db, "chats"), where("id", "in", chatIds)));
+    return {chats: chats.docs.map((doc) => {return {...doc.data() as ChatWrapper, id: doc.id};}) as ChatWrapper[], friends};
+}
+
+export async function openChat(id: string){
+    const chat = await getDoc(doc(db, "chats", id));
+    return chat.data() as Chat;
 }
 
 export async function sendMessage(chat: Chat, message: Message){

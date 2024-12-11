@@ -1,31 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Loader2,
-  Heart,
-  Share2,
-  Bell,
-  MessageSquare,
-  User,
-  Send,
-  Users,
-  Image as ImageIcon,
-  Video,
-  X,
-  Plus,
-} from 'lucide-react';
+import { Loader2, Heart, Share2, Bell, MessageSquare, User, Send, Users, ImageIcon, Video, X, Plus } from 'lucide-react';
 import { Layout } from '../components/layout';
-import { getUsersById, getUser, UserData, Chat, Post, getUserById, getPosts, postStuff, FileDisplay, deletePost, UploadedFile, fileType, likePost, Comment, updatePost } from '../api/db';
+import { getUsersById, getUser, UserData, Post, getUserById, getPosts, postStuff, FileDisplay, deletePost, UploadedFile, fileType, likePost, Comment, updatePost, ChatWrapper, getChats } from '../api/db';
 import { useNavigate } from 'react-router-dom';
 import { postsListener, userListener } from '../api/listeners';
 import SuperSillyLoading from '../components/Loading';
 import { Avatar } from '../api/icons';
 import { Timestamp } from 'firebase/firestore';
+import { GetPallate, Pallate, DefaultPallate } from '../api/settings';
 
-// קומפוננטת טוען
 function LoadingSpinner() {
   return (
     <div className="flex justify-center items-center h-24">
-      <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   );
 }
@@ -54,11 +41,11 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddC
       <div className="space-y-4 mb-4">
         {comments.map((comment) => (
           <div key={comment.name + comment.message.slice(0, 10)} className="flex items-start space-x-3 space-x-reverse">
-            <Avatar icon={comment.icon} className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm" />
+            <Avatar icon={comment.icon} className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-sm" />
             <div className="flex-1">
               <p className="font-semibold">{comment.name}</p>
-              <p className="text-sm text-gray-600">{comment.message}</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-sm text-text">{comment.message}</p>
+              <p className="text-xs text-text mt-1">
                 {comment.timestamp.toDate().toLocaleString()}
               </p>
             </div>
@@ -66,17 +53,17 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddC
         ))}
       </div>
       {canComment && <form onSubmit={handleSubmit} className="flex items-center">
-        <Avatar icon={currentUser.icon} className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm ml-2" />
+        <Avatar icon={currentUser.icon} className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-sm ml-2" />
         <input
           type="text"
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="הוסף תגובה..."
-          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-primary"
         />
         <button
           type="submit"
-          className="ml-2 text-green-500 hover:text-green-600 transition-colors duration-200"
+          className="ml-2 text-primary hover:text-secondary transition-colors duration-200"
         >
           <Send size={20} />
         </button>
@@ -85,9 +72,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddC
   );
 };
 
-// קומפוננטת כרטיס תוכן
-const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (content: string, post: Post) => void; user: UserData; deletePost: (post: string) => void }> = 
-({ item, deletePost, user, userLiked, handleComment }) => {
+const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (content: string, post: Post) => void; user: UserData; deletePost: (post: string) => void, pallate: Pallate }> = 
+({ item, deletePost, user, userLiked, handleComment, pallate }) => {
   const [isLiked, setIsLiked] = useState(userLiked);
   const [likes, setLikes] = useState(item.likes);
   const [poster, setPoster] = useState<UserData | undefined>();
@@ -121,32 +107,32 @@ const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (co
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+    <div className="bg-white shadow-lg rounded-xl overflow-hidden" style={{ backgroundColor: pallate.background }}>
       <div className="p-6">
         <div className="flex items-center mb-4">
-          <Avatar icon={poster.icon} className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl ml-4" />
+          <Avatar icon={poster.icon} className="w-12 h-12 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-xl ml-4" />
           <div>
-            <p className="font-semibold text-lg text-gray-800">{poster.name}</p>
-            <p className="text-sm text-gray-500">
+            <p className="font-semibold text-lg text-text">{poster.name}</p>
+            <p className="text-sm text-text">
               {item.timestamp.toDate().toLocaleString()}
             </p>
           </div>
           {item.owner === poster.id && (
             <button
-              className="mr-auto hover:text-green-500 transition-colors duration-200"
+              className="mr-auto hover:text-primary transition-colors duration-200"
               onClick={() => deletePost(item.id)}
             >
               <X size={24}></X>
             </button>
           )}
         </div>
-        <p className="text-base text-gray-700 mb-4">{item.content}</p>
+        <p className="text-base text-text mb-4">{item.content}</p>
         {item.file && (
           <FileDisplay file={item.file} className="rounded-xl w-full object-cover max-h-96 mb-4"></FileDisplay>
         )}
-        <div className="flex justify-between items-center text-gray-500">
+        <div className="flex justify-between items-center text-text">
           <button
-            className="flex items-center hover:text-green-500 transition-colors duration-200"
+            className="flex items-center hover:text-primary transition-colors duration-200"
             onClick={() => setCanComment(!canComment)}
           >
             <MessageSquare size={24} className="ml-2" />
@@ -154,7 +140,7 @@ const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (co
           </button>
           <button
             className={`flex items-center transition-colors duration-200 ${
-              isLiked ? 'text-green-500' : 'hover:text-green-500'
+              isLiked ? 'text-primary' : 'hover:text-primary'
             }`}
             onClick={handleLike}
           >
@@ -166,7 +152,7 @@ const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (co
             <span className="text-base">{likes}</span>
           </button>
           <button
-            className="flex items-center hover:text-green-500 transition-colors duration-200"
+            className="flex items-center hover:text-primary transition-colors duration-200"
             onClick={handleShare}
           >
             <Share2 size={24} className="ml-2" />
@@ -179,17 +165,18 @@ const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (co
   );
 };
 
-// קומפוננטת תוכן חדש
 function NewContentFeed({
   content,
   handleDelete,
   handleComment,
-  user
+  user,
+  pallate
 }: {
   content: Post[];
   user: UserData;
   handleComment: (content: string, post: Post) => void
   handleDelete: (post: string) => void
+  pallate: Pallate;
 }) {
   if (content.length === 0) {
     return <LoadingSpinner />;
@@ -197,7 +184,7 @@ function NewContentFeed({
   return (
     <div className="space-y-6">
       {content.map((item) => (
-        <ContentCard handleComment={handleComment} user={user} userLiked={user.likes.includes(item.id)} deletePost={handleDelete} key={item.id} item={item} />
+        <ContentCard handleComment={handleComment} user={user} userLiked={user.likes.includes(item.id)} deletePost={handleDelete} key={item.id} item={item} pallate={pallate}/>
       ))}
     </div>
   );
@@ -206,17 +193,19 @@ function NewContentFeed({
 function LeftPanel({
   friends,
   messages,
-  user
+  user,
+  pallate
 }: {
   friends: UserData[];
-  messages: {user: UserData, chat: Chat}[];
+  messages: {user: string, chat: ChatWrapper}[];
   user: UserData;
+  pallate: Pallate;
 }) {
   return (
     <>
-      <div className="bg-white rounded-xl p-6 mb-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <Users className="ml-3 text-green-500" size={24} />
+      <div className="rounded-xl p-6 mb-6" style={{ backgroundColor: pallate.background }}>
+        <h3 className="text-xl font-semibold text-text mb-4 flex items-center">
+          <Users className="ml-3 text-primary" size={24} />
           חברים מקוונים
         </h3>
         <div className="grid grid-cols-3 gap-4">
@@ -229,76 +218,80 @@ function LeftPanel({
                 ></div>
                 <div
                   className={`absolute bottom-0 left-0 w-3 h-3 rounded-full border-2 border-white ${
-                    friend.isOnline ? 'bg-green-500' : 'bg-gray-300'
+                    friend.isOnline ? 'bg-primary' : 'bg-text'
                   }`}
                 ></div>
               </div>
-              <span className="mt-1 text-xs text-gray-700 text-center">
+              <span className="mt-1 text-xs text-text text-center">
                 {friend.name}
               </span>
             </div>
           ))}
         </div>
       </div>
-      <div className="bg-white rounded-xl p-6 mb-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <MessageSquare className="ml-3 text-green-500" size={24} />
+      <div className="rounded-xl p-6 mb-6" style={{ backgroundColor: pallate.background }}>
+        <h3 className="text-xl font-semibold text-text mb-4 flex items-center">
+          <MessageSquare className="ml-3 text-primary" size={24} />
           הודעות חדשות
         </h3>
         <ul className="space-y-3">
-          {messages.map((message) => (
-            <li key={message.chat.id} className="flex items-center justify-between">
+          {messages.map((message) => {
+            const [user, setUser] = useState<UserData | undefined>();
+            useEffect(() => {
+              getUserById(message.user).then((u) => setUser(u));
+            }, [])
+            if (!user){return;}
+            return <li key={message.chat.id} className="flex items-center justify-between">
               <div className="flex items-center">
-                <Avatar className="w-10 h-10 rounded-full ml-3" icon={message.user.icon}></Avatar>
+                <Avatar className="w-10 h-10 rounded-full ml-3" icon={user.icon}></Avatar>
                 <div>
-                  <p className="font-medium text-sm">{message.user.name}</p>
-                  <p className="text-md text-gray-600 truncate">
-                    {message.chat.lastMessage.length > 20
-                      ? message.chat.lastMessage.substring(0, 20) + '...'
-                      : message.chat.lastMessage}
+                  <p className="font-medium text-sm">{user.name}</p>
+                  <p className="text-md text-text truncate">
+                    {message.chat.lastMessage.content.length > 20
+                      ? message.chat.lastMessage.content.substring(0, 20) + '...'
+                      : message.chat.lastMessage.content}
                   </p>
-                  <span className="text-xs text-gray-400">
-                    {message.chat.messages[message.chat.messages.length - 1].timestamp.toDate().toLocaleString()}
+                  <span className="text-xs text-text">
+                    {message.chat.lastMessageDate.toDate().toLocaleString()}
                   </span>
                 </div>
               </div>
-              <button className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
-                <Send className="h-4 w-4 text-green-500" />
+              <button className="p-2 rounded-full hover:bg-background transition-colors duration-200">
+                <Send className="h-4 w-4 text-primary" />
                 <span className="sr-only">Send message</span>
               </button>
-            </li>
-          ))}
+            </li>})}
         </ul>
       </div>
-      <div className="bg-white rounded-xl p-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <Bell className="ml-3 text-green-500" size={24} />
+      <div className="rounded-xl p-6" style={{ backgroundColor: pallate.background }}>
+        <h3 className="text-xl font-semibold text-text mb-4 flex items-center">
+          <Bell className="ml-3 text-primary" size={24} />
           התראות
         </h3>
         <ul className="space-y-3">
           {user.notifications.map((notification, i) => (
             <li
               key={notification.timestamp.toDate().getTime() + i}
-              className="flex items-center bg-gray-50 rounded-lg p-3"
+              className="flex items-center bg-background rounded-lg p-3"
             >
               <Avatar icon={notification.icon} className='w-10 h-10 rounded-full ml-3'></Avatar>
               <div className="flex-grow">
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-text">
                   {notification.content}
                 </p>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-text">
                   {notification.timestamp.toDate().toLocaleString()}
                 </span>
               </div>
               <div className="ml-3">
                 {notification.type === 'like' && (
-                  <Heart className="text-red-500" size={20} />
+                  <Heart className="text-red" size={20} />
                 )}
                 {notification.type === 'comment' && (
-                  <MessageSquare className="text-blue-500" size={20} />
+                  <MessageSquare className="text-blue" size={20} />
                 )}
                 {notification.type === 'message' && (
-                  <User className="text-green-500" size={20} />
+                  <User className="text-primary" size={20} />
                 )}
               </div>
             </li>
@@ -309,10 +302,11 @@ function LeftPanel({
   );
 }
 
-// קומפוננטת יצירת פוסט
 const CreatePost = ({
   onPostSubmit,
+  pallate
 }: {
+  pallate: Pallate;
   onPostSubmit: (newPost: { content: string; file: UploadedFile | undefined }) => void;
 }) => {
   const [content, setContent] = useState('');
@@ -341,14 +335,14 @@ const CreatePost = ({
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-6 mb-6">
+    <div className="shadow-lg rounded-xl p-6 mb-6" style={{ backgroundColor: pallate.background }}>
       <form onSubmit={handleSubmit}>
         <div className="flex items-start mb-4">
-          <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xl ml-4">
+          <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-xl ml-4">
             <User size={24} />
           </div>
           <textarea
-            className="flex-grow border border-gray-300 rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="flex-grow border border-gray-300 rounded-xl p-2 focus:outline-none focus:ring-primary"
             placeholder="מה תרצה לשתף?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -372,18 +366,18 @@ const CreatePost = ({
         )}
         <div className="flex justify-between items-center">
           <div className="flex space-x-4">
-            <label className="cursor-pointer text-gray-500 hover:text-green-500 transition-colors duration-200 ml-4">
+            <label className="cursor-pointer text-text hover:text-primary transition-colors duration-200 ml-4">
               <input type="file" className="hidden" onChange={(file) => handleImageUpload(file, fileType.image)} />
               <ImageIcon size={24} />
             </label>
-            <label className="cursor-pointer text-gray-500 hover:text-green-500 transition-colors duration-200">
+            <label className="cursor-pointer text-text hover:text-primary transition-colors duration-200">
               <input type="file" accept="video/*" className="hidden" />
               <Video size={24} />
             </label>
           </div>
           <button
             type="submit"
-            className="bg-green-500 flex text-white px-4 py-2 rounded-xl hover:bg-green-600 transition-colors duration-200"
+            className="bg-primary flex text-white px-4 py-2 rounded-xl hover:bg-secondary transition-colors duration-200"
           >
             <Plus className='ml-1S'/>
             פרסם
@@ -394,11 +388,11 @@ const CreatePost = ({
   );
 };
 
-// קומפוננטת אפליקציה ראשית
 function App() {
   const [user, setUser] = useState<UserData | null>(null);
   const [friends, setFriends] = useState<UserData[]>([]);
-  const [messages, _setMessages] = useState<{chat: Chat, user: UserData}[]>([]);
+  const [pallate, setPallate] = useState<Pallate>(DefaultPallate());
+  const [messages, setMessages] = useState<{chat: ChatWrapper, user: string}[]>([]);
   const [posts, setPosts] = useState<Post[] | undefined>();
   const postsLimit = 10;
 
@@ -415,7 +409,11 @@ function App() {
       const friendsData = await getUsersById(userData.friends);
       setFriends(friendsData);
       const postsData = await getPosts(postsLimit);
+      const {chats, friends} = await getChats(userData);
+      setMessages(chats.map((message, i) => ({chat: message, user: friends[i]})));
       setPosts(postsData);
+      const pallate = await GetPallate();
+      setPallate(pallate);
       return postsListener(setPosts, postsLimit);
     };
     fetchData();
@@ -461,10 +459,10 @@ function App() {
     }
     updatePost({...post, comments: [...post.comments, comment]});
   };
-  if (!user || !posts) return <SuperSillyLoading></SuperSillyLoading>;
+  if (!user || !posts || !pallate) return <SuperSillyLoading></SuperSillyLoading>;
   return (
     <Layout>
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <div className="flex justify-center">
           <div
             className="w-full max-w-7xl grid grid-cols-12 gap-4"
@@ -473,12 +471,12 @@ function App() {
             {/* תוכן ראשי */}
             <div className="col-span-12 lg:col-span-8 px-4 py-8" dir="rtl">
               <div className="max-w-3xl mx-auto">
-                <h1 className="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-green-400 pb-2">
+                <h1 className="text-3xl font-bold mb-6 text-text border-b-2 border-green-400 pb-2">
                   הודעות ופוסטים
                 </h1>
                 <div className="mb-8">
-                  <CreatePost onPostSubmit={handlePostSubmit} />
-                  <NewContentFeed handleComment={handleComment} user={user} handleDelete={handleDelete} content={posts.sort(
+                  <CreatePost pallate={pallate} onPostSubmit={handlePostSubmit} />
+                  <NewContentFeed pallate={pallate} handleComment={handleComment} user={user} handleDelete={handleDelete} content={posts.sort(
                     (a, b) => a.timestamp.toDate().getTime() > b.timestamp.toDate().getTime() ? 0 : 1)} />
                 </div>
               </div>
@@ -487,7 +485,7 @@ function App() {
             <div className="hidden lg:block col-span-4">
               <div className="sticky top-6">
                 <div className="space-y-6" dir="rtl">
-                  <LeftPanel user={user} friends={friends} messages={messages} />
+                  <LeftPanel pallate={pallate} user={user} friends={friends} messages={messages} />
                 </div>
               </div>
             </div>
@@ -499,3 +497,4 @@ function App() {
 }
 
 export default App;
+
