@@ -363,7 +363,7 @@ const App: React.FC = () => {
               <input
                 type="text"
                 placeholder="חיפוש"
-                className={`w-full p-2 pl-10 pr-4 bg-${pallate.background} rounded-full text-right focus:outline-none focus:ring-2 focus:ring-${pallate.primary}`}
+                className={`w-full p-2 pl-10 pr-4 bg-${pallate.background} rounded-full text-right focus:outline-none focus:ring-2 focus:ring-green-600`}
               />
               <Search className="absolute left-3 top-2.5 text-${pallate.text}" size={20} />
             </div>
