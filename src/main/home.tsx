@@ -211,17 +211,7 @@ function LeftPanel({
         <div className="grid grid-cols-3 gap-4">
           {friends.map((friend) => (
             <div key={friend.id} className="flex flex-col items-center">
-              <div className="relative">
-                <div
-                  className="h-12 w-12 rounded"
-                  dangerouslySetInnerHTML={{ __html: friend.icon }}
-                ></div>
-                <div
-                  className={`absolute bottom-0 left-0 w-3 h-3 rounded-full border-2 border-white ${
-                    friend.isOnline ? 'bg-primary' : 'bg-text'
-                  }`}
-                ></div>
-              </div>
+              <Avatar icon={friend.icon} isOnline={friend.isOnline} className="w-16 h-16 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" />
               <span className="mt-1 text-xs text-text text-center">
                 {friend.name}
               </span>
