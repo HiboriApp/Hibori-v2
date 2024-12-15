@@ -208,7 +208,7 @@ const ProfileInfo: React.FC<{
 const ChatArea: React.FC<{
   messages: Message[]
   onSendMessage: (content: string) => void
-  selectedChat: Chat | null
+  selectedChat: Chat
   chatter: UserData[] | undefined
   onBackClick: () => void
   onProfileClick: (profile: string) => void
@@ -257,7 +257,7 @@ const ChatArea: React.FC<{
     <div className={`flex-grow overflow-y-auto p-4 bg-${pallate.background}`}>
       {messages.map((message) => (
         <MessageComponent 
-        chatter={Array.isArray(chatter) ? chatter.find((chat) => chat.id === message.sender) : chatter} 
+        chatter={message.sender == user.id ? user : otherUser} 
         key={message.sender + message.timestamp.toDate().toString()} message={message} isSent={message.sender === 'אתה'} pallate={pallate} />
       ))}
     </div>
@@ -282,7 +282,6 @@ const App: React.FC = () => {
   const [showChatList, setShowChatList] = useState(true)
   const chatListRef = useRef<HTMLDivElement>(null)
   const chatAreaRef = useRef<HTMLDivElement>(null)
-  console.log(selectedChatters);
   const [isMobile, setIsMobile] = useState<boolean>(false)
 
   useEffect(() => {
@@ -360,16 +359,14 @@ const App: React.FC = () => {
       return
     }
     try {
-      const chat = await openChat(openChatName(user.id, id));
+      const chat = await openChat(id);
       setOpenedChats([...openedChats, chat])
       const chatters = await getUsersById(chat.person);
       setSelectedChat(chat);
       setSelectedChatters(chatters)
       setShowChatList(false)
     }catch{
-      if (await chatExists(openChatName(user.id, id))){
-        return;
-      }
+      if (await chatExists(openChatName(user.id, id))){return;}
       const chat: Chat = {
         person: [user.id, id],
         messages: [],
@@ -387,6 +384,8 @@ const App: React.FC = () => {
   const handleSendMessage = (content: string) => {
     if (selectedChatId === null  || !user) return;
     if (!selectedChat)return;
+    setOpenedChats([...openedChats, {...selectedChat, messages: [...selectedChat.messages, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())}]}])
+    setSelectedChat({...selectedChat, messages: [...selectedChat.messages, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())}]})
     sendMessage(selectedChat, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())})
   }
   if (!pallate || !chatsWrapper || !user){return <SuperSillyLoading></SuperSillyLoading>}
