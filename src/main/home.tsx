@@ -237,12 +237,12 @@ function LeftPanel({
                 <div>
                   <p className="font-medium text-sm">{user.name}</p>
                   <p className="text-md text-text truncate">
-                    {message.chat.lastMessage.content.length > 20
+                    {message.chat.lastMessage && (message.chat.lastMessage.content.length > 20
                       ? message.chat.lastMessage.content.substring(0, 20) + '...'
-                      : message.chat.lastMessage.content}
+                      : message.chat.lastMessage.content)}
                   </p>
                   <span className="text-xs text-text">
-                    {message.chat.lastMessageDate.toDate().toLocaleString()}
+                    {message.chat.lastMessageDate && message.chat.lastMessageDate.toDate().toLocaleString()}
                   </span>
                 </div>
               </div>

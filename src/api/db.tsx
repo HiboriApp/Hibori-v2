@@ -83,7 +83,7 @@ export async function getUsersById(ids: string[]){
     let result = [];
     for (let i = 0; i < ids.length; i++){
         const user = await getDoc(doc(db, "users", ids[i]));
-        if (!!user.exists()) result.push(user.data() as UserData);
+        if (!!user.exists() && user.id != auth.currentUser?.uid) result.push(user.data() as UserData);
     }
     return result;
 }
@@ -101,19 +101,19 @@ export interface Message{
 
 export interface Chat{
     name?: string,
-    person: string | string[],
-    description: string,
+    person: string[],
+    description?: string,
     messages: Message[],
-    icon: Icon,
+    icon?: Icon,
     id: string,
 }
 
 export interface ChatWrapper{
-    person: string | string[],
+    person: string[],
     name?: string,
     icon: Icon,
-    lastMessage: Message,
-    lastMessageDate: Timestamp,
+    lastMessage: Message | undefined,
+    lastMessageDate: Timestamp | undefined,
     id: string,
 }
 
@@ -128,13 +128,24 @@ export async function getChats(user: UserData){
     let friends = [];
     for (const friend of user.friends){chatIds.push(await openChatName(user.id, friend));friends.push(friend);};
     if (chatIds.length === 0) return {chats: [], friends};
-    const chats = await getDocs(query(collection(db, "chats"), where("id", "in", chatIds)));
+    const chats = await getDocs(query(collection(db, "chats"), where("person", "array-contains", user.id)));
     return {chats: chats.docs.map((doc) => {return {...doc.data() as ChatWrapper, id: doc.id};}) as ChatWrapper[], friends};
 }
 
 export async function openChat(id: string){
     const chat = await getDoc(doc(db, "chats", id));
     return chat.data() as Chat;
+}
+
+export async function chatExists(id: string){
+    const chat = await getDoc(doc(db, "chats", id));
+    return chat.exists();
+}
+
+export async function makeChat(chat: Chat){
+    if (!auth.currentUser) return;
+    return setDoc(doc(db, "chats", chat.id), chat);
+    return chat;
 }
 
 export async function sendMessage(chat: Chat, message: Message){

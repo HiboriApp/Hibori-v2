@@ -4,7 +4,7 @@ import { Menu, MenuItem, MenuButton } from '@szhsin/react-menu'
 import '@szhsin/react-menu/dist/index.css'
 import { Layout } from '../components/layout';
 import SuperSillyLoading from '../components/Loading'
-import { Chat, ChatWrapper, getChats, getUser, getUserById, getUsersById, Message, openChat, openChatName, sendMessage, UserData } from '../api/db'
+import { Chat, chatExists, ChatWrapper, getChats, getUser, getUserById, getUsersById, makeChat, Message, openChat, openChatName, sendMessage, UserData } from '../api/db'
 import { Avatar, unknownIcon } from '../api/icons'
 import { Timestamp } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -20,7 +20,8 @@ const ChatList: React.FC<{
   onSelectChat: (id: string) => void
   selectedChat: string | null
   pallate: Pallate
-}> = ({ chats, onSelectChat, selectedChat, pallate }) => {
+  user: UserData
+}> = ({ chats, onSelectChat, selectedChat, pallate, user }) => {
   return <div className="flex-grow overflow-y-auto">
     {chats.map((chat) => {
       const [chatter, setChatter] = useState<UserData | null>(null);
@@ -43,13 +44,42 @@ const ChatList: React.FC<{
           <div className="flex justify-between items-baseline">
             <div className="font-semibold truncate mr-2">{chatter.name}</div>
             <div className="text-xs text-${pallate.text} flex-shrink-0">
-              {formatTime(chat.lastMessageDate.toDate() || new Date())}
+              {formatTime((chat.lastMessageDate && chat.lastMessageDate.toDate()) || new Date())}
             </div>
           </div>
-          <div className="text-sm text-${pallate.text} truncate mr-2">{chat.lastMessage.content}</div>
+          <div className="text-sm text-${pallate.text} truncate mr-2">{chat.lastMessage && chat.lastMessage.content}</div>
         </div>
       </div>
   })}
+  {
+    user.friends.map((friend) => {
+      if (chats.some((chat) => chat.person.includes(friend))) return null;
+      const [chatter, setChatter] = useState<UserData | null>(null);
+      useEffect(() => {
+        getUserById(friend).then(setChatter);
+      }, []);
+      if (!chatter){return null;}
+      return <div
+      key={chatter.id}
+      className={`p-4 flex items-center space-x-4 cursor-pointer hover:bg-${pallate.background} transition-colors duration-200 ${
+        selectedChat === chatter.id ? `bg-${pallate.secondary}` : ''
+      }`}
+      onClick={() => onSelectChat(chatter.id)}
+    >
+      <div className="flex-shrink-0">
+        <Avatar icon={chatter.icon} isOnline={chatter.isOnline} className={`w-12 h-12 rounded-full object-cover`} />
+      </div>
+      <div className="flex-grow min-w-0">
+        <div className="flex justify-between items-baseline">
+          <div className="font-semibold truncate mr-2">{chatter.name}</div>
+          <div className="text-xs text-${pallate.text} flex-shrink-0">
+            {formatTime(chatter.lastOnline.toDate() || new Date())}
+          </div>
+        </div>
+      </div>
+    </div>
+    })
+  }
   </div>
 }
 
@@ -179,12 +209,14 @@ const ChatArea: React.FC<{
   messages: Message[]
   onSendMessage: (content: string) => void
   selectedChat: Chat | null
-  chatter: UserData | UserData[] | undefined
+  chatter: UserData[] | undefined
   onBackClick: () => void
   onProfileClick: (profile: string) => void
+  user: UserData
   pallate: Pallate
-}> = ({ messages, onSendMessage, chatter, selectedChat, onBackClick, onProfileClick, pallate }) => {
+}> = ({ messages, onSendMessage, user, chatter, selectedChat, onBackClick, onProfileClick, pallate }) => {
   if (!chatter){return null;}
+  const otherUser = chatter.filter((chatter) => chatter.id != user.id)[0];
   return <div className="flex flex-col h-full min-h-0">
     {/* Header */}
     <div className={`bg-${pallate.white} p-4 flex items-center justify-between border-b border-${pallate.gray[200]} flex-shrink-0`}>
@@ -196,16 +228,14 @@ const ChatArea: React.FC<{
           <>
             <div onClick={() => onProfileClick(selectedChat.id)} className="cursor-pointer">
               <Avatar
-                icon={selectedChat.icon}
-                isOnline={!Array.isArray(chatter) ? chatter.isOnline : undefined}
+                icon={selectedChat.icon || otherUser.icon}
+                isOnline={otherUser.isOnline || undefined}
               />
             </div>
             <div className="mr-3">
               <h2 className="font-semibold">{selectedChat.name}</h2>
               <p className="text-xs text-${pallate.text}">
-                {Array.isArray(chatter)
-                  ? `${chatter.length} חברים`
-                  : chatter.isOnline ? 'מחובר' : 'לא מחובר'}
+                {`${otherUser.friends} חברים`}
               </p>
             </div>
           </>
@@ -247,12 +277,12 @@ const App: React.FC = () => {
   const [openedChats, setOpenedChats] = useState<Chat[]>([]);
   const [chatsWrapper, setChatsWrapper] = useState<ChatWrapper[] | null>(null);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-  const [selectedChatters, setSelectedChatters] = useState<UserData[] | UserData | undefined>()
+  const [selectedChatters, setSelectedChatters] = useState<UserData[] | undefined>()
   const navigate = useNavigate();
   const [showChatList, setShowChatList] = useState(true)
   const chatListRef = useRef<HTMLDivElement>(null)
   const chatAreaRef = useRef<HTMLDivElement>(null)
-
+  console.log(selectedChatters);
   const [isMobile, setIsMobile] = useState<boolean>(false)
 
   useEffect(() => {
@@ -325,18 +355,33 @@ const App: React.FC = () => {
       const chat = openedChats.find((chat) => chat.id === openChatName(user.id, id));
       if (!chat){return;}
       setSelectedChat(chat);
-      setSelectedChatters(Array.isArray(chat?.person) ? 
-      await getUsersById(chat.person) : await getUserById(chat?.person || ''));
+      setSelectedChatters(await getUsersById(chat.person));
       setShowChatList(false)
       return
     }
-    const chat = await openChat(openChatName(user.id, id));
-    setOpenedChats([...openedChats, chat])
-    const chatters = Array.isArray(chat?.person) ? 
-    await getUsersById(chat.person) : await getUserById(chat?.person || '');
-    setSelectedChat(chat);
-    setSelectedChatters(chatters)
-    setShowChatList(false)
+    try {
+      const chat = await openChat(openChatName(user.id, id));
+      setOpenedChats([...openedChats, chat])
+      const chatters = await getUsersById(chat.person);
+      setSelectedChat(chat);
+      setSelectedChatters(chatters)
+      setShowChatList(false)
+    }catch{
+      if (await chatExists(openChatName(user.id, id))){
+        return;
+      }
+      const chat: Chat = {
+        person: [user.id, id],
+        messages: [],
+        id: openChatName(user.id, id),
+      }
+      await makeChat(chat);
+      setOpenedChats([...openedChats, chat])
+      const chatters = await getUsersById(chat.person);
+      setSelectedChat(chat);
+      setSelectedChatters(chatters)
+      setShowChatList(false)
+    }
   }
 
   const handleSendMessage = (content: string) => {
@@ -344,7 +389,7 @@ const App: React.FC = () => {
     if (!selectedChat)return;
     sendMessage(selectedChat, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())})
   }
-  if (!pallate || !chatsWrapper){return <SuperSillyLoading></SuperSillyLoading>}
+  if (!pallate || !chatsWrapper || !user){return <SuperSillyLoading></SuperSillyLoading>}
   return (
     <Layout>
     <div dir="rtl" className={`h-screen md:h-[94vh] flex bg-${pallate.background} text-right overflow-hidden`}>
@@ -369,7 +414,7 @@ const App: React.FC = () => {
             </div>
           </div>
           {/* Chat List */}
-          <ChatList chats={chatsWrapper} onSelectChat={handleSelectChat} selectedChat={selectedChatId} pallate={pallate} />
+          <ChatList chats={chatsWrapper} user={user} onSelectChat={handleSelectChat} selectedChat={selectedChatId} pallate={pallate} />
         </div>
       </div>
       {/* Chat Area */}
@@ -385,6 +430,7 @@ const App: React.FC = () => {
               messages={selectedChat.messages}
               onSendMessage={handleSendMessage}
               chatter={selectedChatters}
+              user={user}
               selectedChat={selectedChat}
               onBackClick={() => setShowChatList(true)}
               onProfileClick={(profile) => setShowProfile(profile)}
