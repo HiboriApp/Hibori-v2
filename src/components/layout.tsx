@@ -94,7 +94,7 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
               to={route.path}
               className={`flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                 isActive
-                  ? `text-${palette.primary} bg-${palette.background} border-b-2 border-${palette.special}`
+                  ? `text-${palette.primary} bg-${palette.background} border-b-2 border-green-600 !important`
                   : `text-${palette.text} hover:bg-${palette.background}`
               }`}
             >
