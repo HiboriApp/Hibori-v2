@@ -5,7 +5,6 @@ import { MessageSquare, Home, Bell, Search, User, HelpCircle, Settings } from 'l
 import { GetPallate, Pallate } from '../api/settings';
 import { getUser, UserData } from '../api/db';
 import Loading from './Loading';
-import { Avatar } from '../api/icons';
 
 // Routes
 const routes = [
@@ -24,19 +23,18 @@ const pageTransition = {
 function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
   return (
     <div className="flex items-center space-x-4 space-x-reverse">
-      <Avatar
-        className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-[${palette.secondary}]`}
-        icon={user.icon}
-        isOnline={true}
-      />
+      <div
+        className={`w-10 h-10 rounded-full overflow-hidden ring-2 ring-${palette.secondary}`}
+        dangerouslySetInnerHTML={{ __html: user.icon }}
+      ></div>
       <div>
-        <p className={`text-sm font-semibold text-[${palette.text}]`}>{user.name}</p>
+        <p className={`text-sm font-semibold text-${palette.text}`}>{user.name}</p>
       </div>
       <Link
         to={'/settings'}
-        className={`p-2 rounded-full hover:bg-[${palette.background}] focus:outline-none focus:ring-2 focus:ring-[${palette.secondary}]`}
+        className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
       >
-        <Settings className={`h-6 w-6 text-[${palette.text}]`} />
+        <Settings className={`h-6 w-6 text-${palette.text}`} />
         <span className="sr-only">Settings</span>
       </Link>
     </div>
@@ -51,15 +49,15 @@ function SearchBar({ palette }: { palette: Pallate }) {
         type="text"
         placeholder="חיפוש..."
         className={`
-          w-full py-2 pr-10 pl-4 rounded-lg 
-          bg-[${palette.white}]
-          border border-[${palette.gray[200]}]
-          focus:outline-none focus:ring-2 focus:ring-[${palette.secondary}]
-          text-[${palette.gray[800]}] placeholder-[${palette.gray[400]}]
+          w-full py-2 pr-10 pl-4 rounded-3xl 
+          bg-white
+          border border-gray-200
+          focus:outline-none focus:ring-2 focus:ring-green-600
+          text-gray-800 placeholder-gray-400
         `}
       />
       <Search
-        className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[${palette.special}]`}
+        className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-${palette.special}`}
       />
     </div>
   );
@@ -69,9 +67,9 @@ function SearchBar({ palette }: { palette: Pallate }) {
 function NotificationBell({ palette }: { palette: Pallate }) {
   return (
     <button
-      className={`relative p-2 rounded-full hover:bg-[${palette.background}] focus:outline-none focus:ring-2 focus:ring-[${palette.secondary}]`}
+      className={`relative p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
     >
-      <Bell className={`h-6 w-6 text-[${palette.text}]`} />
+      <Bell className={`h-6 w-6 text-${palette.text}`} />
       <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full"></span>
     </button>
   );
@@ -82,7 +80,7 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
   const location = useLocation();
 
   return (
-    <aside className={`hidden md:flex md:flex-col md:w-64 bg-[${palette.white}] border-r border-[${palette.green}]`}>
+    <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-green-500`}>
       <div className="p-4 self-center">
         <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
       </div>
@@ -96,8 +94,8 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
               to={route.path}
               className={`flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                 isActive
-                  ? `text-[${palette.primary}] bg-[${palette.background}] border-b-2 border-[${palette.secondary}]`
-                  : `text-[${palette.text}] hover:bg-[${palette.background}]`
+                  ? `text-${palette.primary} bg-${palette.background} border-b-2 border-${palette.special}`
+                  : `text-${palette.text} hover:bg-${palette.background}`
               }`}
             >
               <Icon className="ml-2 h-5 w-5" />
@@ -106,7 +104,7 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
           );
         })}
       </nav>
-      <div className={`p-4 border-t border-[${palette.secondary}]`}>
+      <div className={`p-4 border-t border-${palette.secondary}`}>
         <UserProfile user={user} palette={palette} />
       </div>
     </aside>
@@ -116,11 +114,11 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
 // Header Component
 function Header({ palette }: { palette: Pallate }) {
   return (
-    <header className={`bg-[${palette.white}] border-b border-[${palette.secondary}] px-4 py-2 flex items-center`}>
+    <header className={`bg-white border-b border-${palette.secondary} px-4 py-2 flex items-center`}>
       <button
-        className={`p-2 rounded-full hover:bg-[${palette.background}] focus:outline-none focus:ring-2 focus:ring-green-500`}
+        className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}
       >
-        <HelpCircle className={`h-6 w-6 text-[${palette.text}]`} />
+        <HelpCircle className={`h-6 w-6 text-${palette.text}`} />
       </button>
       <div className="flex-1 flex justify-center">
         {/* On desktop, show SearchBar */}
@@ -146,7 +144,7 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
 
   return (
     <nav
-      className={`md:hidden fixed bottom-0 left-0 right-0 bg-[${palette.white}] border-t border-[${palette.secondary}] flex justify-around items-center h-16`}
+      className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-${palette.secondary} flex justify-around items-center h-16`}
     >
       {routes.map((route) => {
         const Icon = route.icon;
@@ -157,8 +155,8 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
             to={route.path}
             className={`flex flex-col items-center justify-center w-full h-full ${
               isActive
-                ? `text-[${palette.primary}] border-t-2 border-[${palette.secondary}]`
-                : `text-[${palette.text}]`
+                ? `text-${palette.primary} border-t-2 border-${palette.secondary}`
+                : `text-${palette.text}`
             }`}
           >
             <Icon className="h-6 w-6" />
@@ -180,7 +178,7 @@ function MainContent({
 }) {
   const location = useLocation();
   return (
-    <main className={`flex-1 overflow-y-auto bg-[${palette.background}]`}>
+    <main className={`flex-1 overflow-y-auto bg-${palette.background}`}>
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}
@@ -226,7 +224,7 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
   }
 
   return (
-    <div className={`flex flex-col h-screen bg-[${palette.background}]`} dir="rtl">
+    <div className={`flex flex-col h-screen bg-${palette.background}`} dir="rtl">
       {!hideLayoutOnMobile && <Header palette={palette} />}
       <div className="flex flex-1 overflow-hidden">
         {!hideLayoutOnMobile && <Sidebar palette={palette} user={user} />}
