@@ -3,6 +3,7 @@ import Home from "./main/home";
 import Connections from "./main/connections";
 import Messages from "./main/messages";
 import AddFriendsPage from "./main/add-connections";
+import AiFriends from './main/ai';
 
 export default function Routes() : RouteObject[]{
   return [
@@ -25,6 +26,10 @@ export default function Routes() : RouteObject[]{
     {
       path: '/messages/:id',
       element: <Messages></Messages>
+    },
+    {
+      path: '/ai',
+      element: <AiFriends></AiFriends>
     }
 
   ];

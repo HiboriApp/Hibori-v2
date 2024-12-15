@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Home, Bell, Search, User, HelpCircle, Settings } from 'lucide-react';
+import { MessageSquare, Home, Bell, Search, User, HelpCircle, Settings, Sparkles } from 'lucide-react';
 import { GetPallate, Pallate } from '../api/settings';
 import { getUser, UserData } from '../api/db';
 import Loading from './Loading';
@@ -12,6 +12,7 @@ const routes = [
   { name: 'דף הבית', path: '/home', icon: Home },
   { name: 'חברים', path: '/connections', icon: User },
   { name: 'הודעות', path: '/messages', icon: MessageSquare },
+  { name: 'מוצא החברים', path: '/ai', icon: Sparkles}
 ];
 
 // Animations
