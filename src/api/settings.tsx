@@ -32,7 +32,7 @@ export interface Pallate {
       secondary: '#22c55e',
       tertiary: '#065f46',
       text: '#FFFFFFFF',
-      background: '#000000FF',
+      background: '#FFFFFFFF',
       special: '#134e4a',
       blue: '#3b82f6',
       blueHover: '#dbeafe',
