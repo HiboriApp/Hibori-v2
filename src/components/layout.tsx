@@ -77,9 +77,11 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
 
   return (
     <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-green-500`}>
+      <a href="/" className='self-center'>
       <div className="p-4 self-center">
         <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
       </div>
+      </a>
       <nav className="flex-1 px-2 py-4 space-y-2">
         {routes.map((route) => {
           const Icon = route.icon;
