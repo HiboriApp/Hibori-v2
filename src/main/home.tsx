@@ -36,8 +36,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddC
   };
 
   return (
-    <div className="mt-4">
-      {comments.length > 0 && <h3 className="text-lg font-semibold mb-2">תגובות</h3>}
+    <div className="mt-4 mr-4">
+      {comments.length > 0 && <h3 className="text-lg font-semibold mb-2 ">תגובות</h3>}
       <div className="space-y-4 mb-4">
         {comments.map((comment) => (
           <div key={comment.name + comment.message.slice(0, 10)} className="flex items-start space-x-3 space-x-reverse">
@@ -106,7 +106,7 @@ const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (co
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-xl overflow-hidden" style={{ backgroundColor: pallate.background }}>
+    <div className="bg-white shadow-lg rounded-xl overflow-y-auto" style={{ backgroundColor: pallate.background }}>
       <div className="p-6">
         <div className="flex items-center mb-4">
           <Avatar icon={poster.icon} className="w-12 h-12 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-xl ml-4" />
