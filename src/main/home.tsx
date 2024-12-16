@@ -116,7 +116,7 @@ const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (co
               {item.timestamp.toDate().toLocaleString()}
             </p>
           </div>
-          {item.owner === poster.id && (
+          {item.owner === user.id && (
             <button
               className="mr-auto hover:text-primary transition-colors duration-200"
               onClick={() => deletePost(item.id)}
