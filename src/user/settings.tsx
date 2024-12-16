@@ -1,14 +1,58 @@
 import Layout from "../components/layout";
-
-
-import React, { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import { getUser, UserData, setUser as setUserInDB } from "../api/db";
+import { Avatar, Icon, IconType } from "../api/icons";
+import Loading from "../components/Loading";
+import { useNavigate } from "react-router-dom";
 
 export default function SettingsPage() {
+  const [user, setUser] = useState<UserData | null>(null);
   const [hasProfileImage, setHasProfileImage] = useState(true);
+  const [pfp, setPFP] = useState<Icon | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
+
+  const handleChangePFP = async () => {
+    if (!fileRef.current){return;}
+    fileRef.current?.click();
+    fileRef.current.onchange = () => {
+    if (!fileRef.current){return;}
+    let file = (fileRef.current.files && fileRef.current.files.length > 0) ? fileRef.current.files[0] : null;
+    if (!file){return;}
+    const reader = new FileReader();
+    reader.onload = () => {
+      const icon = reader.result as string;
+      setPFP({type: IconType.image, content: icon});
+      setHasProfileImage(true);
+    }
+    reader.readAsDataURL(file);
+  }}
+  const handleSave = async () => {
+    console.log(user)
+    if (!user){return;}
+    await setUserInDB(user);
+    navigate('/home');
+  }
+  useEffect(() => {
+    async function fetchData() {
+      const userData = await getUser();
+      if (!userData) {
+        navigate('/');
+        return;
+      }
+      setUser(userData);
+      if (userData.icon) {
+        setPFP(userData.icon);
+        setHasProfileImage(true);
+      }
+    }
+    fetchData();
+  }, [])
+  if (!user || !pfp){return <Loading></Loading>;}
   return (
-    <div dir="rtl" className="min-h-screen bg-gray-50 text-gray-800 p-8">
+    <Layout><div dir="rtl" className="min-h-screen bg-gray-50 text-gray-800 p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-green-600">הגדרות</h1>
 
@@ -21,11 +65,10 @@ export default function SettingsPage() {
                 <div className="relative w-40 h-40 rounded-full overflow-hidden mb-4 group">
                   {hasProfileImage ? (
                     <>
-                      <img
-                        src="https://via.placeholder.com/160"
-                        alt="תמונת פרופיל"
-                        className="w-full h-full object-cover"
-                      />
+                      <Avatar
+                      icon={pfp}
+                      className="h-full w-full object-cover"
+                      ></Avatar>
                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button
                           onClick={() => setHasProfileImage(false)}
@@ -44,8 +87,15 @@ export default function SettingsPage() {
                     </div>
                   )}
                 </div>
+
+                <input 
+        type="file" 
+        accept="image/*"
+        ref={fileRef}
+        style={{ display: 'none' }}
+        ></input>
                 <button 
-                  onClick={() => setHasProfileImage(true)}
+                  onClick={() => handleChangePFP()}
                   className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"
                 >
                   {hasProfileImage ? 'שנה תמונה' : 'הוסף תמונה'}
@@ -57,6 +107,8 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     id="name"
+                    value={user.name}
+                    onChange={(e) => setUser({ ...user, name: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                     placeholder="הכנס את השם שלך"
                   />
@@ -66,6 +118,8 @@ export default function SettingsPage() {
                   <input
                     type="email"
                     id="email"
+                    value={user.email}
+                    onChange={(e) => setUser({ ...user, email: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                     placeholder="הכנס את כתובת הדואר האלקטרוני שלך"
                   />
@@ -75,6 +129,8 @@ export default function SettingsPage() {
                   <textarea
                     id="bio"
                     rows={4}
+                    value={user.bio}
+                    onChange={(e) => setUser({ ...user, bio: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                     placeholder="ספר לנו מעט על עצמך"
                   ></textarea>
@@ -88,16 +144,9 @@ export default function SettingsPage() {
             <h2 className="text-xl font-semibold mb-4 text-green-600">העדפות התראות</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">התראות דוא"ל</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                </label>
-              </div>
-              <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">התראות דחיפה</span>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
+                  <input value={"" + user.wantsNotifications} onChange={(e) => setUser({ ...user, wantsNotifications: e.target.checked })} type="checkbox" className="sr-only peer" />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                 </label>
               </div>
@@ -105,12 +154,13 @@ export default function SettingsPage() {
           </section>
 
           {/* Account Settings */}
+          {/*unused for now
           <section className="bg-white p-6 rounded-xl shadow-md">
             <h2 className="text-xl font-semibold mb-4 text-green-600">הגדרות חשבון</h2>
             <div className="space-y-4">
               <div className="relative">
                 <label htmlFor="language" className="block text-sm font-medium mb-1 text-gray-700">שפה</label>
-                <select
+                {/*<select
                   id="language"
                   className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-green-500 transition-all duration-200"
                 >
@@ -141,11 +191,13 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
-          </section>
+            
+          </section>*/}
 
           {/* Save Button */}
           <div className="flex justify-end">
             <button
+            onClick={() => handleSave()}
               type="button"
               className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 text-lg font-semibold"
             >
@@ -154,16 +206,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </div></Layout>
   );
-}
-
-
-
-
-
-export function Settings() {
-    return <Layout children={
-        <SettingsPage></SettingsPage>
-    }></Layout>
 }
