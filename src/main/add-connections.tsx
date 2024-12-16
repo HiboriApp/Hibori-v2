@@ -14,7 +14,7 @@ const UserCard: React.FC<{
   const mutualFriends = user.friends.filter(f => otherUser.friends.includes(f)).length;
   return <div className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
     <div className="flex items-center space-x-4 gap-4">
-      <Avatar icon={otherUser.icon} className="w-12 h-12 rounded-full object-cover" />
+      <Avatar icon={otherUser.icon} className="w-30 h-12 rounded-full object-cover" />
       <div className="mr-4">
         <h3 className="font-semibold text-lg">{otherUser.name}</h3>
         <p className="text-xs text-gray-400">{mutualFriends} חברים משותפים</p>
