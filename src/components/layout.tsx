@@ -3,9 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Home, Bell, Search, User, HelpCircle, Settings, Sparkles } from 'lucide-react';
 import { GetPallate, Pallate } from '../api/settings';
-import { getUser, UserData } from '../api/db';
+import { getUser, UserData, setUser as setUserInDB } from '../api/db';
 import Loading from './Loading';
 import { Avatar } from '../api/icons';
+import { Timestamp } from 'firebase/firestore';
 
 // Routes
 const routes = [
@@ -25,7 +26,7 @@ const pageTransition = {
 function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
   return (
     <div className="flex items-center justify-around space-x-4 space-x-reverse">
-      <Avatar icon={user.icon} isOnline={user.isOnline} className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" ></Avatar>
+      <Avatar icon={user.icon} isOnline={user.lastOnline.toDate() > new Date()} className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" ></Avatar>
       <p className="text-sm font-medium text-text">{user.name}</p>
       <Link
         to={'/settings'}
@@ -217,6 +218,15 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
     }
     fetchData();
   }, [navigate]);
+
+  setInterval(() => {
+    if (!user){return;}
+    if (user.lastOnline > Timestamp.fromDate(new Date())){return;}
+    let date = new Date();
+    date.setMinutes(date.getMinutes() + 120);
+    setUser({...user, lastOnline: Timestamp.fromDate(date)});
+    setUserInDB(user);
+  }, 1000);
 
   if (!palette || !user) {
     return <Loading></Loading>;

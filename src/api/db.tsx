@@ -44,7 +44,6 @@ export interface UserData{
     notifications: Notification[]
     likes: string[]
     friends: string[]
-    isOnline: boolean
     lastOnline: Timestamp
 }
 
@@ -172,7 +171,6 @@ export async function CreateUser(name: string, user: User, email: string){
         notifications: [],
         likes: [],
         friends: [],
-        isOnline: true,
         lastOnline: Timestamp.fromDate(new Date()),
     };
     await setUser(data);

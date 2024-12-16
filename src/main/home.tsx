@@ -93,7 +93,6 @@ const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (co
         .share({
           title: `פוסט מאת ${poster.name}`,
           text: item.content,
-          url: window.location.href,
         })
         .then(() => {
           console.log('Successfully shared');
@@ -211,7 +210,7 @@ function LeftPanel({
         <div className="grid grid-cols-3 gap-4">
           {friends.map((friend) => (
             <div key={friend.id} className="flex flex-col items-center">
-              <Avatar icon={friend.icon} isOnline={friend.isOnline} className="w-16 h-16 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" />
+              <Avatar icon={friend.icon} isOnline={friend.lastOnline.toDate() > new Date()} className="w-16 h-16 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" />
               <span className="mt-1 text-xs text-text text-center">
                 {friend.name}
               </span>

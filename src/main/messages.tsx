@@ -38,7 +38,7 @@ const ChatList: React.FC<{
         onClick={() => onSelectChat(chat.id)}
       >
         <div className="flex-shrink-0">
-          <Avatar icon={chatter.icon} isOnline={chatter.isOnline} className={`w-12 h-12 rounded-full object-cover`} />
+          <Avatar icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className={`w-12 h-12 rounded-full object-cover`} />
         </div>
         <div className="flex-grow min-w-0">
           <div className="flex justify-between items-baseline">
@@ -67,7 +67,7 @@ const ChatList: React.FC<{
       onClick={() => onSelectChat(chatter.id)}
     >
       <div className="flex-shrink-0">
-        <Avatar icon={chatter.icon} isOnline={chatter.isOnline} className={`w-12 h-12 rounded-full object-cover`} />
+        <Avatar icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className={`w-12 h-12 rounded-full object-cover`} />
       </div>
       <div className="flex-grow min-w-0">
         <div className="flex justify-between items-baseline">
@@ -166,7 +166,7 @@ const ProfileInfo: React.FC<{
         <div className="flex flex-col items-center mb-4">
           <Avatar className="w-24 h-24 rounded-full mb-2" icon={chatter.icon}></Avatar>
           <h3 className="text-xl font-semibold">{chatter.name}</h3>
-          <p className="text-${pallate.text}">{chatter.isOnline ? 'מחובר' : 'לא מחובר'}</p>
+          <p className="text-${pallate.text}">{(chatter.lastOnline.toDate() > new Date()) ? 'מחובר' : 'לא מחובר'}</p>
         </div>
         {Array.isArray(members) ? (
           <>
@@ -229,7 +229,7 @@ const ChatArea: React.FC<{
             <div onClick={() => onProfileClick(selectedChat.id)} className="cursor-pointer">
               <Avatar
                 icon={selectedChat.icon || otherUser.icon}
-                isOnline={otherUser.isOnline || undefined}
+                isOnline={otherUser.lastOnline.toDate() > new Date()}
               />
             </div>
             <div className="mr-3">
