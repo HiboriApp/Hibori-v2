@@ -37,7 +37,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddC
 
   return (
     <div className="mt-4">
-      <h3 className="text-lg font-semibold mb-2">תגובות</h3>
+      {comments.length > 0 && <h3 className="text-lg font-semibold mb-2">תגובות</h3>}
       <div className="space-y-4 mb-4">
         {comments.map((comment) => (
           <div key={comment.name + comment.message.slice(0, 10)} className="flex items-start space-x-3 space-x-reverse">
