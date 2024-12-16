@@ -226,8 +226,9 @@ const ChatArea: React.FC<{
         </button>
         {selectedChat && (
           <>
-            <div onClick={() => onProfileClick(selectedChat.id)} className="cursor-pointer">
+            <div onClick={() => onProfileClick(selectedChat.id)}>
               <Avatar
+                className='w-8 h-8'
                 icon={selectedChat.icon || otherUser.icon}
                 isOnline={otherUser.lastOnline.toDate() > new Date()}
               />
@@ -235,22 +236,13 @@ const ChatArea: React.FC<{
             <div className="mr-3">
               <h2 className="font-semibold">{selectedChat.name}</h2>
               <p className="text-xs text-${pallate.text}">
-                {`${otherUser.friends} חברים`}
+                {`${otherUser.name}`}
               </p>
             </div>
           </>
         )}
       </div>
       <div className="flex items-center space-x-4">
-        <Menu menuButton={<MenuButton><MoreVertical size={20} /></MenuButton>} transition>
-          <MenuItem>
-            <a href="#Attachment" className="block w-full">
-              קבצים מצורפים
-            </a>
-          </MenuItem>
-          <MenuItem>חיפוש</MenuItem>
-          <MenuItem>השתק התראות</MenuItem>
-        </Menu>
       </div>
     </div>
     {/* Messages */}
