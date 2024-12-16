@@ -52,7 +52,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddC
           </div>
         ))}
       </div>
-      {canComment && <form onSubmit={handleSubmit} className="flex items-center">
+      {canComment && <form onSubmit={handleSubmit} className="flex items-center mb-4">
         <Avatar icon={currentUser.icon} className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-sm ml-2" />
         <input
           type="text"
@@ -65,7 +65,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddC
           type="submit"
           className="ml-2 text-primary hover:text-secondary transition-colors duration-200"
         >
-          <Send size={20} />
+          <Send size={20} className='mr-2 ml-2' />
         </button>
       </form>}
     </div>
@@ -139,7 +139,7 @@ const ContentCard: React.FC<{ item: Post, userLiked: boolean; handleComment: (co
           </button>
           <button
             className={`flex items-center transition-colors duration-200 ${
-              isLiked ? 'text-primary' : 'hover:text-primary'
+              isLiked ? 'text-green-600' : 'hover:text-green-600'
             }`}
             onClick={handleLike}
           >
@@ -452,7 +452,7 @@ function App() {
   if (!user || !posts || !pallate) return <SuperSillyLoading></SuperSillyLoading>;
   return (
     <Layout>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background ">
         <div className="flex justify-center">
           <div
             className="w-full max-w-7xl grid grid-cols-12 gap-4"
