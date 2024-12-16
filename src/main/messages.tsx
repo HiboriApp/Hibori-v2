@@ -64,7 +64,7 @@ const ChatList: React.FC<{
       className={`p-4 flex items-center space-x-4 cursor-pointer hover:bg-${pallate.background} transition-colors duration-200 ${
         selectedChat === chatter.id ? `bg-${pallate.secondary}` : ''
       }`}
-      onClick={() => onSelectChat(chatter.id)}
+      onClick={() => onSelectChat(openChatName(user.id, chatter.id))}
     >
       <div className="flex-shrink-0">
         <Avatar icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className={`w-12 h-12 rounded-full object-cover`} />
@@ -257,7 +257,7 @@ const ChatArea: React.FC<{
     <div className={`flex-grow overflow-y-auto p-4 bg-${pallate.background}`}>
       {messages.map((message) => (
         <MessageComponent 
-        chatter={Array.isArray(chatter) ? chatter.find((chat) => chat.id === message.sender) : chatter} 
+        chatter={message.sender == user.id ? user : otherUser} 
         key={message.sender + message.timestamp.toDate().toString()} message={message} isSent={message.sender === 'אתה'} pallate={pallate} />
       ))}
     </div>
@@ -360,14 +360,14 @@ const App: React.FC = () => {
       return
     }
     try {
-      const chat = await openChat(openChatName(user.id, id));
+      const chat = await openChat(id);
       setOpenedChats([...openedChats, chat])
       const chatters = await getUsersById(chat.person);
       setSelectedChat(chat);
       setSelectedChatters(chatters)
       setShowChatList(false)
     }catch{
-      if (await chatExists(openChatName(user.id, id))){
+      if (await chatExists(id)){
         return;
       }
       const chat: Chat = {

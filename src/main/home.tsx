@@ -200,6 +200,7 @@ function LeftPanel({
   user: UserData;
   pallate: Pallate;
 }) {
+  const navigate = useNavigate();
   return (
     <>
       <div className="rounded-xl p-6 mb-6" style={{ backgroundColor: pallate.background }}>
@@ -245,7 +246,7 @@ function LeftPanel({
                   </span>
                 </div>
               </div>
-              <button className="p-2 rounded-full hover:bg-background transition-colors duration-200">
+              <button className="p-2 rounded-full hover:bg-background transition-colors duration-200" onClick={() => navigate(`/messages/${message.chat.id}`)}>
                 <Send className="h-4 w-4 text-primary" />
                 <span className="sr-only">Send message</span>
               </button>
