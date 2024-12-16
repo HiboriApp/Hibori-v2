@@ -144,7 +144,7 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
 
   return (
     <nav
-      className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-${palette.secondary} flex justify-around items-center h-16`}
+      className={`md:hidden fixed bottom-0 left-0 right-0 bg-white !important border-t border-${palette.secondary} flex justify-around items-center h-16 z-50`}
     >
       {routes.map((route) => {
         const Icon = route.icon;
@@ -178,7 +178,7 @@ function MainContent({
 }) {
   const location = useLocation();
   return (
-    <main className={`flex-1 overflow-y-auto bg-${palette.background}`}>
+    <main className={`flex-1 bg-${palette.background}`}>
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}
