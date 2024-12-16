@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../api/firebase';
 
-export default function SignUpPage(){
+export function SignUpPage(){
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,21 +25,38 @@ export default function SignUpPage(){
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen justify-center bg-white" dir="rtl">
-    {/* Mobile and Tablet View */}
-    <div className="w-full md:w-1/2 flex flex-col items-center justify-center  px-4">
-      {/* Wave design for mobile */}
-      <div className="md:hidden w-full h-full overflow-hidden absolute top-0 left-0">
+      {/* Mobile and Tablet View */}
+      <div className="w-full md:w-1/2 flex flex-col items-center justify-center  px-4 rounded-bl-lg rounded-tr-3xl ">
+        {/* Wave design for mobile */}
+        <div className="w-full md:w-[40vw] h-full overflow-hidden absolute top-0 right-0">
         <svg className="w-full h-auto" viewBox="0 0 500 150" preserveAspectRatio="none">
-          <path d="M0,0 C150,100 350,0 500,100 L500,0 L0,0 Z" fill="#06AA06"></path>
+          <defs>
+            <linearGradient id="leafGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#4ade80" /> {/* green-400 */}
+              <stop offset="50%" stopColor="#22c55e" /> {/* green-500 */}
+              <stop offset="100%" stopColor="#16a34a" /> {/* green-600 */}
+            </linearGradient>
+          </defs>
+          <path d="M0,0 C150,100 350,0 500,100 L500,0 L0,0 Z" fill="url(#leafGradient)">
+            <animate
+              attributeName="d"
+              dur="10s"
+              repeatCount="indefinite"
+              values="
+                M0,0 C150,100 350,0 500,100 L500,0 L0,0 Z;
+                M0,0 C150,80 350,20 500,100 L500,0 L0,0 Z;
+                M0,0 C150,100 350,0 500,100 L500,0 L0,0 Z"
+            />
+          </path>
         </svg>
       </div>
 
-
-
-        {/* Signup form - Centered on mobile and desktop */}
-        <div className="w-full max-w-md mx-auto p-6 md:p-8 bg-white md:bg-transparent rounded-t-3xl md:rounded-none z-10 flex-grow flex flex-col justify-center">
-          <h2 className="text-3xl font-bold text-[#06AA06] mb-6 text-center md:text-start">הרשמה</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Login form - Centered on mobile and desktop */}
+      <div className="w-full max-w-md mx-auto p-6 md:p-8 md:bg-transparent rounded-t-3xl md:rounded-none z-20 flex flex-col justify-center md:mt-0 ">
+            <h2 className="text-3xl font-bold text-green-500 mb-6 text-center md:text-start">הירשמות</h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+            
+        
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-[#115614] mb-1">
                 שם מלא
@@ -106,21 +123,18 @@ export default function SignUpPage(){
         </div>
       </div>
 
-      <div className="hidden md:flex w-full md:w-1/2 items-center justify-center relative overflow-hidden h-screen">
-        <img
-          src="/skibidi.png"
-          alt="Background"
-          className="absolute inset-0 w-full h-full object-cover z-0"
-        />
-
-        <div className="absolute inset-0 bg-[#06AA06] opacity-50 z-10"></div>
-
-        <div className="relative z-20 text-white text-center px-4">
-          <h3 className="text-3xl md:text-4xl font-bold mb-4">ברוכים הבאים!</h3>
-          <p className="text-lg md:text-xl mb-6">צור חשבון חדש כדי להתחיל</p>
+    
+        <div className="md:flex -order-1 md:order-1 w-full md:w-1/2 h-[30vh] md:h-auto items-center justify-center relative overflow-hidden rounded-bl-[30em] rounded-tr-[40em] mt-14 md:mt-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-400 via-green-500 to-green-600 shadow-inner">
+          <div className="absolute inset-0 bg-gradient-to-tl from-transparent via-white/10 to-white/30"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-4/5 h-4/5 bg-gradient-to-br from-green-300 via-green-400 to-green-600 rounded-tl-[70%] rounded-br-[70%] transform rotate-45 shadow-lg"></div>
+          </div>
+          <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/20"></div>
         </div>
       </div>
-    </div>
+      </div> 
   );
 };
 
+export default SignUpPage;
