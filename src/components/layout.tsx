@@ -144,7 +144,7 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
 
   return (
     <nav
-      className={`md:hidden fixed bottom-0 left-0 right-0 bg-white !important border-t border-${palette.secondary} flex justify-around items-center h-16 z-50`}
+      className={`md:hidden fixed bottom-0 left-0 right-0 bg-white !important border-t border-gray-200 !important flex justify-around items-center h-16 z-50`}
     >
       {routes.map((route) => {
         const Icon = route.icon;
@@ -155,7 +155,7 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
             to={route.path}
             className={`flex flex-col items-center justify-center w-full h-full ${
               isActive
-                ? `text-${palette.primary} border-t-2 border-${palette.secondary}`
+                ? `text-${palette.primary} border-t-2 border-green-600`
                 : `text-${palette.text}`
             }`}
           >
@@ -237,7 +237,7 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
       {!hideLayoutOnMobile && <Header palette={palette} />}
       <div className="flex flex-1 overflow-hidden">
         {!hideLayoutOnMobile && <Sidebar palette={palette} user={user} />}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-y-auto">
           {/* On mobile, search bar is displayed here */}
           {!hideLayoutOnMobile && (
             <div className="md:hidden">
