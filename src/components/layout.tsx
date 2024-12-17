@@ -65,8 +65,8 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
                   : `text-${palette.text} hover:bg-${palette.background}`
               }`}
             >
-              <Icon className={'ml-2 min-h-6 min-w-6'} />
-              {isHovering && route.name}
+              <Icon className={'ml-2 min-h-6 min-w-6 translate-x-1'} />
+              <p className='min-w-16'>{isHovering && route.name}</p>
             </Link>
           );
         })}
