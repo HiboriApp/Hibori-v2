@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Home, Bell, Search, User, HelpCircle, Settings, Sparkles } from 'lucide-react';
+import { MessageSquare, Home, User, Settings, Sparkles } from 'lucide-react';
 import { GetPallate, Pallate } from '../api/settings';
 import { getUser, UserData, setUser as setUserInDB } from '../api/db';
 import Loading from './Loading';
@@ -38,50 +38,17 @@ function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
     </div>
   );
 }
-
-// SearchBar Component
-function SearchBar({ palette }: { palette: Pallate }) {
-  return (
-    <div className="relative hidden md:block">
-      <input
-        type="text"
-        placeholder="חיפוש..."
-        className={`
-          w-full py-2 pr-10 pl-4 rounded-3xl 
-          bg-white
-          border border-gray-200
-          focus:outline-none focus:ring-2 focus:ring-green-600
-          text-gray-800 placeholder-gray-400
-        `}
-      />
-      <Search
-        className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-${palette.special}`}
-      />
-    </div>
-  );
-}
-
-// NotificationBell Component
-function NotificationBell({ palette }: { palette: Pallate }) {
-  return (
-    <button
-      className={`relative p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
-    >
-      <Bell className={`h-6 w-6 text-${palette.text}`} />
-      <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full"></span>
-    </button>
-  );
-}
-
 // Sidebar Component
 function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
   const location = useLocation();
+  const [isHovering, setIsHovering] = useState(false);
 
   return (
-    <aside className={`hidden md:flex md:flex-col md:w-64 bg-white border-r border-green-500`}>
-      <a href="/" className='self-center'>
-      <div className="p-4 self-center">
-        <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
+    <aside onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}
+    className={`hidden md:flex md:flex-col ${isHovering ? 'md:w-64' : 'md:w-16'} transition-all duration-200 bg-white border-r border-green-500`}>
+      <a href="/" className='self-start'>
+      <div className="p-4 self-end">
+        <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
       </div>
       </a>
       <nav className="flex-1 px-2 py-4 space-y-2">
@@ -98,43 +65,16 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
                   : `text-${palette.text} hover:bg-${palette.background}`
               }`}
             >
-              <Icon className="ml-2 h-5 w-5" />
-              {route.name}
+              <Icon className={'ml-2 min-h-6 min-w-6'} />
+              {isHovering && route.name}
             </Link>
           );
         })}
       </nav>
       <div className={`p-4 border-t border-${palette.secondary}`}>
-        <UserProfile user={user} palette={palette} />
+        {isHovering ? <UserProfile user={user} palette={palette} /> : <Avatar icon={user.icon} isOnline={user.lastOnline.toDate() > new Date()} className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" ></Avatar>}
       </div>
     </aside>
-  );
-}
-
-// Header Component
-function Header({ palette }: { palette: Pallate }) {
-  return (
-    <header className={`bg-white border-b border-${palette.secondary} px-4 py-2 flex items-center`}>
-      <button
-        className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-green-500`}
-      >
-        <HelpCircle className={`h-6 w-6 text-${palette.text}`} />
-      </button>
-      <div className="flex-1 flex justify-center">
-        {/* On desktop, show SearchBar */}
-        <div className="hidden md:block w-full max-w-md">
-          <SearchBar palette={palette} />
-        </div>
-        {/* On mobile, show logo */}
-        <div className="md:hidden">
-          <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
-        </div>
-      </div>
-      {/* Right Section */}
-      <div className="flex items-center flex-none space-x-4 space-x-reverse">
-        <NotificationBell palette={palette} />
-      </div>
-    </header>
   );
 }
 
@@ -218,15 +158,17 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
     }
     fetchData();
   }, [navigate]);
-
-  setInterval(() => {
-    if (!user){return;}
-    if (user.lastOnline > Timestamp.fromDate(new Date())){return;}
-    let date = new Date();
-    date.setMinutes(date.getMinutes() + 120);
-    setUser({...user, lastOnline: Timestamp.fromDate(date)});
-    setUserInDB(user);
-  }, 1000);
+  useEffect(() => {
+    let timeout = setInterval(() => {
+      if (!user) return;
+      let date = new Date();
+      date.setMinutes(date.getMinutes() + 5);
+      if (user.lastOnline.toMillis() > new Date().getTime()) return;
+      setUser({...user, lastOnline: Timestamp.fromDate(date)});
+      setUserInDB(user);
+    }, 1000);
+    return () => clearInterval(timeout);
+  })
 
   if (!palette || !user) {
     return <Loading></Loading>;
@@ -234,16 +176,9 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
 
   return (
     <div className={`flex flex-col h-screen bg-${palette.background}`} dir="rtl">
-      {!hideLayoutOnMobile && <Header palette={palette} />}
       <div className="flex flex-1 overflow-hidden">
         {!hideLayoutOnMobile && <Sidebar palette={palette} user={user} />}
         <div className="flex-1 flex flex-col overflow-y-auto">
-          {/* On mobile, search bar is displayed here */}
-          {!hideLayoutOnMobile && (
-            <div className="md:hidden">
-              <SearchBar palette={palette} />
-            </div>
-          )}
           <MainContent palette={palette}>{children}</MainContent>
         </div>
       </div>
@@ -253,3 +188,4 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
 }
 
 export default Layout;
+

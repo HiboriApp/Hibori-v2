@@ -155,7 +155,7 @@ export async function sendMessage(chat: Chat, message: Message){
 
 export async function setUser(user: UserData){
     if (!auth.currentUser) return;
-    await setDoc(doc(db, "users", user.id), user);
+    await setDoc(doc(db, "users", user.id), user, {merge: true});
     return user;
 }
 
