@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { ChevronRight, Send, Paperclip, Smile, MoreVertical, Search, X, ChevronLeft } from 'lucide-react'
-import { Menu, MenuItem, MenuButton } from '@szhsin/react-menu'
+import { ChevronRight, Send, Paperclip, Smile, Search, X, ChevronLeft } from 'lucide-react'
 import '@szhsin/react-menu/dist/index.css'
 import { Layout } from '../components/layout';
 import SuperSillyLoading from '../components/Loading'
@@ -274,8 +273,6 @@ const App: React.FC = () => {
   const [showChatList, setShowChatList] = useState(true)
   const chatListRef = useRef<HTMLDivElement>(null)
   const chatAreaRef = useRef<HTMLDivElement>(null)
-  console.log(selectedChatters);
-  const [isMobile, setIsMobile] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -288,14 +285,6 @@ const App: React.FC = () => {
       setChatsWrapper(chats.chats);
     }
     fetchChats()
-  }, [])
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    window.addEventListener('resize', handleResize)
-    handleResize() // Initialize
-    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   useEffect(() => {
@@ -335,9 +324,6 @@ const App: React.FC = () => {
       document.removeEventListener('touchend', handleTouchEnd)
     }
   }, [])
-
-  // Determine whether to hide the layout on mobile when in chat area
-  const hideLayoutOnMobile = isMobile && selectedChatId !== null && !showChatList
 
   const handleSelectChat = async (id: string) => {
     if (!user){return;}

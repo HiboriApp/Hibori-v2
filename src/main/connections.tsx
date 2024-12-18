@@ -21,7 +21,7 @@ const FriendCard: React.FC<{
       <div className="ml-4">
         <h3 className={`font-semibold text-lg text-${pallate.text}`}>{friend.name}</h3>
         <p className={`text-sm text-${pallate.gray[500]}`}>
-          {friend.isOnline ? 'מחובר' : 'לא מחובר'}
+          {friend.lastOnline.toDate() > new Date()  ? 'מחובר' : 'לא מחובר'}
         </p>
         <p className={`text-xs text-${pallate.gray[400]}`}>{mutualFriends} חברים משותפים</p>
       </div>
