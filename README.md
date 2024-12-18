@@ -1,7 +1,9 @@
-# Tauri + React + Typescript
+# Hibori
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+## Signin new versions
 
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+```powershell
+$cert = New-SelfSignedCertificate -Subject "Hibori" -Type CodeSigningCert -KeyUsage DigitalSignature -FriendlyName "Hibori"
+$password = ConvertTo-SecureString -String "qsxft129" -Force -AsPlainText
+signtool sign /a /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com /f cert.pfx /p qsxft129 "Exe file here.exe"
+```
