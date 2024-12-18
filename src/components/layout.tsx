@@ -162,10 +162,10 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
     let timeout = setInterval(() => {
       if (!user) return;
       let date = new Date();
-      date.setMinutes(date.getMinutes() + 5);
-      if (user.lastOnline.toMillis() > new Date().getTime()) return;
+      date.setMinutes(date.getMinutes() + 5)
+      if (user.lastOnline.toDate().getTime() > new Date().getTime()) return;
       setUser({...user, lastOnline: Timestamp.fromDate(date)});
-      setUserInDB(user);
+      setUserInDB({...user, lastOnline: Timestamp.fromDate(date)});
     }, 1000);
     return () => clearInterval(timeout);
   })
