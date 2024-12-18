@@ -176,6 +176,11 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
 
   return (
     <div className={`flex flex-col h-screen bg-${palette.background}`} dir="rtl">
+      {!hideLayoutOnMobile && <div className='md:hidden flex flex-row justify-between items-center border-b-2 border-gray-200 p-4'>
+        <Avatar icon={user.icon} isOnline={user.lastOnline.toDate() > new Date()} className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" ></Avatar>
+        <Link to={'/settings'}><div><Settings className={`h-8 w-8 ml-3 text-${palette.text}`} />
+        <span className="sr-only">Settings</span></div></Link>
+      </div>}
       <div className="flex flex-1 overflow-hidden">
         {!hideLayoutOnMobile && <Sidebar palette={palette} user={user} />}
         <div className="flex-1 flex flex-col overflow-y-auto">
