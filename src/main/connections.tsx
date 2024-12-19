@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, MessageSquare, UserPlus, UserMinus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout';
-import { getUser, getUsersById, openChatName, removeFriend, UserData } from '../api/db';
+import { getUser, getUsersById, openChatName, reccomendedFriends, removeFriend, UserData } from '../api/db';
 import SuperSillyLoading from '../components/Loading';
 import { Avatar } from '../api/icons';
 import { GetPallate, Pallate } from '../api/settings';
@@ -45,8 +45,10 @@ const FriendCard: React.FC<{
 
 const RecommendedFriends = ({ user, pallate }: { user: UserData; pallate: Pallate }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const recommendedFriends: never[] = [];
-
+  const [recommendedFriends, setReccomendedFriends] = useState<UserData[]>([]);
+  useEffect(() => {
+      reccomendedFriends(user, 10).then((res) => setReccomendedFriends(res));
+  }, [])
   return (
     <div className="rounded-lg shadow-md overflow-hidden">
       <button
@@ -60,7 +62,7 @@ const RecommendedFriends = ({ user, pallate }: { user: UserData; pallate: Pallat
         <div className="p-4 space-y-4">
           {recommendedFriends.map(friend => (
             <FriendCard
-              key={friend}
+              key={friend.id}
               user={user}
               friend={friend}
               onMessage={() => {}}

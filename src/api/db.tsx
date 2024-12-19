@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDoc, getDocs, limit, query, setDoc, Timestamp, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { DefaultPallate, Pallate } from "./settings";
 import { auth, db } from "./firebase";
 import { User } from "firebase/auth";
@@ -72,6 +72,12 @@ export async function removeFriend(user: UserData, friend: string){
 export async function getUserById(id: string){
     const user = await getDoc(doc(db, "users", id));
     return user.data() as UserData;
+}
+
+export async function reccomendedFriends(user: UserData, lim: number){
+    const friends = user.friends.length > 0 ? user.friends : [''];
+    const res = await getDocs(query(collection(db, "users"), where('id', 'not-in', friends), limit(lim), orderBy('friends', 'desc')));
+    return res.docs.map((doc) => doc.data() as UserData);
 }
 
 export async function addNotification(user: UserData, notification: Notification){
