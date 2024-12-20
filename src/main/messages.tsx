@@ -25,9 +25,9 @@ const ChatList: React.FC<{
     {chats.map((chat) => {
       const [chatter, setChatter] = useState<UserData | null>(null);
       useEffect(() => {
-        if (Array.isArray(chat.person)) (chat.person.length == 0 ? setChatter(null) : getUserById(chat.person[0]).then(setChatter));
-        else getUserById(chat.person).then(setChatter);
-      })
+        if (!chat.person.filter((id) => id != user.id)[0]){console.error("FAILED TO FIND THE SECOND USER");return;}
+        getUserById(chat.person.filter((id) => id != user.id)[0]).then((res) => setChatter(res));
+      }, [])
       if (!chatter) return null;
       return <div
         key={chat.id}
