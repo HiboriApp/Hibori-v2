@@ -63,7 +63,7 @@ const ChatList: React.FC<{
       className={`p-4 flex items-center space-x-4 cursor-pointer hover:bg-${pallate.background} transition-colors duration-200 ${
         selectedChat === chatter.id ? `bg-${pallate.secondary}` : ''
       }`}
-      onClick={() => onSelectChat(openChatName(user.id, chatter.id))}
+      onClick={() => onSelectChat(chatter.id)}
     >
       <div className="flex-shrink-0">
         <Avatar icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className={`w-12 h-12 rounded-full object-cover`} />
