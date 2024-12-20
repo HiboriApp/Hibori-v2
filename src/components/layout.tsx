@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Home, User, Settings, Sparkles } from 'lucide-react';
-import { GetPallate, Pallate } from '../api/settings';
-import { getUser, UserData, setUser as setUserInDB } from '../api/db';
-import Loading from './Loading';
-import { Avatar } from '../api/icons';
-import { Timestamp } from 'firebase/firestore';
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageSquare, Home, User, Settings, Sparkles } from "lucide-react";
+import { GetPallate, Pallate } from "../api/settings";
+import { getUser, UserData, setUser as setUserInDB } from "../api/db";
+import Loading from "./Loading";
+import { Avatar } from "../api/icons";
+import { Timestamp } from "firebase/firestore";
 
 // Routes
 const routes = [
-  { name: 'דף הבית', path: '/home', icon: Home },
-  { name: 'חברים', path: '/connections', icon: User },
-  { name: 'הודעות', path: '/messages', icon: MessageSquare },
-  { name: 'מוצא החברים', path: '/ai', icon: Sparkles}
+  { name: "דף הבית", path: "/home", icon: Home },
+  { name: "חברים", path: "/connections", icon: User },
+  { name: "הודעות", path: "/messages", icon: MessageSquare },
+  { name: "מוצא החברים", path: "/ai", icon: Sparkles },
 ];
 
 // Animations
@@ -26,10 +26,14 @@ const pageTransition = {
 function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
   return (
     <div className="flex items-center justify-around space-x-4 space-x-reverse">
-      <Avatar icon={user.icon} isOnline={user.lastOnline.toDate() > new Date()} className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" ></Avatar>
+      <Avatar
+        icon={user.icon}
+        isOnline={user.lastOnline.toDate() > new Date()}
+        className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg"
+      ></Avatar>
       <p className="text-sm font-medium text-text">{user.name}</p>
       <Link
-        to={'/settings'}
+        to={"/settings"}
         className={`p-2 rounded-full hover:bg-${palette.background} focus:outline-none focus:ring-2 focus:ring-${palette.secondary}`}
       >
         <Settings className={`h-6 w-6 text-${palette.text}`} />
@@ -44,12 +48,17 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
   const [isHovering, setIsHovering] = useState(false);
 
   return (
-    <aside onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}
-    className={`hidden md:flex md:flex-col ${isHovering ? 'md:w-64' : 'md:w-16'} transition-all duration-200 bg-white border-r border-green-500`}>
-      <a href="/" className='self-start'>
-      <div className="p-4 self-end">
-        <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
-      </div>
+    <aside
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className={`hidden md:flex md:flex-col ${
+        isHovering ? "md:w-64" : "md:w-16"
+      } transition-all duration-200 bg-white border-r border-green-500`}
+    >
+      <a href="/" className="self-start">
+        <div className="p-4 self-end">
+          <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
+        </div>
       </a>
       <nav className="flex-1 px-2 py-4 space-y-2">
         {routes.map((route) => {
@@ -65,14 +74,22 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
                   : `text-${palette.text} hover:bg-${palette.background}`
               }`}
             >
-              <Icon className={'ml-2 min-h-6 min-w-6 translate-x-1'} />
-              <p className='min-w-16'>{isHovering && route.name}</p>
+              <Icon className={"ml-2 min-h-6 min-w-6 translate-x-1"} />
+              <p className="min-w-16">{isHovering && route.name}</p>
             </Link>
           );
         })}
       </nav>
       <div className={`p-4 border-t border-${palette.secondary}`}>
-        {isHovering ? <UserProfile user={user} palette={palette} /> : <Avatar icon={user.icon} isOnline={user.lastOnline.toDate() > new Date()} className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" ></Avatar>}
+        {isHovering ? (
+          <UserProfile user={user} palette={palette} />
+        ) : (
+          <Avatar
+            icon={user.icon}
+            isOnline={user.lastOnline.toDate() > new Date()}
+            className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg"
+          ></Avatar>
+        )}
       </div>
     </aside>
   );
@@ -151,7 +168,7 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
       setPalette(newPalette);
       const userData = await getUser();
       if (!userData) {
-        navigate('/');
+        navigate("/");
         return;
       }
       setUser(userData);
@@ -162,25 +179,38 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
     let timeout = setInterval(() => {
       if (!user) return;
       let date = new Date();
-      date.setMinutes(date.getMinutes() + 5)
+      date.setMinutes(date.getMinutes() + 5);
       if (user.lastOnline.toDate().getTime() > new Date().getTime()) return;
-      setUser({...user, lastOnline: Timestamp.fromDate(date)});
-      setUserInDB({...user, lastOnline: Timestamp.fromDate(date)});
+      setUser({ ...user, lastOnline: Timestamp.fromDate(date) });
+      setUserInDB({ ...user, lastOnline: Timestamp.fromDate(date) });
     }, 1000);
     return () => clearInterval(timeout);
-  })
+  });
 
   if (!palette || !user) {
     return <Loading></Loading>;
   }
 
   return (
-    <div className={`flex flex-col h-screen bg-${palette.background}`} dir="rtl">
-      {!hideLayoutOnMobile && <div className='md:hidden flex flex-row justify-between items-center border-b-2 border-gray-200 p-4'>
-        <Avatar icon={user.icon} isOnline={user.lastOnline.toDate() > new Date()} className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg" ></Avatar>
-        <Link to={'/settings'}><div><Settings className={`h-8 w-8 ml-3 text-${palette.text}`} />
-        <span className="sr-only">Settings</span></div></Link>
-      </div>}
+    <div
+      className={`flex flex-col justify-center h-[95vh] md:h-screen bg-${palette.background}`}
+      dir="rtl"
+    >
+      {!hideLayoutOnMobile && (
+        <div className="md:hidden flex flex-row justify-between items-center border-b-2 shadow-md shadow-slate-50  p-4 ">
+          <Avatar
+            icon={user.icon}
+            isOnline={user.lastOnline.toDate() > new Date()}
+            className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg"
+          ></Avatar>
+          <Link to={"/settings"}>
+            <div>
+              <Settings className={`h-7 w-7 ml-3 text-${palette.text}`} />
+              <span className="sr-only">Settings</span>
+            </div>
+          </Link>
+        </div>
+      )}
       <div className="flex flex-1 overflow-hidden">
         {!hideLayoutOnMobile && <Sidebar palette={palette} user={user} />}
         <div className="flex-1 flex flex-col overflow-y-auto">
@@ -193,4 +223,3 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
 }
 
 export default Layout;
-
