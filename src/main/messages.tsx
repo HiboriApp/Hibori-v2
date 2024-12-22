@@ -147,14 +147,14 @@ const MessageComponent: React.FC<{
             )}
             <div className="break-words">
               {message.isDeleted ? (
-                <span className="text-gray-500 italic">ההודעה נמחקה</span>
+                <span className="italic underline">[ההודעה נמחקה]</span>
               ) : (
                 message.content
               )}
             </div>
             <div className="text-xs mt-1 flex items-center justify-end">
               {formatTime(message.timestamp.toDate())}
-              {message.isEdited && <span className="ml-1">(נערך)</span>}
+              {message.isEdited && <span className="mr-1">(נערך)</span>}
             </div>
           </div>
           {showOptions && !message.isDeleted && (
