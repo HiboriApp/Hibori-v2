@@ -429,9 +429,16 @@ const ChatArea: React.FC<{
         <div ref={messagesEndRef} />  
       </div>
       {/* Background Image */}
-      <div className='absolute inset-0 z-0'>
-        <img src="/skibidi.png" alt="Background" className='h-full w-full object-cover' />
-      </div>
+      <div className="absolute inset-0 z-0">
+      <video
+        src="/5f5bffb7-8754-4cd0-9d04-151adb9370e6 (1).mp4"
+        className="h-full w-full object-cover"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+    </div>
       {/* Input Area */}
       <div className="flex-shrink-0 z-10">
         <InputArea
@@ -604,7 +611,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div dir="rtl" className="h-screen md:h-[94vh] flex bg-gray-100 text-right overflow-hidden">
+    <div dir="rtl" className="h-screen  flex bg-gray-100 text-right overflow-hidden">
       {/* Chat List */}
       <div
         ref={chatListRef}
