@@ -132,7 +132,7 @@ const MessageComponent: React.FC<{
       <div className={`flex items-start ${isSent ? 'flex-row-reverse' : 'flex-row'}`}>
         <Avatar icon={chatter ? chatter.icon : unknownIcon()} className={`w-8 h-8 ${isSent ? 'ml-2' : 'mr-2'}`} />
         <div className={`flex flex-col ${isSent ? 'items-end' : 'items-start'}`}>
-          <span className="text-xs text-gray-500 mb-1">{chatter?.name}</span>
+          <span className="text-xs text-gray-800 font-semibold mb-1">{chatter?.name}</span>
           <div
             className={`message-container min-w-[80px] relative p-3 rounded-lg ${
               isSent ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
