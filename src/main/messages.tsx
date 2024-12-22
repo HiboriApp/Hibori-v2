@@ -412,7 +412,7 @@ const ChatArea: React.FC<{
         </div>
       </div>
       {/* Messages */}
-      <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 relative z-10 ">
+      <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 relative z-10">
         {messages.map((message) => (
           <MessageComponent 
             key={message.id}
@@ -434,8 +434,7 @@ const ChatArea: React.FC<{
         src="/5f5bffb7-8754-4cd0-9d04-151adb9370e6 (1).mp4"
         className="h-full w-full object-cover"
         autoPlay
-        loop
-        muted
+        loop       
         playsInline
       />
     </div>
