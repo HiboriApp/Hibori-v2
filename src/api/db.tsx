@@ -102,7 +102,8 @@ export async function findNonFriends(user: UserData, friends: number){
 export interface Message{
     timestamp: Timestamp, 
     content: string, 
-    sender: string
+    sender: string,
+    reply?: number,
 }
 
 export interface Chat{
@@ -148,15 +149,9 @@ export async function chatExists(id: string){
     return chat.exists();
 }
 
-export async function makeChat(chat: Chat){
+export async function setChat(chat: Chat){
     if (!auth.currentUser) return;
-    return setDoc(doc(db, "chats", chat.id), chat);
-    return chat;
-}
-
-export async function sendMessage(chat: Chat, message: Message){
-    if (!auth.currentUser) return;
-    return await setDoc(doc(db, "chats", chat.id), {messages: [...chat.messages, message]}, {merge: true});
+    return await setDoc(doc(db, "chats", chat.id), chat);
 }
 
 export async function setUser(user: UserData){

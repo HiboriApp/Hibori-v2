@@ -3,7 +3,7 @@ import { ChevronRight, Send, Paperclip, Smile, Search, X, ChevronLeft } from 'lu
 import '@szhsin/react-menu/dist/index.css'
 import { Layout } from '../components/layout';
 import SuperSillyLoading from '../components/Loading'
-import { Chat, chatExists, ChatWrapper, getChats, getUser, getUserById, getUsersById, makeChat, Message, openChat, openChatName, sendMessage, UserData } from '../api/db'
+import { Chat, chatExists, ChatWrapper, getChats, getUser, getUserById, getUsersById, Message, openChat, openChatName, setChat, UserData } from '../api/db'
 import { Avatar, unknownIcon } from '../api/icons'
 import { Timestamp } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -355,7 +355,7 @@ const App: React.FC = () => {
         messages: [],
         id: openChatName(user.id, id),
       }
-      await makeChat(chat);
+      await setChat(chat);
       setOpenedChats([...openedChats, chat])
       const chatters = await getUsersById(chat.person);
       setSelectedChat(chat);
@@ -367,9 +367,10 @@ const App: React.FC = () => {
   const handleSendMessage = async (content: string) => {
     if (selectedChatId === null  || !user) return;
     if (!selectedChat)return;
-    setSelectedChat({...selectedChat, messages: [...selectedChat.messages, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())}]});
+    const chat = {...selectedChat, messages: [...selectedChat.messages, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())}]}
+    setSelectedChat(chat);
     setOpenedChats(openedChats.map((chat) => (chat.id === selectedChatId ? {...chat, messages: [...chat.messages, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())}]} : chat)));
-    await sendMessage(selectedChat, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())})
+    await setChat(chat)
   }
   if (!pallate || !chatsWrapper || !user){return <SuperSillyLoading></SuperSillyLoading>}
   return (
