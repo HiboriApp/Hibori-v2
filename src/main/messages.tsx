@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { ChevronRight, Send, Paperclip, Smile, Search, X, ChevronLeft, MoreVertical, Edit, Trash, Reply, ChevronDown } from 'lucide-react'
+import { ChevronRight, Send, Paperclip, Smile, Search, X, ChevronLeft,  Edit, Trash, Reply,  } from 'lucide-react'
 import '@szhsin/react-menu/dist/index.css'
 import { Layout } from '../components/layout'
 import SuperSillyLoading from '../components/Loading'
@@ -158,15 +158,15 @@ const MessageComponent: React.FC<{
             </div>
           </div>
           {showOptions && !message.isDeleted && (
-            <div className={`mt-1 flex ${isSent ? 'justify-start' : 'justify-end'}`}>
-              <button onClick={() => onEdit(message.id)} className="p-1 text-gray-600 hover:text-blue-500">
-                <Edit size={16} />
+            <div className={`mt-1  bg-white rounded shadow-md border-2 border-gray-200 flex ${isSent ? 'justify-start' : 'justify-end'}`}>
+              <button onClick={() => onEdit(message.id)} className="p-1 mr-2 text-gray-600 hover:text-blue-500">
+                <Edit size={20} />
               </button>
-              <button onClick={() => onDelete(message.id)} className="p-1 text-gray-600 hover:text-red-500">
-                <Trash size={16} />
+              <button onClick={() => onDelete(message.id)} className="p-1 mr-2 text-gray-600 hover:text-red-500">
+                <Trash size={20} />
               </button>
-              <button onClick={() => onReply(message.id)} className="p-1 text-gray-600 hover:text-green-500">
-                <Reply size={16} />
+              <button onClick={() => onReply(message.id)} className="p-1 mr-2 ml-2 text-gray-600 hover:text-green-500">
+                <Reply size={20} />
               </button>
             </div>
           )}
@@ -201,9 +201,9 @@ const InputArea: React.FC<{
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col  bg-white border-t border-gray-200">
+    <form onSubmit={handleSubmit} className="flex flex-col border-t border-gray-200">
       {replyingTo && (
-        <div className="bg-gray-100 p-2 mb-2 rounded flex justify-between items-center">
+        <div className="bg-gray-100 p-2 mb-[0.5vh]  flex justify-between items-center">
           <span className="text-sm">מגיב ל: {replyingTo.content}</span>
           <button type="button" onClick={onCancelReply} className="text-gray-500 hover:text-red-500">
             <X size={16} />
@@ -211,7 +211,7 @@ const InputArea: React.FC<{
         </div>
       )}
       {editingMessage && (
-        <div className="bg-gray-100 p-2 mb-2 rounded flex justify-between items-center">
+        <div className="bg-gray-100 p-2 mb-[0.5vh] flex justify-between items-center">
           <span className="text-sm">עורך הודעה</span>
           <button type="button" onClick={onCancelEdit} className="text-gray-500 hover:text-red-500">
             <X size={16} />
@@ -383,9 +383,9 @@ const ChatArea: React.FC<{
   }, [messages])
 
   return (
-    <div className="flex flex-col h-full min-h-0 chat-area">
+    <div className="flex flex-col h-full min-h-0 chat-area relative">
       {/* Header */}
-      <div className="bg-white p-4 flex items-center justify-between border-b border-gray-200 flex-shrink-0">
+      <div className="bg-white bg-opacity-75 p-4 flex items-center justify-between border-b border-gray-200 flex-shrink-0 z-10">
         <div className="flex items-center">
           <button onClick={onBackClick} className="md:hidden ml-2 text-gray-600">
             <ChevronRight size={24} />
@@ -412,7 +412,7 @@ const ChatArea: React.FC<{
         </div>
       </div>
       {/* Messages */}
-      <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 bg-gray-100 relative">
+      <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 relative z-10 ">
         {messages.map((message) => (
           <MessageComponent 
             key={message.id}
@@ -426,11 +426,14 @@ const ChatArea: React.FC<{
             replyingTo={message.reply ? messages.find(m => m.id === message.reply) : undefined}
           />
         ))}
-        <div ref={messagesEndRef} />
-     
+        <div ref={messagesEndRef} />  
+      </div>
+      {/* Background Image */}
+      <div className='absolute inset-0 z-0'>
+        <img src="/skibidi.png" alt="Background" className='h-full w-full object-cover' />
       </div>
       {/* Input Area */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 z-10">
         <InputArea
           onSendMessage={handleSendMessage}
           pallate={pallate}
@@ -671,6 +674,4 @@ const App: React.FC = () => {
 }
 
 export default App
-
-
 
