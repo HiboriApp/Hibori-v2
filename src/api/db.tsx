@@ -156,7 +156,7 @@ export async function makeChat(chat: Chat){
 
 export async function sendMessage(chat: Chat, message: Message){
     if (!auth.currentUser) return;
-    return setDoc(doc(db, "chats", chat.id), {messages: [...chat.messages, message]}, {merge: true});
+    return await setDoc(doc(db, "chats", chat.id), {messages: [...chat.messages, message]}, {merge: true});
 }
 
 export async function setUser(user: UserData){

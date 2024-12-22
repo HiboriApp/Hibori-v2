@@ -8,6 +8,7 @@ import { Avatar, unknownIcon } from '../api/icons'
 import { Timestamp } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GetPallate, Pallate } from '../api/settings'
+import { chatsListener } from '../api/listeners';
 
 
 const formatTime = (date: Date) => {
@@ -283,6 +284,7 @@ const App: React.FC = () => {
       if (!user){navigate('/');return;}
       const chats = await getChats(user);
       setChatsWrapper(chats.chats);
+      return chatsListener((chats) => setOpenedChats(chats));
     }
     fetchChats()
   }, [])
@@ -362,10 +364,12 @@ const App: React.FC = () => {
     }
   }
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     if (selectedChatId === null  || !user) return;
     if (!selectedChat)return;
-    sendMessage(selectedChat, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())})
+    setSelectedChat({...selectedChat, messages: [...selectedChat.messages, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())}]});
+    setOpenedChats(openedChats.map((chat) => (chat.id === selectedChatId ? {...chat, messages: [...chat.messages, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())}]} : chat)));
+    await sendMessage(selectedChat, {content, sender: user.id, timestamp: Timestamp.fromDate(new Date())})
   }
   if (!pallate || !chatsWrapper || !user){return <SuperSillyLoading></SuperSillyLoading>}
   return (
