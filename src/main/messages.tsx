@@ -610,7 +610,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div dir="rtl" className="h-screen  flex bg-gray-100 text-right overflow-hidden">
+    <Layout children={<div dir="rtl" className="h-screen  flex bg-gray-100 text-right overflow-hidden">
       {/* Chat List */}
       <div
         ref={chatListRef}
@@ -675,7 +675,7 @@ const App: React.FC = () => {
           pallate={pallate}
         />
       )}
-    </div>
+    </div>}></Layout>
   )
 }
 
