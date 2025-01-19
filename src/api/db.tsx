@@ -104,6 +104,9 @@ export interface Message{
     content: string, 
     sender: string,
     reply?: number,
+    id: string,
+    isEdited?: boolean,
+    isDeleted?: boolean
 }
 
 export interface Chat{
@@ -151,7 +154,8 @@ export async function chatExists(id: string){
 
 export async function setChat(chat: Chat){
     if (!auth.currentUser) return;
-    return await setDoc(doc(db, "chats", chat.id), chat);
+    setDoc(doc(db, "chats", chat.id), chat);
+    return chat;
 }
 
 export async function setUser(user: UserData){
