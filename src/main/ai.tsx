@@ -1,12 +1,19 @@
 import Layout from "../components/layout";
 import { useState, useEffect } from 'react'
 import { MessageCircle, UserPlus } from 'lucide-react'
+import Predict from "../api/ai";
+import { findNonFriends, getUser, getUserById, openChatName, UserData } from "../api/db";
+import { Avatar } from "../api/icons";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showResult, setShowResult] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [animationKey, setAnimationKey] = useState(0)
+  const [found, setFound] = useState<UserData | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -16,13 +23,29 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSearching(true)
-    setTimeout(() => {
+    const user = await getUser();
+    if (!user){navigate('/');return;}
+    setUser(user)
+    const others = (await findNonFriends(user, 20)).filter((u) => u.id !== user.id);
+    const result = await Predict(user, others, searchQuery);
+    if (result == "null"){
       setShowResult(true)
       setIsSearching(false)
-    }, 1500) // Simulating search delay
+      return;
+    }
+    const found = await getUserById(result.trim());
+    if (!found){
+      setShowResult(true)
+      setIsSearching(false)
+      return;
+    }
+    console.log(found);
+    setFound(found);
+    setShowResult(true)
+    setIsSearching(false)
   }
 
   return (
@@ -77,17 +100,20 @@ export default function Home() {
           </p>
         )}
 
-        {showResult && (
+        {showResult && found && user && (
           <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6 animate-fade-in-up">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">מצאנו חבר מושלם עבורך!</h2>
             <div className="flex items-center space-x-6 space-x-reverse">
-              <img src="https://picsum.photos/200" alt="Friend" className="w-24 h-24 rounded-full object-cover shadow-md" />
+              <Avatar
+              className="w-24 h-24 rounded-full object-cover shadow-md"
+              icon={found.icon}
+              ></Avatar>
               <div className="flex-grow">
-                <h3 className="text-base font-semibold text-gray-800">ישראל ישראלי</h3>
-               
+                <h3 className="text-base font-semibold text-gray-800">{found.name}</h3>
               </div>
               <div className="flex flex-col space-y-2">
-                <button className=" text-black p-2 rounded-full hover:bg-blue-600 transition-colors duration-300">
+                <button className=" text-black p-2 rounded-full hover:bg-blue-600 transition-colors duration-300"
+                onClick={() => navigate("/messages/" + openChatName(user.id, found.id))}>
                   <MessageCircle size={24} />
                 </button>
                 <button className=" text-black p-2 rounded-full hover:bg-green-600 transition-colors duration-300">
