@@ -28,9 +28,10 @@ export default function Home() {
     setIsSearching(true)
     const user = await getUser();
     if (!user){navigate('/');return;}
-    setUser(user)
+    setUser(user);
     const others = (await findNonFriends(user, 20)).filter((u) => u.id !== user.id);
     const result = await Predict(user, others, searchQuery);
+    console.log(result);
     if (result == "null"){
       setShowResult(true)
       setIsSearching(false)
@@ -42,7 +43,6 @@ export default function Home() {
       setIsSearching(false)
       return;
     }
-    console.log(found);
     setFound(found);
     setShowResult(true)
     setIsSearching(false)
