@@ -600,7 +600,7 @@ function TopPanel({
                       className=" text-sm bg-white text-black font-semibold hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center rounded-full px-4 py-2 w-full border border-gray-300"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/chat/${message.chat.id}`);
+                        navigate(`/messages/${message.chat.id}`);
                       }}
                     >
                       <MessageSquare className="w-4 h-4 ml-2" />

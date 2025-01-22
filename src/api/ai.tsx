@@ -8,7 +8,7 @@ export default async function Predict(user: UserData, students: UserData[], quer
     Your job is finding friends for a Certain user. You're given a user, a query, and a list of possible friends.
     Select the best option for a friend from the following options, according to the query and the user.
     Respond with the ID of the ID of the best possible friend. If there are no possible friends, respond with "null".
-    ATTEMPT NOT TO RESPOND WITH NULL UNLESS YOU FIND NO POSSIBLE USERS
+    If you find no one that fits the query, respond with a random user's ID.
 
     Example:
     User: אביב,
@@ -27,6 +27,19 @@ export default async function Predict(user: UserData, students: UserData[], quer
     ID: I43OpNw34d
 
     Best response: I43OpNw34d
+
+    example 2:
+    User: אביב,
+    Bio: אני אוהב כדורגל
+    Query: אני מחפש משהו שאוהב כדורגל
+
+    Options:
+    1.
+    User: אליהו,
+    Bio:
+    ID: A12fFAS23rcw
+
+    Best response: A12fFAS23rcw
 
     Your turn:
 
