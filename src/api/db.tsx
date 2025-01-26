@@ -46,6 +46,7 @@ export interface UserData{
     friends: string[]
     lastOnline: Timestamp
     wantsNotifications: boolean
+    colors?: Pallate
 }
 
 export async function updatePallate(user: UserData, newPallate: Pallate){
