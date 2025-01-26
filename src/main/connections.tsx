@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Search,
   MessageSquare,
-  UserPlus,
   UserMinus,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "../components/layout";
@@ -13,7 +10,6 @@ import {
   getUser,
   getUsersById,
   openChatName,
-  reccomendedFriends,
   removeFriend,
   UserData,
 } from "../api/db";
@@ -66,45 +62,6 @@ const FriendCard: React.FC<{
           <UserMinus size={20} />
         </button>
       </div>
-    </div>
-  );
-};
-
-const RecommendedFriends = ({
-  user,
-  pallate,
-}: {
-  user: UserData;
-  pallate: Pallate;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [recommendedFriends, setReccomendedFriends] = useState<UserData[]>([]);
-  useEffect(() => {
-    reccomendedFriends(user, 10).then((res) => setReccomendedFriends(res));
-  }, []);
-  return (
-    <div className="rounded-lg shadow-md overflow-hidden">
-      <button
-        className={`w-full p-4 bg-${pallate.secondary} text-${pallate.white} font-semibold flex justify-between items-center`}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        חברים מומלצים
-        {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-      </button>
-      {isOpen && (
-        <div className="p-4 space-y-4">
-          {recommendedFriends.map((friend) => (
-            <FriendCard
-              key={friend.id}
-              user={user}
-              friend={friend}
-              onMessage={() => {}}
-              onRemove={() => {}}
-              pallate={pallate}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
@@ -280,10 +237,6 @@ const FriendsPage: React.FC = () => {
                 pallate={pallate}
               />
             ))}
-          </div>
-
-          <div className="mt-8">
-            <RecommendedFriends user={user} pallate={pallate} />
           </div>
         </div>
 

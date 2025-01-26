@@ -11,11 +11,8 @@ import {
   ImageIcon,
   Video,
   X,
-  Plus,
   ChevronDown,
-  ChevronUp,
   Trash2,
-  Reply,
   MoreVertical,
   Smile,
 } from "lucide-react";
@@ -55,16 +52,11 @@ function LoadingSpinner() {
 
 interface CommentProps {
   comment: Comment;
-  onReply: (parentId: string, parentContent: string) => void;
-  onLike: (commentId: string) => void;
   currentUser: UserData;
 }
 
 const CommentItem: React.FC<CommentProps> = ({
   comment,
-  onReply,
-  onLike,
-  currentUser,
 }) => {
   return (
     <div className="mt-4">
@@ -78,39 +70,10 @@ const CommentItem: React.FC<CommentProps> = ({
             <p className="font-semibold text-gray-800 text-sm">
               {comment.name}
             </p>
-            {comment.replyTo && (
-              <div className="bg-gray-100 p-2 rounded-md my-2 text-sm">
-                <p className="font-semibold">
-                  בתגובה ל: {comment.replyTo.name}
-                </p>
-                <p className="text-gray-600">{comment.replyTo.content}</p>
-              </div>
-            )}
             <p className="text-sm text-gray-600 break-words mt-2">
               {comment.message}
             </p>
             <div className="flex items-center mt-3 space-x-4 space-x-reverse text-xs text-gray-500">
-              <button
-                onClick={() => onLike(comment.id)}
-                className="flex items-center hover:text-primary transition-colors duration-200"
-              >
-                <Heart
-                  className="w-4 h-4 ml-1"
-                  fill={
-                    comment.likes?.includes(currentUser.id)
-                      ? "currentColor"
-                      : "none"
-                  }
-                />
-                <span>{comment.likes?.length || 0}</span>
-              </button>
-              <button
-                onClick={() => onReply(comment.id, comment.message)}
-                className="flex items-center hover:text-primary transition-colors duration-200"
-              >
-                <Reply className="w-4 h-4 ml-1" />
-                <span>השב</span>
-              </button>
               <span>{comment.timestamp.toDate().toLocaleString()}</span>
             </div>
           </div>
@@ -126,14 +89,12 @@ interface CommentSectionProps {
     content: string,
     replyTo?: { id: string; content: string; name: string }
   ) => void;
-  onLikeComment: (commentId: string) => void;
   currentUser: UserData;
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   comments,
   onAddComment,
-  onLikeComment,
   currentUser,
 }) => {
   const [newComment, setNewComment] = useState("");
@@ -160,20 +121,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
   };
 
-  const handleReply = (parentId: string, parentContent: string) => {
-    const parentComment = comments.find((comment) => comment.id === parentId);
-    if (parentComment) {
-      setReplyingTo({
-        id: parentId,
-        content: parentContent,
-        name: parentComment.name,
-      });
-      if (commentInputRef.current) {
-        commentInputRef.current.focus();
-      }
-    }
-  };
-
   return (
     <div className="mt-6 rounded-lg p-4">
       <h3 className="text-lg font-semibold mb-4">תגובות</h3>
@@ -184,21 +131,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm"
           />
           <div className="flex-grow relative">
-            {replyingTo && (
-              <div className="bg-gray-50 p-2 rounded-md mb-2 text-sm relative">
-                <p className="font-semibold">
-                  בתגובה ל: {replyingTo.name}
-                  <button
-                    type="button"
-                    onClick={() => setReplyingTo(null)}
-                    className="absolute top-3 left-3 text-gray-500 hover:text-gray-700"
-                  >
-                    <X size={16} />
-                  </button>
-                </p>
-                <p className="text-gray-600">{replyingTo.content}</p>
-              </div>
-            )}
             <div className="relative">
               <textarea
                 ref={commentInputRef}
@@ -221,10 +153,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       <div className="space-y-4">
         {comments.map((comment) => (
           <CommentItem
-            key={comment.id}
+            key={comment.name + comment.timestamp.toString()}
             comment={comment}
-            onReply={handleReply}
-            onLike={onLikeComment}
             currentUser={currentUser}
           />
         ))}
@@ -295,7 +225,6 @@ const ContentCard: React.FC<{
     post: Post,
     replyTo?: { id: string; content: string; name: string }
   ) => void;
-  handleLikeComment: (commentId: string) => void;
   user: UserData;
   deletePost: (post: string) => void;
   pallate: Pallate;
@@ -305,7 +234,6 @@ const ContentCard: React.FC<{
   user,
   userLiked,
   handleComment,
-  handleLikeComment,
   pallate,
 }) => {
   const [isLiked, setIsLiked] = useState(userLiked);
@@ -392,7 +320,7 @@ const ContentCard: React.FC<{
                   {item.owner === user.id && (
                     <button
                       onClick={handleDeleteClick}
-                      className="block w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100 hover:text-red-700 flex items-center justify-center"
+                      className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100 hover:text-red-700 flex items-center justify-center"
                       role="menuitem"
                     >
                       <Trash2 className="w-4 h-4 ml-2" />
@@ -401,7 +329,7 @@ const ContentCard: React.FC<{
                   )}
                   <button
                     onClick={handleShare}
-                    className="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center justify-center"
+                    className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center justify-center"
                     role="menuitem"
                   >
                     <Share2 className="w-4 h-4 ml-2" />
@@ -447,7 +375,6 @@ const ContentCard: React.FC<{
           onAddComment={(content, replyTo) =>
             handleComment(content, item, replyTo)
           }
-          onLikeComment={(commentId) => handleLikeComment(commentId)}
           currentUser={user}
         />
       </div>
@@ -464,7 +391,6 @@ function NewContentFeed({
   content,
   handleDelete,
   handleComment,
-  handleLikeComment,
   user,
   pallate,
 }: {
@@ -475,7 +401,6 @@ function NewContentFeed({
     post: Post,
     replyTo?: { id: string; content: string; name: string }
   ) => void;
-  handleLikeComment: (commentId: string) => void;
   handleDelete: (post: string) => void;
   pallate: Pallate;
 }) {
@@ -487,7 +412,6 @@ function NewContentFeed({
       {content.map((item) => (
         <ContentCard
           handleComment={handleComment}
-          handleLikeComment={handleLikeComment}
           user={user}
           userLiked={user.likes.includes(item.id)}
           deletePost={handleDelete}
@@ -752,7 +676,7 @@ const CreatePost = ({
         <div className="mt-4 flex justify-end">
           <button
             type="submit"
-            className="bg-gradient-to-r from-green-400 to-green-500 to-green-600 text-white font-bold px-6 py-2 rounded-full hover:opacity-90 transition-opacity duration-200 text-sm flex items-center shadow-md"
+            className="bg-gradient-to-r from-green-400 to-green-600 text-white font-bold px-6 py-2 rounded-full hover:opacity-90 transition-opacity duration-200 text-sm flex items-center shadow-md"
           >
             <Send className="w-4 h-4 ml-2" />
             פרסם
@@ -836,25 +760,15 @@ function App() {
   const handleComment = (
     message: string,
     post: Post,
-    replyTo?: { id: string; content: string; name: string }
   ) => {
     if (!user) {
       return;
     }
     const newComment: Comment = {
-      id: Date.now().toString(),
       message,
       name: user.name,
       icon: user.icon,
       timestamp: Timestamp.now(),
-      likes: [],
-      replyTo: replyTo
-        ? {
-            id: replyTo.id,
-            content: replyTo.content,
-            name: replyTo.name,
-          }
-        : undefined,
     };
 
     const updatedPosts = posts?.map((p) => {
@@ -870,35 +784,6 @@ function App() {
       if (updatedPost) {
         updatePost(updatedPost);
       }
-    }
-  };
-
-  const handleLikeComment = (commentId: string) => {
-    if (!user) return;
-    const updatedPosts = posts?.map((post) => {
-      const updateCommentLikes = (comments: Comment[]): Comment[] => {
-        return comments.map((comment) => {
-          if (comment.id === commentId) {
-            const likes = comment.likes || [];
-            const userIndex = likes.indexOf(user.id);
-            if (userIndex === -1) {
-              likes.push(user.id);
-            } else {
-              likes.splice(userIndex, 1);
-            }
-            return { ...comment, likes };
-          }
-          return comment;
-        });
-      };
-      return { ...post, comments: updateCommentLikes(post.comments) };
-    });
-    setPosts(updatedPosts);
-    const updatedPost = updatedPosts?.find((p) =>
-      p.comments.some((c) => c.id === commentId)
-    );
-    if (updatedPost) {
-      updatePost(updatedPost);
     }
   };
 
@@ -920,7 +805,6 @@ function App() {
             <NewContentFeed
               pallate={pallate}
               handleComment={handleComment}
-              handleLikeComment={handleLikeComment}
               user={user}
               handleDelete={handleDelete}
               content={posts.sort(

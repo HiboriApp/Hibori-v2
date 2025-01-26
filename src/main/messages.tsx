@@ -20,7 +20,7 @@ const ChatList: React.FC<{
   selectedChat: string | null
   pallate: Pallate
   user: UserData
-}> = ({ chats, onSelectChat, selectedChat, pallate, user }) => {
+}> = ({ chats, onSelectChat, selectedChat, user }) => {
   return (
     <div className="flex-grow overflow-y-auto">
       {chats.map((chat) => {
@@ -98,7 +98,7 @@ const MessageComponent: React.FC<{
   onDelete: (messageId: string) => void
   onReply: (messageId: string) => void
   replyingTo?: Message
-}> = ({ message, chatter, isSent, pallate, onEdit, onDelete, onReply, replyingTo }) => {
+}> = ({ message, chatter, isSent, onEdit, onDelete, onReply, replyingTo }) => {
   const [showOptions, setShowOptions] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -183,7 +183,7 @@ const InputArea: React.FC<{
   onCancelReply: () => void
   editingMessage: Message | null
   onCancelEdit: () => void
-}> = ({ onSendMessage, pallate, replyingTo, onCancelReply, editingMessage, onCancelEdit }) => {
+}> = ({ onSendMessage, replyingTo, onCancelReply, editingMessage, onCancelEdit }) => {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -245,7 +245,7 @@ const ProfileInfo: React.FC<{
   chatter: UserData | UserData | undefined
   onClose: () => void
   pallate: Pallate
-}> = ({ chat, onClose, chatter, pallate }) => {
+}> = ({ chat, onClose, chatter  }) => {
   const [showAllMembers, setShowAllMembers] = useState(false)
   const [members, setMembers] = useState<UserData[] | UserData | undefined>()
   
@@ -321,7 +321,6 @@ const ChatArea: React.FC<{
 }> = ({ messages, onSendMessage, user, chatter, selectedChat, onBackClick, onProfileClick, pallate }) => {
   const [replyingTo, setReplyingTo] = useState<Message | null>(null)
   const [editingMessage, setEditingMessage] = useState<Message | null>(null)
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   
@@ -361,22 +360,6 @@ const ChatArea: React.FC<{
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
-
-  useEffect(() => {
-    const checkScrollPosition = () => {
-      if (scrollContainerRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current
-        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 20
-        setShowScrollToBottom(!isAtBottom)
-      }
-    }
-
-    const scrollContainer = scrollContainerRef.current
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', checkScrollPosition)
-      return () => scrollContainer.removeEventListener('scroll', checkScrollPosition)
-    }
-  }, [])
 
   useEffect(() => {
     scrollToBottom()
@@ -430,13 +413,13 @@ const ChatArea: React.FC<{
       </div>
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-      <video
+      {/*<video
         src="/5f5bffb7-8754-4cd0-9d04-151adb9370e6 (1).mp4"
         className="h-full w-full object-cover"
         autoPlay
         loop       
         playsInline
-      />
+      />*/}
     </div>
       {/* Input Area */}
       <div className="flex-shrink-0 z-10">
@@ -552,6 +535,7 @@ const App: React.FC = () => {
         id: openChatName(user.id, id),
       }
       const createdChat = await setChat(newChat)
+      if (!createdChat){return;}
       setOpenedChats([...openedChats, createdChat])
       const chatters = await getUsersById(createdChat.person)
       setSelectedChat(createdChat)

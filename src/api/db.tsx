@@ -103,7 +103,7 @@ export interface Message{
     timestamp: Timestamp, 
     content: string, 
     sender: string,
-    reply?: number,
+    reply?: string,
     id: string,
     isEdited?: boolean,
     isDeleted?: boolean
