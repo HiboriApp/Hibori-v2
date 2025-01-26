@@ -193,8 +193,8 @@ export default function SettingsPage() {
         setPFP(userData.icon)
         setHasProfileImage(true)
       }
-      if (userData.colors) {
-        setColors(userData.colors)
+      if (userData.pallate) {
+        setColors(userData.pallate)
       }
     }
     fetchData()
