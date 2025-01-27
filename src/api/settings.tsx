@@ -1,21 +1,23 @@
 export interface Pallate {
-    primary: string
-    secondary: string
-    tertiary: string
-    background: string
-    text: string
+  primary: string
+  secondary: string
+  tertiary: string
+  background: string
+  text: string
+  main: string
+}
+
+export function DefaultPallate(): Pallate {
+  return {
+    primary: '#3b82f6',
+    secondary: '#f3f4f6',
+    tertiary: '#f1f5f9',
+    text: '#F3F6FFFF',
+    background: '#0D1620FF',
+    main: '#0D1620FF',
   }
-  
-  export function DefaultPallate(): Pallate {
-    return {
-      primary: '#3b82f6',
-      secondary: '#f3f4f6',
-      tertiary: '#f1f5f9',
-      text: '#111827',
-      background: '#f1f5f9',
-    }
-  }
-  
+}
+
   
 
 export async function SetPallate(pallate: Pallate){
