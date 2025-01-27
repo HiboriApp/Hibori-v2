@@ -1,3 +1,5 @@
+import { UserData } from "./db"
+
 export interface Pallate {
   primary: string
   secondary: string
@@ -25,7 +27,7 @@ export async function SetPallate(pallate: Pallate){
     return pallate;
 }
 
-export async function GetPallate() : Promise<Pallate> {
-    return DefaultPallate();
+export async function GetPallate(user: UserData) : Promise<Pallate> {
+    return user.pallate;
 }
 

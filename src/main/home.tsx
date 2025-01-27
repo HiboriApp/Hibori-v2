@@ -615,7 +615,6 @@ function App() {
   const [messages, setMessages] = useState<{ chat: ChatWrapper; user: string }[]>([])
   const [posts, setPosts] = useState<Post[] | undefined>()
   const postsLimit = 10
-
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -632,12 +631,12 @@ function App() {
       const { chats, friends } = await getChats(userData)
       setMessages(chats.map((message, i) => ({ chat: message, user: friends[i] })))
       setPosts(postsData)
-      const pallateData = await GetPallate()
+      const pallateData = await GetPallate(userData)
+      console.log(pallateData);
       setPallate(pallateData)
       return postsListener(setPosts, postsLimit)
     }
     fetchData()
-
     const unsubscribe = userListener(async (user) => {
       setUser(user)
       const friendsData = await getUsersById(user.friends)
@@ -645,7 +644,7 @@ function App() {
     })
     return unsubscribe
   }, [navigate])
-
+  console.log(pallate.primary);
   const handleDelete = (id: string) => {
     if (!user) {
       return

@@ -161,13 +161,13 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
 
   useEffect(() => {
     async function fetchData() {
-      const newPalette = await GetPallate()
-      setPalette(newPalette)
       const userData = await getUser()
       if (!userData) {
         navigate("/")
         return
       }
+      const newPalette = await GetPallate(userData)
+      setPalette(newPalette)
       setUser(userData)
     }
     fetchData()
