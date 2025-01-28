@@ -53,10 +53,11 @@ export async function updatePallate(user: UserData, newPallate: Pallate){
     return setDoc(doc(db, "users", user.id), {newPallate}, {merge: true});
 }
 
-export async function getUser(){
+export async function getUser(): Promise<UserData | undefined>{
     if (!auth.currentUser) return;
     const user = await getDoc(doc(db, "users", auth.currentUser.uid));
-    return user.data() as UserData;
+    const data = user.data() as UserData;
+    return {...data, pallate: data.pallate || DefaultPallate()};
 }
 
 export async function addFriend(user: UserData, friend: string){

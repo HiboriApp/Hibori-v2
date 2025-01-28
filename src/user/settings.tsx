@@ -99,8 +99,9 @@ function ColorPaletteSettings({
 
   return (
     <div className="space-y-4">
-      {Object.entries(colors).map(([colorType, colorValue]) => (
-        <div key={colorType}>
+      {Object.entries(colors).map(([colorType, colorValue]) => {
+        console.log(colorType, ", ", colorValue);
+        return <div key={colorType}>
           <label htmlFor={`color-${colorType}`} className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
             {colorType.charAt(0).toUpperCase() + colorType.slice(1)}
           </label>
@@ -110,7 +111,7 @@ function ColorPaletteSettings({
               id={`color-${colorType}`}
               value={colorValue}
               onChange={(e) => handleColorChange(colorType as keyof Pallate, e.target.value)}
-              className="h-8 w-8 border-none rounded-full overflow-hidden"
+              className="h-8 w-8 rounded-full overflow-hidden"
             />
             <input
               type="text"
@@ -121,7 +122,7 @@ function ColorPaletteSettings({
             />
           </div>
         </div>
-      ))}
+    })}
       <button
         onClick={() => onSave(colors)}
         className="px-4 py-2 rounded-lg transition-colors duration-200"
