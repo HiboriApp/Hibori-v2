@@ -632,7 +632,6 @@ function App() {
       setMessages(chats.map((message, i) => ({ chat: message, user: friends[i] })))
       setPosts(postsData)
       const pallateData = await GetPallate(userData)
-      console.log(pallateData);
       setPallate(pallateData)
       return postsListener(setPosts, postsLimit)
     }
@@ -644,7 +643,6 @@ function App() {
     })
     return unsubscribe
   }, [navigate])
-  console.log(pallate.primary);
   const handleDelete = (id: string) => {
     if (!user) {
       return

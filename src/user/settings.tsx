@@ -100,7 +100,6 @@ function ColorPaletteSettings({
   return (
     <div className="space-y-4">
       {Object.entries(colors).map(([colorType, colorValue]) => {
-        console.log(colorType, ", ", colorValue);
         return <div key={colorType}>
           <label htmlFor={`color-${colorType}`} className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
             {colorType.charAt(0).toUpperCase() + colorType.slice(1)}
