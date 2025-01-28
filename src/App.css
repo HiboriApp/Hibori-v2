@@ -24,15 +24,6 @@
     }
   }
 
-  .animate-gradient-text {
-    animation: gradient-text 4s ease infinite;
-    background: linear-gradient(to right, #4ade80, #22c55e, #16a34a);
-    background-size: 200% auto;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
   @keyframes gradient-text {
     0% {
       background-position: 0% 50%;

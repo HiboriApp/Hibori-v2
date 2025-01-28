@@ -6,22 +6,33 @@ import { Layout } from "../components/layout"
 import { getUser, getUsersById, openChatName, removeFriend, type UserData } from "../api/db"
 import SuperSillyLoading from "../components/Loading"
 import { Avatar } from "../api/icons"
+import { DefaultPallate, GetPallate, type Pallate } from "../api/settings"
 
 const FriendCard: React.FC<{
   friend: UserData
   user: UserData
   onMessage: (person: UserData) => void
   onRemove: (id: string) => void
-}> = ({ friend, onMessage, user, onRemove }) => {
+  pallate: Pallate
+}> = ({ friend, onMessage, user, onRemove, pallate }) => {
   const mutualFriends = user.friends.filter((f) => friend.friends.includes(f)).length
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
+    <div
+      className="rounded-lg shadow-md p-4 flex items-center justify-between"
+      style={{ backgroundColor: pallate.main }}
+    >
       <div className="flex items-center space-x-4 gap-3">
         <Avatar icon={friend.icon} className="w-12 h-12 rounded-full object-cover" />
         <div className="ml-4">
-          <h3 className="font-semibold text-lg text-gray-800">{friend.name}</h3>
-          <p className="text-sm text-gray-500">{friend.lastOnline.toDate() > new Date() ? "מחובר" : "לא מחובר"}</p>
-          <p className="text-xs text-gray-400">{mutualFriends} חברים משותפים</p>
+          <h3 className="font-semibold text-lg" style={{ color: pallate.text }}>
+            {friend.name}
+          </h3>
+          <p className="text-sm" style={{ color: pallate.text }}>
+            {friend.lastOnline.toDate() > new Date() ? "מחובר" : "לא מחובר"}
+          </p>
+          <p className="text-xs" style={{ color: pallate.text }}>
+            {mutualFriends} חברים משותפים
+          </p>
         </div>
       </div>
       <div className="flex items-center space-x-2">
@@ -40,13 +51,17 @@ const ConfirmationPopup: React.FC<{
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
+  pallate: Pallate
   friendName: string
-}> = ({ isOpen, onClose, onConfirm, friendName }) => {
+}> = ({ isOpen, onClose, onConfirm, friendName, pallate }) => {
   if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+      <div
+        className="rounded-lg p-6 max-w-sm w-full mx-4"
+        style={{ backgroundColor: pallate.main, color: pallate.text }}
+      >
         <h2 className="text-xl font-bold mb-4 text-gray-800">הסרת חבר</h2>
         <p className="mb-6 text-gray-800">האם אתה בטוח שברצונך להסיר את {friendName} מרשימת החברים שלך?</p>
         <div className="flex justify-end space-x-4">
@@ -66,6 +81,7 @@ const ConfirmationPopup: React.FC<{
 const FriendsPage: React.FC = () => {
   const [user, setUser] = useState<UserData | null>(null)
   const [friends, setFriends] = useState<UserData[]>()
+  const [pallate, setPallate] = useState<Pallate>(DefaultPallate())
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -76,6 +92,7 @@ const FriendsPage: React.FC = () => {
         return
       }
       setUser(userData)
+      setPallate(GetPallate(userData))
       setFriends(await getUsersById(userData.friends))
     }
     fetchData()
@@ -126,11 +143,18 @@ const FriendsPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen mb-14 md:mb-0 p-8 rtl bg-gray-100" dir="rtl">
+      <div
+        className="min-h-screen mb-14 md:mb-0 p-8 rtl"
+        dir="rtl"
+        style={{ color: pallate.text, backgroundColor: pallate.background }}
+      >
         <div className="max-w-3xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-gray-800">החברים שלי</h1>
-            <button className="group relative overflow-hidden rounded-full bg-gradient-to-r from-green-500 to-green-600 shadow-md transition-all duration-300 hover:shadow-lg">
+            <button
+              className="group relative overflow-hidden rounded-full shadow-md transition-all duration-300 hover:shadow-lg"
+              style={{ backgroundColor: pallate.primary }}
+            >
               <Link
                 to="/addfriends"
                 className="relative z-10 flex items-center space-x-2 px-6 py-3 text-white transition-colors duration-300 group-hover:text-white"
@@ -162,7 +186,12 @@ const FriendsPage: React.FC = () => {
             <input
               type="text"
               placeholder="חפש חברים..."
-              className="w-full p-3 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 pr-10 rounded-full border focus:outline-none focus:ring-2"
+              style={{
+                backgroundColor: pallate.main,
+                color: pallate.text,
+                borderColor: pallate.secondary,
+              }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -177,6 +206,7 @@ const FriendsPage: React.FC = () => {
                 user={user}
                 onMessage={handleMessage}
                 onRemove={handleRemoveFriend}
+                pallate={pallate}
               />
             ))}
           </div>
@@ -187,6 +217,7 @@ const FriendsPage: React.FC = () => {
           onClose={() => setConfirmRemove({ isOpen: false, friendId: null, friendName: "" })}
           onConfirm={confirmRemoveFriend}
           friendName={confirmRemove.friendName}
+          pallate={pallate}
         />
       </div>
     </Layout>

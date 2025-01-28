@@ -5,6 +5,7 @@ import { Avatar, type Icon, IconType } from "../api/icons"
 import Loading from "../components/Loading"
 import { useNavigate } from "react-router-dom"
 import Layout from "../components/layout"
+import { DefaultPallate } from "../api/settings"
 
 export interface Pallate {
   primary: string
@@ -13,17 +14,6 @@ export interface Pallate {
   background: string
   text: string
   main: string
-}
-
-export function DefaultPallate(): Pallate {
-  return {
-    primary: '#3b82f6',
-    secondary: '#f3f4f6',
-    tertiary: '#f1f5f9',
-    text: '#F3F6FFFF',
-    background: '#0D1620FF',
-    main: '#0D1620FF',
-  }
 }
 
 // VideoSettings Component
@@ -122,13 +112,22 @@ function ColorPaletteSettings({
           </div>
         </div>
     })}
-      <button
+    <div className="h-full flex">
+    <button
         onClick={() => onSave(colors)}
         className="px-4 py-2 rounded-lg transition-colors duration-200"
         style={{ backgroundColor: colors.tertiary, color: colors.text }}
       >
         שמור הגדרות צבעים
       </button>
+      <button
+        onClick={() => onSave(DefaultPallate())}
+        className="px-4 py-2 rounded-lg transition-colors duration-200 mr-auto"
+        style={{ backgroundColor: colors.tertiary, color: colors.text }}
+      >
+        אתחול הצבעים
+      </button>
+    </div>
     </div>
   )
 }

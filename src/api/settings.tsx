@@ -27,7 +27,7 @@ export async function SetPallate(pallate: Pallate){
     return pallate;
 }
 
-export async function GetPallate(user: UserData) : Promise<Pallate> {
-    return user.pallate;
+export function GetPallate(user: UserData) : Pallate {
+    return user.pallate || DefaultPallate();
 }
 
