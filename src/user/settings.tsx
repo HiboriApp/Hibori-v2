@@ -164,7 +164,7 @@ export default function SettingsPage() {
     }
   }
 
-  const handleVideoUpload = async (file: File) => {
+  const handleVideoUpload = async (_file: File) => {
     if (user) {
       setUser({
         ...user,
