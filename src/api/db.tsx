@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, setDoc, Timestamp, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, setDoc, startAt, Timestamp, where } from "firebase/firestore";
 import { DefaultPallate, Pallate } from "./settings";
 import { auth, db } from "./firebase";
 import { User } from "firebase/auth";
@@ -223,10 +223,12 @@ export interface Post{
     owner: string
 }
 
-export async function getPosts(count?: number | undefined){
+export async function getPosts(start?: number, count?: number| undefined){
     if (!auth.currentUser) return;
     if (!count){return (await getDocs(query(collection(db, "posts")))).docs.map((doc) => doc.data() as Post);}
-    else {return (await (getDocs(query(collection(db, "posts"), limit(count))))).docs.map((doc) => doc.data() as Post);}
+    else {
+        return (await (getDocs(query(collection(db, "posts"), limit(count), orderBy("timestamp", "desc"), startAt(start || 0))))).docs.map((doc) => doc.data() as Post);
+    }
 }
 
 export async function postStuff(post: Post){

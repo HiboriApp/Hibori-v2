@@ -353,18 +353,20 @@ function NewContentFeed({
   handleComment,
   user,
   pallate,
+  handleBottom
 }: {
   content: Post[]
   user: UserData
   handleComment: (content: string, post: Post, replyTo?: { id: string; content: string; name: string }) => void
   handleDelete: (post: string) => void
   pallate: Pallate
+  handleBottom: () => void
 }) {
   if (content.length === 0) {
     return <LoadingSpinner />
   }
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" ref={(node) => {if (node) node.onscrollend = () => handleBottom()}}>
       {content.map((item) => (
         <ContentCard
           handleComment={handleComment}
@@ -627,7 +629,7 @@ function App() {
       setUser(userData)
       const friendsData = await getUsersById(userData.friends)
       setFriends(friendsData)
-      const postsData = await getPosts(postsLimit)
+      const postsData = await getPosts(0, postsLimit)
       const { chats, friends } = await getChats(userData)
       setMessages(chats.map((message, i) => ({ chat: message, user: friends[i] })))
       setPosts(postsData)
@@ -710,6 +712,7 @@ function App() {
             <NewContentFeed
               pallate={pallate}
               handleComment={handleComment}
+              handleBottom={() => getPosts(posts.length, posts.length + postsLimit)}
               user={user}
               handleDelete={handleDelete}
               content={posts.sort((a, b) => b.timestamp.toDate().getTime() - a.timestamp.toDate().getTime())}
