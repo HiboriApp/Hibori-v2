@@ -46,6 +46,7 @@ export interface UserData{
     friends: string[]
     lastOnline: Timestamp
     wantsNotifications: boolean
+    background: string | undefined
 }
 
 export async function updatePallate(user: UserData, newPallate: Pallate){
@@ -181,6 +182,7 @@ export async function CreateUser(name: string, user: User, email: string){
         friends: [],
         wantsNotifications: true,
         lastOnline: Timestamp.fromDate(new Date()),
+        background: undefined
     };
     await setUser(data);
     return true;

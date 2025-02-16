@@ -533,6 +533,7 @@ const CreatePost = ({
     setContent("")
     setFile(undefined)
   }
+  
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: fileType) => {
     const file = e.target.files?.[0]
@@ -568,7 +569,7 @@ const CreatePost = ({
                 <ImageIcon size={20} />
               </label>
               <label className="cursor-pointer text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2">
-                <input type="file" accept="video/*" className="hidden" />
+                <input type="file" accept="video/*" className="hidden" onChange={(file) => handleImageUpload(file, fileType.video)} />
                 <Video size={20} />
               </label>
               <button

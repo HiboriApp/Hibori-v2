@@ -6,6 +6,7 @@ import Loading from "../components/Loading"
 import { useNavigate } from "react-router-dom"
 import Layout from "../components/layout"
 import { DefaultPallate } from "../api/settings"
+import { uploadString } from "../api/cloudinary"
 
 export interface Pallate {
   primary: string
@@ -155,21 +156,27 @@ export default function SettingsPage() {
         return
       }
       const reader = new FileReader()
-      reader.onload = () => {
+      reader.onload = async () => {
         const icon = reader.result as string
-        setPFP({ type: IconType.image, content: icon })
+        setPFP({ type: IconType.image, content: await uploadString(icon) })
         setHasProfileImage(true)
       }
       reader.readAsDataURL(file)
     }
   }
 
-  const handleVideoUpload = async (_file: File) => {
+  const handleVideoUpload = async (file: File) => {
+    if (file && user){
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const video = reader.result as string;
+        setUser({
+          ...user,
+          background: await uploadString(video),
+        });
+      }
+    }
     if (user) {
-      setUser({
-        ...user,
-        // videoFileName: file.name,
-      })
     }
   }
 
