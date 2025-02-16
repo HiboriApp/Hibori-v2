@@ -5,13 +5,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyA7oCGybecfh554ctxG5mGTYNZIDw5PrQg",
-    authDomain: "hibori-complete.firebaseapp.com",
-    projectId: "hibori-complete",
-    storageBucket: "hibori-complete.firebasestorage.app",
-    messagingSenderId: "962226487196",
-    appId: "1:962226487196:web:77676f622a945c04fb1259",
-    measurementId: "G-7T2BCH97TR"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_APP_ID,
+    measurementId: import.meta.env.VITE_MEASUREMENT_ID
   };
   
   
