@@ -42,6 +42,7 @@ import SuperSillyLoading from "../components/Loading"
 import { Avatar } from "../api/icons"
 import { Timestamp } from "firebase/firestore"
 import { type Pallate, DefaultPallate, GetPallate } from "../api/settings"
+import { uploadString } from "../api/cloudinary"
 
 function LoadingSpinner() {
   return (
@@ -538,9 +539,9 @@ const CreatePost = ({
     if (file) {
       const fileName = file.name
       const reader = new FileReader()
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const file = reader.result as string
-        setFile({ type, content: file, name: fileName } as UploadedFile)
+        setFile({ type, content: await uploadString(file), name: fileName } as UploadedFile)
       }
       reader.readAsDataURL(file)
     }
