@@ -35,13 +35,11 @@ import { useNavigate, useParams } from "react-router-dom"
 import { GetPallate, type Pallate } from "../api/settings"
 import { chatsListener } from "../api/listeners"
 
-// --- Helper Function to Truncate Text ---
 const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text
   return text.slice(0, maxLength) + "..."
 }
 
-// --- Custom CSS for shake animation ---
 const globalStyles = `
 @keyframes shake {
   0% { transform: translateX(0); }
@@ -57,12 +55,10 @@ if (typeof document !== "undefined") {
   document.head.appendChild(styleEl)
 }
 
-// Helper function to format time.
 const formatTime = (date: Date) => {
   return date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })
 }
 
-// ChatList Component
 const ChatList: React.FC<{
   chats: ChatWrapper[]
   onSelectChat: (id: string) => void
@@ -153,7 +149,6 @@ const ChatList: React.FC<{
   )
 }
 
-// MessageComponent with updated event handlers for long press on both touch and desktop.
 const MessageComponent: React.FC<{
   message: Message
   chatter: UserData | undefined
@@ -167,25 +162,21 @@ const MessageComponent: React.FC<{
   const [showOptions, setShowOptions] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Start long press timer (works for both touch and mouse events)
   const startTimer = () => {
     timeoutRef.current = setTimeout(() => {
       setShowOptions(true)
     }, 500)
   }
-
   const clearTimer = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
   }
-
   const copyMessage = () => {
     if (!message.isDeleted) {
       navigator.clipboard.writeText(message.content)
     }
   }
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (showOptions && !(event.target as Element).closest(".message-container")) {
@@ -195,7 +186,6 @@ const MessageComponent: React.FC<{
     document.addEventListener("click", handleClickOutside)
     return () => document.removeEventListener("click", handleClickOutside)
   }, [showOptions])
-
   return (
     <div className={`mb-4 ${isSent ? "mr-auto" : "ml-auto"} relative`} style={{ userSelect: "none" }}>
       <div
@@ -289,7 +279,6 @@ const MessageComponent: React.FC<{
   )
 }
 
-// InputArea with auto-resizing textarea and enhanced reply preview (with "X" on the far right).
 const InputArea: React.FC<{
   onSendMessage: (content: string) => void
   pallate: Pallate
@@ -378,7 +367,7 @@ const InputArea: React.FC<{
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={editingMessage ? "ערוך הודעה..." : "הקלד הודעה..."}
-          className="flex-grow p-3 bg-gray-100 rounded-full text-right focus:outline-none resize-none overflow-hidden"
+          className="flex-grow p-3 bg-gray-100 rounded-xl text-right focus:outline-none resize-none overflow-hidden"
           style={{ color: pallate.text }}
         />
         <button type="submit" style={{ color: pallate.primary }} className="ml-2 mr-2">
@@ -389,7 +378,6 @@ const InputArea: React.FC<{
   )
 }
 
-// ProfileInfo Component
 const ProfileInfo: React.FC<{
   chat: Chat
   chatter: UserData | undefined
@@ -462,7 +450,6 @@ const ProfileInfo: React.FC<{
   )
 }
 
-// ChatArea Component
 const ChatArea: React.FC<{
   messages: Message[]
   onSendMessage: (content: string, replyToOrEdit?: string) => void
@@ -508,7 +495,6 @@ const ChatArea: React.FC<{
   }, [messages])
   return (
     <div className="flex flex-col h-full min-h-0 chat-area relative" style={{ backgroundColor: pallate.background }}>
-      {/* Header */}
       <div
         className="p-4 flex items-center justify-between border-b flex-shrink-0 z-10"
         style={{ backgroundColor: `${pallate.background}CC`, borderColor: pallate.secondary }}
@@ -536,7 +522,6 @@ const ChatArea: React.FC<{
           )}
         </div>
       </div>
-      {/* Messages */}
       <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 relative z-10">
         {messages.map((message) => (
           <MessageComponent
@@ -553,7 +538,6 @@ const ChatArea: React.FC<{
         ))}
         <div ref={messagesEndRef} />
       </div>
-      {/* Input Area */}
       <div className="flex-shrink-0 z-10">
         <InputArea
           onSendMessage={handleSendMessage}
@@ -575,7 +559,6 @@ const ChatArea: React.FC<{
   )
 }
 
-// Main App component
 const App: React.FC = () => {
   const { id } = useParams()
   const [selectedChatId, setSelectedChatId] = useState<string | null>(id || null)
