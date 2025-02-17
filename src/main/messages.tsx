@@ -92,11 +92,7 @@ const ChatList: React.FC<{
             onClick={() => onSelectChat(chat.id)}
           >
             <div className="flex-shrink-0">
-              <Avatar
-                icon={chatter.icon}
-                isOnline={chatter.lastOnline.toDate() > new Date()}
-                className="w-12 h-12 rounded-full object-cover"
-              />
+              <Avatar icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className="w-12 h-12 rounded-full object-cover" />
             </div>
             <div className="flex-grow min-w-0">
               <div className="flex justify-between items-baseline">
@@ -128,11 +124,7 @@ const ChatList: React.FC<{
             onClick={() => onSelectChat(chatter.id)}
           >
             <div className="flex-shrink-0">
-              <Avatar
-                icon={chatter.icon}
-                isOnline={chatter.lastOnline.toDate() > new Date()}
-                className="w-12 h-12 rounded-full object-cover"
-              />
+              <Avatar icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className="w-12 h-12 rounded-full object-cover" />
             </div>
             <div className="flex-grow min-w-0">
               <div className="flex justify-between items-baseline">
@@ -161,7 +153,6 @@ const MessageComponent: React.FC<{
 }> = ({ message, chatter, isSent, pallate, onEdit, onDelete, onReply, replyingTo }) => {
   const [showOptions, setShowOptions] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-
   const startTimer = () => {
     timeoutRef.current = setTimeout(() => {
       setShowOptions(true)
@@ -233,7 +224,7 @@ const MessageComponent: React.FC<{
             )}
             <div>
               {message.isDeleted ? (
-                <span className="italic text-gray-500">[ההודעה נמחקה]</span>
+                <span className={`italic ${isSent ? "text-white" : "text-gray-500"}`}>[ההודעה נמחקה]</span>
               ) : (
                 message.content
               )}
@@ -328,12 +319,7 @@ const InputArea: React.FC<{
               {truncateText(replyingTo.content, 50)}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onCancelReply}
-            style={{ color: pallate.secondary }}
-            className="ml-auto"
-          >
+          <button type="button" onClick={onCancelReply} style={{ color: pallate.secondary }} className="ml-auto">
             <X size={16} />
           </button>
         </div>
@@ -505,11 +491,7 @@ const ChatArea: React.FC<{
           </button>
           {selectedChat && (
             <div className="flex items-center cursor-pointer" onClick={() => onProfileClick(selectedChat.id)}>
-              <Avatar
-                className="w-10 h-10"
-                icon={selectedChat.icon || otherUser.icon}
-                isOnline={otherUser.lastOnline.toDate() > new Date()}
-              />
+              <Avatar className="w-10 h-10" icon={selectedChat.icon || otherUser.icon} isOnline={otherUser.lastOnline.toDate() > new Date()} />
               <div className="mr-3">
                 <h2 className="font-semibold" style={{ color: pallate.text }}>
                   {selectedChat.name}
