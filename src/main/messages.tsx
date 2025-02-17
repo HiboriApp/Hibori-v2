@@ -153,7 +153,7 @@ const ChatList: React.FC<{
   )
 }
 
-// MessageComponent with tooltip and restrictions.
+// MessageComponent with updated event handlers for long press on both touch and desktop.
 const MessageComponent: React.FC<{
   message: Message
   chatter: UserData | undefined
@@ -167,19 +167,25 @@ const MessageComponent: React.FC<{
   const [showOptions, setShowOptions] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const handleTouchStart = () => {
+  // Start long press timer (works for both touch and mouse events)
+  const startTimer = () => {
     timeoutRef.current = setTimeout(() => {
       setShowOptions(true)
     }, 500)
   }
-  const handleTouchEnd = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+
+  const clearTimer = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
   }
+
   const copyMessage = () => {
     if (!message.isDeleted) {
       navigator.clipboard.writeText(message.content)
     }
   }
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (showOptions && !(event.target as Element).closest(".message-container")) {
@@ -189,19 +195,19 @@ const MessageComponent: React.FC<{
     document.addEventListener("click", handleClickOutside)
     return () => document.removeEventListener("click", handleClickOutside)
   }, [showOptions])
+
   return (
-    <div
-      className={`mb-4 ${isSent ? "mr-auto" : "ml-auto"} relative`}
-      style={{ userSelect: "none" }}
-    >
+    <div className={`mb-4 ${isSent ? "mr-auto" : "ml-auto"} relative`} style={{ userSelect: "none" }}>
       <div
         className={`flex items-start ${isSent ? "flex-row-reverse" : "flex-row"}`}
+        onTouchStart={startTimer}
+        onTouchEnd={clearTimer}
+        onMouseDown={startTimer}
+        onMouseUp={clearTimer}
+        onMouseLeave={clearTimer}
         style={showOptions ? { animation: "shake 0.5s" } : undefined}
       >
-        <Avatar
-          icon={chatter ? chatter.icon : unknownIcon()}
-          className={`w-10 h-10 ${isSent ? "ml-3" : "mr-3"}`}
-        />
+        <Avatar icon={chatter ? chatter.icon : unknownIcon()} className={`w-10 h-10 ${isSent ? "ml-3" : "mr-3"}`} />
         <div className={`flex flex-col ${isSent ? "items-end" : "items-start"}`}>
           <span className="text-xs font-semibold mb-1" style={{ color: pallate.text }}>
             {chatter?.name}
@@ -217,8 +223,11 @@ const MessageComponent: React.FC<{
               overflowWrap: "break-word",
               wordBreak: "break-word",
             }}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
+            onTouchStart={startTimer}
+            onTouchEnd={clearTimer}
+            onMouseDown={startTimer}
+            onMouseUp={clearTimer}
+            onMouseLeave={clearTimer}
           >
             {replyingTo && (
               <div
@@ -234,7 +243,7 @@ const MessageComponent: React.FC<{
             )}
             <div>
               {message.isDeleted ? (
-                <span className="italic text-white">[ההודעה נמחקה]</span>
+                <span className="italic text-gray-500">[ההודעה נמחקה]</span>
               ) : (
                 message.content
               )}
@@ -280,7 +289,7 @@ const MessageComponent: React.FC<{
   )
 }
 
-// InputArea with an auto-resizing textarea and enhanced reply preview.
+// InputArea with auto-resizing textarea and enhanced reply preview (with "X" on the far right).
 const InputArea: React.FC<{
   onSendMessage: (content: string) => void
   pallate: Pallate
@@ -314,8 +323,10 @@ const InputArea: React.FC<{
     <form onSubmit={handleSubmit} className="flex flex-col border-t" style={{ borderColor: pallate.secondary }}>
       {replyingTo && replyingToUser && (
         <div
-          className="p-2 mb-1 flex items-center rounded-md "
+          className="p-2 mb-1 flex items-center rounded-md"
           style={{
+            backgroundColor: "rgba(255,255,255,0.2)",
+            backdropFilter: "blur(10px)",
             border: `1px solid ${pallate.secondary}`,
           }}
         >
@@ -331,10 +342,10 @@ const InputArea: React.FC<{
           <button
             type="button"
             onClick={onCancelReply}
-            style={{ color: pallate.primary }}
-            className="mr-auto"
+            style={{ color: pallate.secondary }}
+            className="ml-auto"
           >
-            <X size={20} />
+            <X size={16} />
           </button>
         </div>
       )}
