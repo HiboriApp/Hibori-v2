@@ -234,7 +234,7 @@ const MessageComponent: React.FC<{
             )}
             <div>
               {message.isDeleted ? (
-                <span className="italic text-gray-500">[ההודעה נמחקה]</span>
+                <span className="italic text-white">[ההודעה נמחקה]</span>
               ) : (
                 message.content
               )}
