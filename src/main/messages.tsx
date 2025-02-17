@@ -1,6 +1,17 @@
-import type React from "react"
-import { useState, useEffect, useRef } from "react"
-import { ChevronRight, Send, Paperclip, Smile, Search, X, ChevronLeft, Edit, Trash, Reply } from "lucide-react"
+import React, { useState, useEffect, useRef } from "react"
+import {
+  ChevronRight,
+  Send,
+  Paperclip,
+  Smile,
+  Search,
+  X,
+  ChevronLeft,
+  Edit,
+  Trash,
+  Reply,
+  Copy,
+} from "lucide-react"
 import "@szhsin/react-menu/dist/index.css"
 import { Layout } from "../components/layout"
 import SuperSillyLoading from "../components/Loading"
@@ -24,10 +35,34 @@ import { useNavigate, useParams } from "react-router-dom"
 import { GetPallate, type Pallate } from "../api/settings"
 import { chatsListener } from "../api/listeners"
 
+// --- Helper Function to Truncate Text ---
+const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text
+  return text.slice(0, maxLength) + "..."
+}
+
+// --- Custom CSS for shake animation ---
+const globalStyles = `
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+`
+if (typeof document !== "undefined") {
+  const styleEl = document.createElement("style")
+  styleEl.innerHTML = globalStyles
+  document.head.appendChild(styleEl)
+}
+
+// Helper function to format time.
 const formatTime = (date: Date) => {
   return date.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })
 }
 
+// ChatList Component
 const ChatList: React.FC<{
   chats: ChatWrapper[]
   onSelectChat: (id: string) => void
@@ -40,17 +75,18 @@ const ChatList: React.FC<{
       {chats.map((chat) => {
         const [chatter, setChatter] = useState<UserData | null>(null)
         useEffect(() => {
-          if (!chat.person.filter((id) => id != user.id)[0]) {
+          const otherId = chat.person.find((id) => id !== user.id)
+          if (!otherId) {
             console.error("FAILED TO FIND THE SECOND USER")
             return
           }
-          getUserById(chat.person.filter((id) => id != user.id)[0]).then((res) => setChatter(res))
+          getUserById(otherId).then(setChatter)
         }, [])
         if (!chatter) return null
         return (
           <div
             key={chat.id}
-            className={`p-4 flex items-center space-x-4 cursor-pointer transition-colors duration-200 ${
+            className={`p-4 flex items-center space-x-4 cursor-pointer transition-colors duration-200 hover:bg-opacity-30 ${
               selectedChat === chat.id ? "bg-opacity-20" : ""
             }`}
             style={{
@@ -117,6 +153,7 @@ const ChatList: React.FC<{
   )
 }
 
+// MessageComponent with tooltip and restrictions.
 const MessageComponent: React.FC<{
   message: Message
   chatter: UserData | undefined
@@ -135,69 +172,105 @@ const MessageComponent: React.FC<{
       setShowOptions(true)
     }, 500)
   }
-
   const handleTouchEnd = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+  }
+  const copyMessage = () => {
+    if (!message.isDeleted) {
+      navigator.clipboard.writeText(message.content)
     }
   }
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (showOptions && !(event.target as Element).closest(".message-container")) {
         setShowOptions(false)
       }
     }
-
     document.addEventListener("click", handleClickOutside)
-    return () => {
-      document.removeEventListener("click", handleClickOutside)
-    }
+    return () => document.removeEventListener("click", handleClickOutside)
   }, [showOptions])
-
   return (
-    <div className={`mb-4 ${isSent ? "mr-auto" : "ml-auto"} max-w-[80%]`}>
-      <div className={`flex items-start ${isSent ? "flex-row-reverse" : "flex-row"}`}>
-        <Avatar icon={chatter ? chatter.icon : unknownIcon()} className={`w-8 h-8 ${isSent ? "ml-2" : "mr-2"}`} />
+    <div
+      className={`mb-4 ${isSent ? "mr-auto" : "ml-auto"} relative`}
+      style={{ userSelect: "none" }}
+    >
+      <div
+        className={`flex items-start ${isSent ? "flex-row-reverse" : "flex-row"}`}
+        style={showOptions ? { animation: "shake 0.5s" } : undefined}
+      >
+        <Avatar
+          icon={chatter ? chatter.icon : unknownIcon()}
+          className={`w-10 h-10 ${isSent ? "ml-3" : "mr-3"}`}
+        />
         <div className={`flex flex-col ${isSent ? "items-end" : "items-start"}`}>
           <span className="text-xs font-semibold mb-1" style={{ color: pallate.text }}>
             {chatter?.name}
           </span>
           <div
-            className={`message-container min-w-[80px] relative p-3 rounded-lg`}
+            className="message-container relative p-4 rounded-2xl shadow-md transition-all duration-200 break-words"
             style={{
               backgroundColor: isSent ? pallate.primary : pallate.secondary,
               color: isSent ? pallate.background : pallate.text,
+              minWidth: "150px",
+              maxWidth: "80%",
+              minHeight: "50px",
+              overflowWrap: "break-word",
+              wordBreak: "break-word",
             }}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
             {replyingTo && (
-              <div className={`text-xs italic mb-2 p-1 ${isSent ? "bg-blue-600" : "bg-gray-300"} rounded`}>
-                מגיב ל: {replyingTo.content}
+              <div
+                className="text-xs italic mb-2 p-2 rounded-md"
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  backdropFilter: "blur(10px)",
+                  border: `1px solid ${pallate.secondary}`,
+                }}
+              >
+                מגיב ל: {truncateText(replyingTo.content, 50)}
               </div>
             )}
-            <div className="break-words">
-              {message.isDeleted ? <span className="italic underline">[ההודעה נמחקה]</span> : message.content}
+            <div>
+              {message.isDeleted ? (
+                <span className="italic text-gray-500">[ההודעה נמחקה]</span>
+              ) : (
+                message.content
+              )}
             </div>
-            <div className="text-xs mt-1 flex items-center justify-end">
+            <div className="text-xs mt-2 flex items-center justify-end">
               {formatTime(message.timestamp.toDate())}
-              {message.isEdited && <span className="mr-1">(נערך)</span>}
+              {message.isEdited && !message.isDeleted && <span className="mr-1">(נערך)</span>}
             </div>
           </div>
           {showOptions && !message.isDeleted && (
             <div
-              className={`mt-1 rounded shadow-md border-2 flex ${isSent ? "justify-start" : "justify-end"}`}
-              style={{ backgroundColor: pallate.background, borderColor: pallate.secondary }}
+              className="absolute -top-16 left-1/2 transform -translate-x-1/2 flex items-center justify-around rounded-xl shadow-lg"
+              style={{
+                width: "240px",
+                height: "45px",
+                padding: "0 10px",
+                backdropFilter: "blur(10px)",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                border: `1px solid ${pallate.secondary}`,
+              }}
             >
-              <button onClick={() => onEdit(message.id)} className="p-1 mr-2" style={{ color: pallate.text }}>
-                <Edit size={20} />
-              </button>
-              <button onClick={() => onDelete(message.id)} className="p-1 mr-2" style={{ color: pallate.text }}>
-                <Trash size={20} />
-              </button>
-              <button onClick={() => onReply(message.id)} className="p-1 mr-2 ml-2" style={{ color: pallate.text }}>
+              {isSent && (
+                <>
+                  <button onClick={() => onEdit(message.id)} title="ערוך" className="hover:text-blue-600">
+                    <Edit size={20} />
+                  </button>
+                  <button onClick={() => onDelete(message.id)} title="מחק" className="hover:text-red-600">
+                    <Trash size={20} />
+                  </button>
+                </>
+              )}
+              <button onClick={() => onReply(message.id)} title="השב" className="hover:text-green-600">
                 <Reply size={20} />
+              </button>
+              <button onClick={copyMessage} title="העתק" className="hover:text-gray-600">
+                <Copy size={20} />
               </button>
             </div>
           )}
@@ -207,22 +280,29 @@ const MessageComponent: React.FC<{
   )
 }
 
+// InputArea with an auto-resizing textarea and enhanced reply preview.
 const InputArea: React.FC<{
   onSendMessage: (content: string) => void
   pallate: Pallate
   replyingTo: Message | null
+  replyingToUser: UserData | null
   onCancelReply: () => void
   editingMessage: Message | null
   onCancelEdit: () => void
-}> = ({ onSendMessage, pallate, replyingTo, onCancelReply, editingMessage, onCancelEdit }) => {
+}> = ({ onSendMessage, pallate, replyingTo, replyingToUser, onCancelReply, editingMessage, onCancelEdit }) => {
   const [message, setMessage] = useState("")
-
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   useEffect(() => {
     if (editingMessage) {
       setMessage(editingMessage.content)
     }
   }, [editingMessage])
-
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + "px"
+    }
+  }, [message])
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (message.trim()) {
@@ -230,26 +310,42 @@ const InputArea: React.FC<{
       setMessage("")
     }
   }
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col border-t" style={{ borderColor: pallate.secondary }}>
-      {replyingTo && (
+      {replyingTo && replyingToUser && (
         <div
-          className="p-2 mb-[0.5vh] flex justify-between items-center"
-          style={{ backgroundColor: `${pallate.secondary}20` }}
+          className="p-2 mb-1 flex items-center rounded-md "
+          style={{
+            border: `1px solid ${pallate.secondary}`,
+          }}
         >
-          <span className="text-sm" style={{ color: pallate.text }}>
-            מגיב ל: {replyingTo.content}
-          </span>
-          <button type="button" onClick={onCancelReply} style={{ color: pallate.secondary }}>
-            <X size={16} />
+          <Avatar icon={replyingToUser.icon} className="w-8 h-8 mr-2" />
+          <div>
+            <div className="text-sm font-semibold" style={{ color: pallate.text }}>
+              {replyingToUser.name}
+            </div>
+            <div className="text-xs" style={{ color: pallate.text }}>
+              {truncateText(replyingTo.content, 50)}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onCancelReply}
+            style={{ color: pallate.primary }}
+            className="mr-auto"
+          >
+            <X size={20} />
           </button>
         </div>
       )}
       {editingMessage && (
         <div
-          className="p-2 mb-[0.5vh] flex justify-between items-center"
-          style={{ backgroundColor: `${pallate.secondary}20` }}
+          className="p-2 mb-1 flex justify-between items-center rounded-md"
+          style={{
+            backgroundColor: "rgba(255,255,255,0.2)",
+            backdropFilter: "blur(10px)",
+            border: `1px solid ${pallate.secondary}`,
+          }}
         >
           <span className="text-sm" style={{ color: pallate.text }}>
             עורך הודעה
@@ -259,22 +355,22 @@ const InputArea: React.FC<{
           </button>
         </div>
       )}
-      <div className="flex items-center p-2 min-w-[300px]" style={{ backgroundColor: pallate.background }}>
-        <button type="button" style={{ color: pallate.secondary }}>
+      <div className="flex items-center p-3" style={{ backgroundColor: pallate.background }}>
+        <button type="button" style={{ color: pallate.primary }} className="mr-2">
           <Smile size={24} />
         </button>
-        <button type="button" style={{ color: pallate.secondary }}>
+        <button type="button" style={{ color: pallate.primary }} className="mr-2 ml-2">
           <Paperclip size={24} />
         </button>
-        <input
-          type="text"
+        <textarea
+          ref={textareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={editingMessage ? "ערוך הודעה..." : "הקלד הודעה..."}
-          className="flex-grow p-2 bg-transparent text-right focus:outline-none"
+          className="flex-grow p-3 bg-gray-100 rounded-full text-right focus:outline-none resize-none overflow-hidden"
           style={{ color: pallate.text }}
         />
-        <button type="submit" style={{ color: pallate.primary }}>
+        <button type="submit" style={{ color: pallate.primary }} className="ml-2 mr-2">
           <Send size={24} />
         </button>
       </div>
@@ -282,24 +378,21 @@ const InputArea: React.FC<{
   )
 }
 
+// ProfileInfo Component
 const ProfileInfo: React.FC<{
   chat: Chat
-  chatter: UserData | UserData | undefined
+  chatter: UserData | undefined
   onClose: () => void
   pallate: Pallate
-}> = ({ chat, onClose, chatter }) => {
+}> = ({ chat, onClose, chatter, pallate }) => {
   const [showAllMembers, setShowAllMembers] = useState(false)
   const [members, setMembers] = useState<UserData[] | UserData | undefined>()
-
   if (!chatter) return null
-
   useEffect(() => {
     if (Array.isArray(chat.person)) getUsersById(chat.person).then(setMembers)
     else getUserById(chat.person).then(setMembers)
   }, [])
-
   if (!members) return null
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -310,9 +403,11 @@ const ProfileInfo: React.FC<{
           </button>
         </div>
         <div className="flex flex-col items-center mb-4">
-          <Avatar className="w-24 h-24 rounded-full mb-2" icon={chatter.icon}></Avatar>
+          <Avatar className="w-24 h-24 rounded-full mb-2" icon={chatter.icon} />
           <h3 className="text-xl font-semibold">{chatter.name}</h3>
-          <p className="text-gray-600">{chatter.lastOnline.toDate() > new Date() ? "מחובר" : "לא מחובר"}</p>
+          <p className="text-gray-600">
+            {chatter.lastOnline.toDate() > new Date() ? "מחובר" : "לא מחובר"}
+          </p>
         </div>
         {Array.isArray(members) ? (
           <>
@@ -323,7 +418,7 @@ const ProfileInfo: React.FC<{
             <div>
               <h4 className="font-semibold mb-2">חברי הקבוצה</h4>
               <div className="flex overflow-x-auto pb-2 mb-2">
-                {members?.slice(0, showAllMembers ? undefined : 3).map((member) => (
+                {members.slice(0, showAllMembers ? undefined : 3).map((member) => (
                   <div key={member.id} className="flex-shrink-0 ml-2 text-center">
                     <Avatar icon={member.icon} className="w-8 h-8" />
                     <p className="text-xs mt-1">{member.name}</p>
@@ -343,10 +438,10 @@ const ProfileInfo: React.FC<{
         ) : (
           <div className="space-y-2">
             <p>
-              <strong>אימייל</strong> {chatter.email}
+              <strong>אימייל:</strong> {chatter.email}
             </p>
             <p>
-              <strong>מידע אישי: </strong>
+              <strong>מידע אישי:</strong>
               <br /> {chatter.bio}
             </p>
           </div>
@@ -356,9 +451,10 @@ const ProfileInfo: React.FC<{
   )
 }
 
+// ChatArea Component
 const ChatArea: React.FC<{
   messages: Message[]
-  onSendMessage: (content: string, replyTo?: string) => void
+  onSendMessage: (content: string, replyToOrEdit?: string) => void
   selectedChat: Chat | null
   chatter: UserData[] | undefined
   onBackClick: () => void
@@ -370,29 +466,19 @@ const ChatArea: React.FC<{
   const [editingMessage, setEditingMessage] = useState<Message | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-
   if (!chatter) return null
-
-  const otherUser = chatter.filter((c) => c.id != user.id)[0]
-
+  const otherUser = chatter.find((c) => c.id !== user.id)!
   const handleEditMessage = (messageId: string) => {
     const messageToEdit = messages.find((m) => m.id === messageId)
-    if (messageToEdit) {
-      setEditingMessage(messageToEdit)
-    }
+    if (messageToEdit) setEditingMessage(messageToEdit)
   }
-
   const handleDeleteMessage = (messageId: string) => {
     onSendMessage("", messageId)
   }
-
   const handleReplyMessage = (messageId: string) => {
     const replyMessage = messages.find((m) => m.id === messageId)
-    if (replyMessage) {
-      setReplyingTo(replyMessage)
-    }
+    if (replyMessage) setReplyingTo(replyMessage)
   }
-
   const handleSendMessage = (content: string) => {
     if (editingMessage) {
       onSendMessage(content, editingMessage.id)
@@ -403,15 +489,12 @@ const ChatArea: React.FC<{
     }
     scrollToBottom()
   }
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
-
   useEffect(() => {
     scrollToBottom()
   }, [messages])
-
   return (
     <div className="flex flex-col h-full min-h-0 chat-area relative" style={{ backgroundColor: pallate.background }}>
       {/* Header */}
@@ -424,26 +507,23 @@ const ChatArea: React.FC<{
             <ChevronRight size={24} />
           </button>
           {selectedChat && (
-            <>
-              <div onClick={() => onProfileClick(selectedChat.id)}>
-                <Avatar
-                  className="w-8 h-8"
-                  icon={selectedChat.icon || otherUser.icon}
-                  isOnline={otherUser.lastOnline.toDate() > new Date()}
-                />
-              </div>
-              <div className="ml-3">
+            <div className="flex items-center cursor-pointer" onClick={() => onProfileClick(selectedChat.id)}>
+              <Avatar
+                className="w-10 h-10"
+                icon={selectedChat.icon || otherUser.icon}
+                isOnline={otherUser.lastOnline.toDate() > new Date()}
+              />
+              <div className="mr-3">
                 <h2 className="font-semibold" style={{ color: pallate.text }}>
                   {selectedChat.name}
                 </h2>
-                <p className="text-md mr-2" style={{ color: pallate.secondary }}>
-                  {`${otherUser.name}`}
+                <p className="text-sm" style={{ color: pallate.text }}>
+                  {otherUser.name}
                 </p>
               </div>
-            </>
+            </div>
           )}
         </div>
-        <div className="flex items-center space-x-4"></div>
       </div>
       {/* Messages */}
       <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 relative z-10">
@@ -451,7 +531,7 @@ const ChatArea: React.FC<{
           <MessageComponent
             key={message.id}
             message={message}
-            chatter={message.sender == user.id ? user : otherUser}
+            chatter={message.sender === user.id ? user : otherUser}
             isSent={message.sender === user.id}
             pallate={pallate}
             onEdit={handleEditMessage}
@@ -468,8 +548,15 @@ const ChatArea: React.FC<{
           onSendMessage={handleSendMessage}
           pallate={pallate}
           replyingTo={replyingTo}
-          onCancelReply={() => setReplyingTo(null)}
+          replyingToUser={
+            replyingTo
+              ? replyingTo.sender === user.id
+                ? user
+                : otherUser
+              : null
+          }
           editingMessage={editingMessage}
+          onCancelReply={() => setReplyingTo(null)}
           onCancelEdit={() => setEditingMessage(null)}
         />
       </div>
@@ -477,6 +564,7 @@ const ChatArea: React.FC<{
   )
 }
 
+// Main App component
 const App: React.FC = () => {
   const { id } = useParams()
   const [selectedChatId, setSelectedChatId] = useState<string | null>(id || null)
@@ -491,7 +579,12 @@ const App: React.FC = () => {
   const [showChatList, setShowChatList] = useState(true)
   const chatListRef = useRef<HTMLDivElement>(null)
   const chatAreaRef = useRef<HTMLDivElement>(null)
-
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
   useEffect(() => {
     const fetchChats = async () => {
       const user = await getUser()
@@ -500,7 +593,6 @@ const App: React.FC = () => {
         navigate("/")
         return
       }
-
       const fetchedPallate = await GetPallate(user)
       setPallate(fetchedPallate)
       const chats = await getChats(user)
@@ -509,37 +601,25 @@ const App: React.FC = () => {
     }
     fetchChats()
   }, [])
-
   useEffect(() => {
     let startX: number
     let isDragging = false
-
     const handleTouchStart = (e: TouchEvent) => {
       startX = e.touches[0].clientX
       isDragging = true
     }
-
     const handleTouchMove = (e: TouchEvent) => {
       if (!isDragging) return
       const currentX = e.touches[0].clientX
       const diff = startX - currentX
-
-      if (diff > 50) {
-        setShowChatList(false)
-      } else if (diff < -50) {
-        setShowChatList(true)
-      }
+      if (diff > 50) setShowChatList(false)
+      else if (diff < -50) setShowChatList(true)
     }
-
-    const handleTouchEnd = () => {
-      isDragging = false
-    }
-
+    const handleTouchEnd = () => { isDragging = false }
     chatListRef.current?.addEventListener("touchstart", handleTouchStart)
     chatAreaRef.current?.addEventListener("touchstart", handleTouchStart)
     document.addEventListener("touchmove", handleTouchMove)
     document.addEventListener("touchend", handleTouchEnd)
-
     return () => {
       chatListRef.current?.removeEventListener("touchstart", handleTouchStart)
       chatAreaRef.current?.removeEventListener("touchstart", handleTouchStart)
@@ -547,16 +627,15 @@ const App: React.FC = () => {
       document.removeEventListener("touchend", handleTouchEnd)
     }
   }, [])
-
   const handleSelectChat = async (id: string) => {
     if (!user) return
     setShowProfile(undefined)
     setSelectedChatId(id)
-    if (openedChats.find((chat) => chat.id === openChatName(user.id, id))) {
-      const chat = openedChats.find((chat) => chat.id === openChatName(user.id, id))
-      if (!chat) return
-      setSelectedChat(chat)
-      setSelectedChatters(await getUsersById(chat.person))
+    const chatId = openChatName(user.id, id)
+    const existingChat = openedChats.find((chat) => chat.id === chatId)
+    if (existingChat) {
+      setSelectedChat(existingChat)
+      setSelectedChatters(await getUsersById(existingChat.person))
       setShowChatList(false)
       return
     }
@@ -568,18 +647,14 @@ const App: React.FC = () => {
       setSelectedChatters(chatters)
       setShowChatList(false)
     } catch {
-      if (await chatExists(id)) {
-        return
-      }
+      if (await chatExists(id)) return
       const newChat: Chat = {
         person: [user.id, id],
         messages: [],
         id: openChatName(user.id, id),
       }
       const createdChat = await setChat(newChat)
-      if (!createdChat) {
-        return
-      }
+      if (!createdChat) return
       setOpenedChats([...openedChats, createdChat])
       const chatters = await getUsersById(createdChat.person)
       setSelectedChat(createdChat)
@@ -587,7 +662,6 @@ const App: React.FC = () => {
       setShowChatList(false)
     }
   }
-
   const handleSendMessage = async (content: string, messageId?: string) => {
     if (selectedChatId === null || !user || !selectedChat) return
     let updatedMessages: Message[]
@@ -595,13 +669,13 @@ const App: React.FC = () => {
     if (messageId) {
       const existingMessage = selectedChat.messages.find((m) => m.id === messageId)
       if (existingMessage) {
-        // This is an edit or delete
         updatedMessages = selectedChat.messages.map((m) =>
-          m.id === messageId ? { ...m, content: content || "ההודעה נמחקה", isEdited: true, isDeleted: !content } : m,
+          m.id === messageId
+            ? { ...m, content: content || "ההודעה נמחקה", isEdited: true, isDeleted: !content }
+            : m
         )
         newMessage = updatedMessages.find((m) => m.id === messageId)!
       } else {
-        // This is a reply
         newMessage = {
           id: Date.now().toString(),
           content,
@@ -612,7 +686,6 @@ const App: React.FC = () => {
         updatedMessages = [...selectedChat.messages, newMessage]
       }
     } else {
-      // This is a new message
       newMessage = {
         id: Date.now().toString(),
         content,
@@ -626,86 +699,79 @@ const App: React.FC = () => {
     setOpenedChats(openedChats.map((chat) => (chat.id === selectedChatId ? updatedChat : chat)))
     await setChat(updatedChat)
   }
-
   if (!pallate || !chatsWrapper || !user) {
     return <SuperSillyLoading />
   }
-
-  return (
-    <Layout
-      children={
-        <div
-          dir="rtl"
-          className="h-screen flex overflow-hidden"
-          style={{ backgroundColor: pallate.background, color: pallate.text }}
-        >
-          {/* Chat List */}
-          <div
-            ref={chatListRef}
-            className={`w-full md:w-1/3 border-l ${showChatList ? "block" : "hidden md:block"}`}
-            style={{ backgroundColor: pallate.main, borderColor: pallate.secondary }}
-          >
-            <div className="flex flex-col h-full min-h-0">
-              {/* Header */}
-              <div className="p-4 border-b border-gray-200 flex-shrink-0">
-                <h1 className="text-2xl font-bold text-gray-800">הודעות</h1>
-                <div className="mt-4 relative">
-                  <input
-                    type="text"
-                    placeholder="חיפוש"
-                    className="w-full p-2 pl-10 pr-4 bg-gray-100 rounded-full text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <Search className="absolute left-3 top-2.5 text-gray-500" size={20} />
-                </div>
-              </div>
-              {/* Chat List */}
-              <ChatList
-                chats={chatsWrapper}
-                user={user}
-                onSelectChat={handleSelectChat}
-                selectedChat={selectedChatId}
-                pallate={pallate}
+  const content = (
+    <div
+      dir="rtl"
+      className="h-screen flex overflow-hidden"
+      style={{ backgroundColor: pallate.background, color: pallate.text }}
+    >
+      <div
+        ref={chatListRef}
+        className={`w-full md:w-1/3 border-l ${showChatList ? "block" : "hidden md:block"}`}
+        style={{ backgroundColor: pallate.main, borderColor: pallate.secondary }}
+      >
+        <div className="flex flex-col h-full min-h-0">
+          <div className="p-4 border-b flex-shrink-0" style={{ borderColor: pallate.secondary }}>
+            <h1 className="text-2xl font-bold">הודעות</h1>
+            <div className="mt-4 relative">
+              <input
+                type="text"
+                placeholder="חיפוש"
+                className="w-full p-2 pl-10 pr-4 bg-gray-100 rounded-full text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <Search className="absolute left-3 top-2.5 text-gray-500" size={20} />
             </div>
           </div>
-          {/* Chat Area */}
-          <div
-            ref={chatAreaRef}
-            className={`flex-grow ${showChatList ? "hidden md:block" : "block"}`}
-            style={{ backgroundColor: pallate.background }}
-          >
-            {selectedChat ? (
-              <div className="flex flex-col h-full min-h-0">
-                <ChatArea
-                  messages={selectedChat.messages}
-                  onSendMessage={handleSendMessage}
-                  chatter={selectedChatters}
-                  user={user}
-                  selectedChat={selectedChat}
-                  onBackClick={() => setShowChatList(true)}
-                  onProfileClick={(profile) => setShowProfile(profile)}
-                  pallate={pallate}
-                />
-              </div>
-            ) : (
-              <div className="h-full flex items-center justify-center" style={{ color: pallate.secondary }}>
-                בחר צ'אט כדי להתחיל לשוחח
-              </div>
-            )}
-          </div>
-          {showProfile && selectedChat && Array.isArray(selectedChatters) && (
-            <ProfileInfo
-              chat={selectedChat}
-              chatter={selectedChatters.find((chatter) => chatter.id === showProfile)}
-              onClose={() => setShowProfile(undefined)}
+          <ChatList
+            chats={chatsWrapper}
+            user={user}
+            onSelectChat={handleSelectChat}
+            selectedChat={selectedChatId}
+            pallate={pallate}
+          />
+        </div>
+      </div>
+      <div
+        ref={chatAreaRef}
+        className={`flex-grow ${showChatList ? "hidden md:block" : "block"}`}
+        style={{ backgroundColor: pallate.background }}
+      >
+        {selectedChat ? (
+          <div className="flex flex-col h-full min-h-0">
+            <ChatArea
+              messages={selectedChat.messages}
+              onSendMessage={handleSendMessage}
+              chatter={selectedChatters}
+              user={user}
+              selectedChat={selectedChat}
+              onBackClick={() => setShowChatList(true)}
+              onProfileClick={(profile) => setShowProfile(profile)}
               pallate={pallate}
             />
-          )}
-        </div>
-      }
-    ></Layout>
+          </div>
+        ) : (
+          <div className="h-full flex items-center justify-center" style={{ color: pallate.secondary }}>
+            בחר צ'אט כדי להתחיל לשוחח
+          </div>
+        )}
+      </div>
+      {showProfile && selectedChat && Array.isArray(selectedChatters) && (
+        <ProfileInfo
+          chat={selectedChat}
+          chatter={selectedChatters.find((chatter) => chatter.id === showProfile)}
+          onClose={() => setShowProfile(undefined)}
+          pallate={pallate}
+        />
+      )}
+    </div>
   )
+  if (isMobile && selectedChat && !showChatList) {
+    return content
+  }
+  return <Layout>{content}</Layout>
 }
 
 export default App
-

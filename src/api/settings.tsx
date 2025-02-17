@@ -11,9 +11,9 @@ export interface Pallate {
 
 export function DefaultPallate(): Pallate {
   return {
-    primary: '#16F829',
-    secondary: '#34B928',
-    tertiary: '#35CB62',
+    primary: '#4caf50',
+    secondary: '#f5f5f5',
+    tertiary: '#66bb6a',
     text: '#000000',
     background: '#FFFFFF',
     main: '#FFFFFF',

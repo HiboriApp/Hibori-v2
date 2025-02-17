@@ -28,7 +28,7 @@ export function notificationIcon(notification: 'message' | 'like' | 'comment', u
 }
 
 export async function GenerateIcons(seed: string) : Promise<Icon> {
-    return {type: IconType.image, content: await uploadString(await createAvatar(lorelei, { seed: seed }).toString())};
+    return {type: IconType.image, content: await createAvatar(lorelei, { seed: seed }).toString()};
 }
 
 export function Avatar({icon, className, isOnline} : {icon: Icon, className?: string, isOnline?: boolean}){

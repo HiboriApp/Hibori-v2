@@ -601,7 +601,7 @@ const CreatePost = ({
           <button
             type="submit"
             className="text-white font-bold px-6 py-2 rounded-full hover:opacity-90 transition-opacity duration-200 text-sm flex items-center shadow-md"
-            style={{ backgroundColor: pallate.primary, color: pallate.text }}
+            style={{ backgroundColor: pallate.primary}}
           >
             <Send className="w-4 h-4 ml-2" />
             פרסם

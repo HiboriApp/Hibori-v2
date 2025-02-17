@@ -116,15 +116,15 @@ function ColorPaletteSettings({
     <div className="h-full flex">
     <button
         onClick={() => onSave(colors)}
-        className="px-4 py-2 rounded-lg transition-colors duration-200"
-        style={{ backgroundColor: colors.tertiary, color: colors.text }}
+        className="px-4 text-white py-2 rounded-lg transition-colors duration-200"
+        style={{ backgroundColor: colors.tertiary,  }}
       >
         שמור הגדרות צבעים
       </button>
       <button
-        onClick={() => onSave(DefaultPallate())}
-        className="px-4 py-2 rounded-lg transition-colors duration-200 mr-auto"
-        style={{ backgroundColor: colors.tertiary, color: colors.text }}
+        onClick={() => {setColors(DefaultPallate());onSave(DefaultPallate())}}
+        className="px-4 text-white py-2 rounded-lg transition-colors duration-200 mr-auto"
+        style={{ backgroundColor: colors.primary, }}
       >
         אתחול הצבעים
       </button>
@@ -344,7 +344,7 @@ export default function SettingsPage() {
             {/* Color Palette Settings */}
             <section className="p-6 rounded-xl shadow-md" style={{ backgroundColor: colors.main }}>
               <h2 className="text-xl font-semibold mb-4" style={{ color: colors.primary }}>הגדרות צבעים</h2>
-              <ColorPaletteSettings initialColors={colors} onSave={(newColors) => setColors(newColors)} />
+              <ColorPaletteSettings initialColors={colors} onSave={(newColors) => {console.log(newColors);setColors(newColors)}} />
             </section>
 
             {/* Save Button */}
@@ -352,8 +352,8 @@ export default function SettingsPage() {
               <button
                 onClick={handleSave}
                 type="button"
-                className="px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 text-lg font-semibold"
-                style={{ backgroundColor: colors.tertiary, color: colors.text }}
+                className="px-6  text-white py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 text-lg font-semibold"
+                style={{ backgroundColor: colors.primary,  }}
               >
                 שמור שינויים
               </button>
