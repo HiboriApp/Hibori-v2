@@ -338,11 +338,14 @@ export default function SettingsPage() {
               </div>
             </section>
 
-            {/* Video Settings */}
+
+          {/*   video settings
             <section className="p-6 rounded-xl shadow-md" style={{ backgroundColor: colors.main }}>
               <h2 className="text-xl font-semibold mb-4" style={{ color: colors.primary }}>הגדרות וידאו</h2>
               <VideoSettings onVideoUpload={handleVideoUpload} colors={colors} />
             </section>
+            */}
+
 
             {/* Color Palette Settings */}
             <section className="p-6 rounded-xl shadow-md" style={{ backgroundColor: colors.main }}>

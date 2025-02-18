@@ -338,7 +338,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm })
           </button>
         </div>
         <p className="mb-6 text-gray-600">האם אתה בטוח שברצונך למחוק את הפוסט?</p>
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <button
             onClick={onClose}
             className="mr-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
@@ -346,8 +346,9 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm })
             ביטול
           </button>
           <button className="flex items-center bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-200" onClick={onConfirm}>
-            <Trash2 className="w-4 h-4 ml-2" />
             אישור
+            <Trash2 className="w-4 h-4 mr-1" />
+
           </button>
         </div>
       </div>
