@@ -271,8 +271,7 @@ const ModalCommentList: React.FC<ModalCommentListProps> = ({ comments, currentUs
         <div className="flex flex-col items-center justify-center py-4">
           <MessageSquare size={32} className="text-gray-500" />
           <p className="mt-2 text-sm" style={{ color: pallate.text }}>
-            אין תגובות, היה הראשון להגיב!
-          </p>
+          איפה כל החברים? אין פה שום תגובות!          </p>
         </div>
       ) : (
         <>
