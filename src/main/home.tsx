@@ -16,7 +16,6 @@ import {
   Trash2,
   MoreVertical,
   Smile,
-  Search,
 } from "lucide-react"
 import { Layout } from "../components/layout"
 import {
@@ -850,16 +849,16 @@ const CreatePost = ({
               style={{ color: pallate.text, backgroundColor: pallate.background }}
             ></textarea>
             <div className="absolute bottom-3 right-3 flex space-x-2 space-x-reverse">
-              <label className="cursor-pointer text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2">
+              <label className="cursor-pointer text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100  rounded-full p-2" style={{backgroundColor: `${pallate.primary}20`, }}>
                 <input type="file" className="hidden" onChange={(file) => handleImageUpload(file, fileType.image)} />
-                <ImageIcon size={20} />
+                <ImageIcon size={20} style={{ color: pallate.primary }}/>
               </label>
-              <label className="cursor-pointer text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2">
+              <label className="cursor-pointer text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2" style={{backgroundColor: `${pallate.primary}20`, }}>
                 <input type="file" accept="video/*" className="hidden" onChange={(file) => handleImageUpload(file, fileType.video)} />
-                <Video size={20} />
+                <Video size={20}  style={{ color: pallate.primary }}/>
               </label>
-              <button type="button" className="text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2">
-                <Smile size={20} />
+              <button type="button" className="text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2" style={{backgroundColor: `${pallate.primary}20`, }}>
+                <Smile size={20} style={{ color: pallate.primary }}/>
               </button>
             </div>
           </div>
