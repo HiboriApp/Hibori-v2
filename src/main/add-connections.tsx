@@ -66,7 +66,7 @@ const AddFriendsPage: React.FC = () => {
     if (!user) {
       return
     }
-    setUser({ ...user, friends: [...user.friends, id] })
+    setUser({ ...user, friends: [...user.friends.filter((f) => f !== id), id] })
     addFriend(user, id)
   }
   if (!users || !user) return <SuperSillyLoading></SuperSillyLoading>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Trash2 } from 'lucide-react'
 import { getUser, type UserData, setUser as setUserInDB } from "../api/db"
-import { Avatar, type Icon, IconType } from "../api/icons"
+import { Avatar, GenerateIcons, type Icon, IconType } from "../api/icons"
 import Loading from "../components/Loading"
 import { useNavigate } from "react-router-dom"
 import Layout from "../components/layout"
@@ -187,6 +187,7 @@ export default function SettingsPage() {
     await setUserInDB({
       ...user,
       pallate: colors,
+      icon: pfp ? pfp : await GenerateIcons(user.id),
     })
     navigate("/home")
   }
