@@ -64,13 +64,14 @@ const ConfirmationPopup: React.FC<{
       >
         <h2 className="text-xl font-bold mb-4 text-gray-800">הסרת חבר</h2>
         <p className="mb-6 text-gray-800">האם אתה בטוח שברצונך להסיר את {friendName} מרשימת החברים שלך?</p>
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-center space-x-4 ">
+        <button onClick={onConfirm} className="px-4 py-2 bg-red-600 ml-3 mr-3 text-white rounded hover:bg-red-700">
+            הסר
+          </button>
           <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
             ביטול
           </button>
-          <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-            הסר
-          </button>
+         
         </div>
       </div>
     </div>
