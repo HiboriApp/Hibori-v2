@@ -387,7 +387,7 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose, pallate, currentUs
     <div className="mb-4">
       {poster && (
         <div className="flex items-center mb-4">
-          <Avatar icon={poster.icon} className="w-10 h-10 rounded-full mr-2" />
+          <Avatar icon={poster.icon} className="w-10 h-10 rounded-full ml-2" />
           <div>
             <p className="font-semibold" style={{ color: pallate.text }}>{poster.name}</p>
             <p className="text-xs" style={{ color: pallate.text }}>
