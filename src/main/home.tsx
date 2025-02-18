@@ -121,7 +121,6 @@ interface CommentSectionProps {
   pallate: Pallate
 }
 
-// CommentSection for use outside the modal.
 const CommentSection: React.FC<CommentSectionProps> = ({
   comments,
   onAddComment,
@@ -169,7 +168,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               />
               <button
                 type="submit"
-                className="absolute bottom-2 right-2 text-white rounded-full p-2 hover:opacity-90 transition-colors duration-200"
+                className="absolute bottom-2 left-2 text-white rounded-full p-2 hover:opacity-90 transition-colors duration-200"
                 style={{ backgroundColor: pallate.primary }}
               >
                 <Send className="w-4 h-4" />
@@ -182,7 +181,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <div className="flex flex-col items-center justify-center py-4">
           <MessageSquare size={32} className="text-gray-500" />
           <p className="mt-2 text-sm" style={{ color: pallate.text }}>
-            אין תגובות, היה הראשון להגיב!
+            איפה כל החברים? אין אף תגובות פה!
           </p>
         </div>
       ) : (
@@ -201,7 +200,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   )
 }
 
-// ModalCommentInput: Fixed comment input inside the modal.
 interface ModalCommentInputProps {
   onAddComment: (content: string, replyTo?: { id: string; content: string; name: string }) => void
   currentUser: UserData
@@ -249,7 +247,7 @@ const ModalCommentInput: React.FC<ModalCommentInputProps> = ({
             />
             <button
               type="submit"
-              className="absolute bottom-2 right-2 text-white rounded-full p-2 hover:opacity-90 transition-colors duration-200"
+              className="absolute bottom-2 left-2 text-white rounded-full p-2 hover:opacity-90 transition-colors duration-200"
               style={{ backgroundColor: pallate.primary }}
             >
               <Send className="w-4 h-4" />
@@ -261,7 +259,6 @@ const ModalCommentInput: React.FC<ModalCommentInputProps> = ({
   )
 }
 
-// ModalCommentList: Scrollable list of comments inside the modal.
 interface ModalCommentListProps {
   comments: Comment[]
   currentUser: UserData
@@ -330,7 +327,6 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm })
   )
 }
 
-// PostModal Component: Renders a single post modal. This is rendered via a portal.
 interface PostModalProps {
   post: Post
   onClose: () => void
@@ -397,7 +393,7 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose, pallate, currentUs
       onClick={onClose}
     >
       <button onClick={onClose} className="absolute top-4 right-4 text-white z-50">
-        <X size={32} />
+        <X size={32} style={{ color: pallate.primary }}/>
       </button>
       <div className="flex flex-col h-screen bg-white" onClick={(e) => e.stopPropagation()}>
         <div className="w-full h-1/2 bg-black flex items-center justify-center">
@@ -590,6 +586,65 @@ function NewContentFeed({
   )
 }
 
+/* --- NEW: MessageItem Component --- */
+interface MessageItemProps {
+  message: { user: string; chat: ChatWrapper }
+  pallate: Pallate
+  expandedMessage: string | null
+  setExpandedMessage: React.Dispatch<React.SetStateAction<string | null>>
+  navigate: (path: string) => void
+}
+const MessageItem: React.FC<MessageItemProps> = ({ message, pallate, expandedMessage, setExpandedMessage, navigate }) => {
+  const [messageUser, setMessageUser] = useState<UserData | undefined>(undefined)
+  useEffect(() => {
+    getUserById(message.user).then((u) => setMessageUser(u))
+  }, [message.user])
+  if (!messageUser) return null
+  return (
+    <li
+      className="bg-white rounded-lg shadow-sm p-2 transition-all duration-300 ease-in-out cursor-pointer hover:bg-gray-50"
+      style={{ backgroundColor: pallate.background }}
+      onClick={() => setExpandedMessage(message.chat.id === expandedMessage ? null : message.chat.id)}
+    >
+      <div className="flex items-center">
+        <Avatar className="w-8 h-8 rounded-full ml-2" icon={messageUser.icon} />
+        <div className="flex-grow">
+          <p className="font-medium text-sm text-gray-800" style={{ color: pallate.text }}>
+            {messageUser.name}
+          </p>
+          <p className="text-xs text-gray-600 truncate max-w-[150px]" style={{ color: pallate.text }}>
+            {message.chat.lastMessage && message.chat.lastMessage.content}
+          </p>
+        </div>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
+            expandedMessage === message.chat.id ? "transform rotate-180" : ""
+          }`}
+        />
+      </div>
+      {expandedMessage === message.chat.id && (
+        <div className="mt-2 p-2 rounded-md">
+          <p className="text-sm text-gray-700" style={{ color: pallate.text }}>
+            {message.chat.lastMessage && message.chat.lastMessage.content}
+          </p>
+          <button
+            className="text-sm bg-white text-black font-semibold hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center rounded-full px-4 py-2 w-full"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(`/messages/${message.chat.id}`)
+            }}
+            style={{ backgroundColor: pallate.main, color: pallate.text }}
+          >
+            <MessageSquare className="w-4 h-4 ml-2" style={{ color: pallate.primary }} />
+            פתח שיחה
+          </button>
+        </div>
+      )}
+    </li>
+  )
+}
+
+/* --- Updated TopPanel --- */
 function TopPanel({
   friends,
   messages,
@@ -603,118 +658,99 @@ function TopPanel({
 }) {
   const navigate = useNavigate()
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null)
+
+  // Only render the panel if at least one section has data
+  if (friends.length === 0 && messages.length === 0 && user.notifications.length === 0) {
+    return null
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: pallate.main }}>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center" style={{ color: pallate.text }}>
-          <Users className="ml-2" style={{ color: pallate.primary }} size={20} />
-          חברים מקוונים
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {friends.slice(0, 6).map((friend) => (
-            <div key={friend.id} className="flex flex-col items-center">
-              <Avatar
-                icon={friend.icon}
-                isOnline={friend.lastOnline.toDate() > new Date()}
-                className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm"
-              />
-              <span className="mt-1 text-xs text-gray-600 text-center" style={{ color: pallate.text }}>
-                {friend.name}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: pallate.main }}>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center" style={{ color: pallate.text }}>
-          <MessageSquare className="ml-2" style={{ color: pallate.primary }} size={20} />
-          הודעות חדשות
-        </h3>
-        <ul className="space-y-2">
-          {messages.slice(0, 3).map((message) => {
-            const [messageUser, setMessageUser] = useState<UserData | undefined>()
-            useEffect(() => {
-              getUserById(message.user).then((u) => setMessageUser(u))
-            }, [message.user])
-            if (!messageUser) return null
-            return (
-              <li
-                key={message.chat.id}
-                className="bg-white rounded-lg shadow-sm p-2 transition-all duration-300 ease-in-out cursor-pointer hover:bg-gray-50"
-                style={{ backgroundColor: pallate.background }}
-                onClick={() =>
-                  setExpandedMessage(message.chat.id === expandedMessage ? null : message.chat.id)
-                }
-              >
-                <div className="flex items-center">
-                  <Avatar className="w-8 h-8 rounded-full ml-2" icon={messageUser.icon} />
-                  <div className="flex-grow">
-                    <p className="font-medium text-sm text-gray-800" style={{ color: pallate.text }}>
-                      {messageUser.name}
-                    </p>
-                    <p className="text-xs text-gray-600 truncate max-w-[150px]" style={{ color: pallate.text }}>
-                      {message.chat.lastMessage && message.chat.lastMessage.content}
-                    </p>
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
-                      expandedMessage === message.chat.id ? "transform rotate-180" : ""
-                    }`}
-                  />
-                </div>
-                {expandedMessage === message.chat.id && (
-                  <div className="mt-2 p-2 rounded-md">
-                    <p className="text-sm text-gray-700" style={{ color: pallate.text }}>
-                      {message.chat.lastMessage && message.chat.lastMessage.content}
-                    </p>
-                    <button
-                      className="text-sm bg-white text-black font-semibold hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center rounded-full px-4 py-2 w-full"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        navigate(`/messages/${message.chat.id}`)
-                      }}
-                      style={{ backgroundColor: pallate.main, color: pallate.text }}
-                    >
-                      <MessageSquare className="w-4 h-4 ml-2" style={{ color: pallate.primary }} />
-                      פתח שיחה
-                    </button>
-                  </div>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-      <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: pallate.main }}>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center" style={{ color: pallate.text }}>
-          <Bell className="ml-2" style={{ color: pallate.primary }} size={20} />
-          התראות
-        </h3>
-        <ul className="space-y-2">
-          {user.notifications.slice(0, 3).map((notification, i) => (
-            <li
-              key={notification.timestamp.toDate().getTime() + i}
-              className="flex items-center bg-white rounded-lg p-2 shadow-sm hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
-              style={{ backgroundColor: pallate.background }}
-            >
-              <Avatar icon={notification.icon} className="w-8 h-8 rounded-full ml-2" />
-              <div className="flex-grow">
-                <p className="text-xs text-gray-700" style={{ color: pallate.text }}>
-                  {notification.content}
-                </p>
-                <span className="text-xs text-gray-500" style={{ color: pallate.text }}>
-                  {notification.timestamp.toDate().toLocaleString()}
+      {friends.length > 0 && (
+        <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: pallate.main }}>
+          <h3
+            className="text-lg font-semibold text-gray-800 mb-4 flex items-center"
+            style={{ color: pallate.text }}
+          >
+            <Users className="ml-2" style={{ color: pallate.primary }} size={20} />
+            חברים מקוונים
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {friends.slice(0, 6).map((friend) => (
+              <div key={friend.id} className="flex flex-col items-center">
+                <Avatar
+                  icon={friend.icon}
+                  isOnline={friend.lastOnline.toDate() > new Date()}
+                  className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm"
+                />
+                <span className="mt-1 text-xs text-gray-600 text-center" style={{ color: pallate.text }}>
+                  {friend.name}
                 </span>
               </div>
-              <div className="ml-2">
-                {notification.type === "like" && <Heart className="text-red-500" size={16} />}
-                {notification.type === "comment" && <MessageSquare className="text-blue-500" size={16} />}
-                {notification.type === "message" && <User className="text-primary" size={16} />}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {messages.length > 0 && (
+        <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: pallate.main }}>
+          <h3
+            className="text-lg font-semibold text-gray-800 mb-4 flex items-center"
+            style={{ color: pallate.text }}
+          >
+            <MessageSquare className="ml-2" style={{ color: pallate.primary }} size={20} />
+            הודעות חדשות
+          </h3>
+          <ul className="space-y-2">
+            {messages.slice(0, 3).map((message) => (
+              <MessageItem
+                key={message.chat.id}
+                message={message}
+                pallate={pallate}
+                expandedMessage={expandedMessage}
+                setExpandedMessage={setExpandedMessage}
+                navigate={navigate}
+              />
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {user.notifications.length > 0 && (
+        <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: pallate.main }}>
+          <h3
+            className="text-lg font-semibold text-gray-800 mb-4 flex items-center"
+            style={{ color: pallate.text }}
+          >
+            <Bell className="ml-2" style={{ color: pallate.primary }} size={20} />
+            התראות
+          </h3>
+          <ul className="space-y-2">
+            {user.notifications.slice(0, 3).map((notification, i) => (
+              <li
+                key={notification.timestamp.toDate().getTime() + i}
+                className="flex items-center bg-white rounded-lg p-2 shadow-sm hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                style={{ backgroundColor: pallate.background }}
+              >
+                <Avatar icon={notification.icon} className="w-8 h-8 rounded-full ml-2" />
+                <div className="flex-grow">
+                  <p className="text-xs text-gray-700" style={{ color: pallate.text }}>
+                    {notification.content}
+                  </p>
+                  <span className="text-xs text-gray-500" style={{ color: pallate.text }}>
+                    {notification.timestamp.toDate().toLocaleString()}
+                  </span>
+                </div>
+                <div className="ml-2">
+                  {notification.type === "like" && <Heart className="text-red-500" size={16} />}
+                  {notification.type === "comment" && <MessageSquare className="text-blue-500" size={16} />}
+                  {notification.type === "message" && <User className="text-primary" size={16} />}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }
@@ -862,7 +898,11 @@ function App() {
     postStuff(post)
     setPosts([...(posts || []), post])
   }
-  const handleComment = (message: string, post: Post, replyTo?: { id: string; content: string; name: string }) => {
+  const handleComment = (
+    message: string,
+    post: Post,
+    replyTo?: { id: string; content: string; name: string }
+  ) => {
     if (!user) return
     const newComment: Comment = {
       message,
@@ -877,7 +917,13 @@ function App() {
     setPosts(updatedPosts)
     if (updatedPosts) {
       const updatedPost = updatedPosts.find((p) => p.id === post.id)
-      if (updatedPost) updatePost(updatedPost)
+      if (updatedPost) {
+        updatePost(updatedPost)
+        // Update the modal post if it's open for the updated post
+        if (selectedPost && selectedPost.id === post.id) {
+          setSelectedPost(updatedPost)
+        }
+      }
     }
   }
   const openModalForPost = (post: Post) => setSelectedPost(post)
