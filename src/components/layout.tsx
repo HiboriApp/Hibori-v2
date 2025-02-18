@@ -211,7 +211,7 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
       )}
       <div className="flex flex-1 overflow-hidden">
         {!hideLayoutOnMobile && <Sidebar palette={palette} user={user} />}
-        <div className="flex-1 flex flex-col overflow-y-auto">
+        <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
           <MainContent palette={palette}>{children}</MainContent>
         </div>
       </div>

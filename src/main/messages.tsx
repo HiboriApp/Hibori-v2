@@ -67,7 +67,7 @@ const ChatList: React.FC<{
   user: UserData
 }> = ({ chats, onSelectChat, selectedChat, pallate, user }) => {
   return (
-    <div className="flex-grow overflow-y-auto" style={{ backgroundColor: pallate.background, color: pallate.text }}>
+    <div className="flex-grow overflow-y-auto  custom-scrollbar" style={{ backgroundColor: pallate.background, color: pallate.text }}>
       {chats.map((chat) => {
         const [chatter, setChatter] = useState<UserData | null>(null)
         useEffect(() => {
@@ -504,7 +504,7 @@ const ChatArea: React.FC<{
           )}
         </div>
       </div>
-      <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 relative z-10">
+      <div ref={scrollContainerRef} className="flex-grow overflow-y-auto  custom-scrollbar  p-4 relative z-10">
         {messages.map((message) => (
           <MessageComponent
             key={message.id}

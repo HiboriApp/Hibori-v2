@@ -787,9 +787,11 @@ function TopPanel({
 const CreatePost = ({
   onPostSubmit,
   pallate,
+  user
 }: {
   pallate: Pallate
   onPostSubmit: (newPost: { content: string; file: UploadedFile | undefined }) => void
+  user: UserData
 }) => {
   const [content, setContent] = useState("")
   const [file, setFile] = useState<UploadedFile | undefined>()
@@ -817,8 +819,11 @@ const CreatePost = ({
       <form onSubmit={handleSubmit}>
         <div className="flex items-start space-x-3 space-x-reverse">
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white shadow-md">
-            <User className="w-6 h-6" />
+
+          <Avatar icon={user.icon} className="w-full h-full"></Avatar>
+            
           </div>
+    
           <div className="flex-grow relative">
             <textarea
               className="w-full rounded-xl p-4 pr-12 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none transition-all duration-200 ease-in-out min-h-[100px]"
@@ -959,11 +964,11 @@ function App() {
   if (!user || !posts || !pallate) return <SuperSillyLoading />
   return (
     <Layout>
-      <div className="min-h-screen" style={{ backgroundColor: pallate.background }}>
-        <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="min-h-screen " style={{ backgroundColor: pallate.background }}>
+        <div className="max-w-3xl mx-auto px-4 py-8 ">
           <TopPanel pallate={pallate} user={user} friends={friends} messages={messages} />
           <div className="mb-8">
-            <CreatePost pallate={pallate} onPostSubmit={handlePostSubmit} />
+            <CreatePost pallate={pallate} onPostSubmit={handlePostSubmit} user={user} />
             <NewContentFeed
               pallate={pallate}
               handleComment={handleComment}
