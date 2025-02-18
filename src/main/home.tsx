@@ -289,7 +289,8 @@ const ModalCommentList: React.FC<ModalCommentListProps> = ({ comments, currentUs
         <div className="flex flex-col items-center justify-center py-4">
           <MessageSquare size={32} className="text-gray-500" />
           <p className="mt-2 text-sm" style={{ color: pallate.text }}>
-          איפה כל החברים? אין פה שום תגובות!           </p>
+            איפה כל החברים? אין פה שום תגובות!
+          </p>
         </div>
       ) : (
         <>
@@ -365,10 +366,18 @@ interface PostModalProps {
 const PostModal: React.FC<PostModalProps> = ({ post, onClose, pallate, currentUser, onAddComment }) => {
   const [isLiked, setIsLiked] = useState(currentUser.likes.includes(post.id))
   const [likes, setLikes] = useState(post.likes)
+  const [poster, setPoster] = useState<UserData | null>(null)
+  
   useEffect(() => {
     setIsLiked(currentUser.likes.includes(post.id))
     setLikes(post.likes)
   }, [post, currentUser])
+
+  // Fetch the post owner data so we can display their avatar and name.
+  useEffect(() => {
+    getUserById(post.owner).then((user) => setPoster(user))
+  }, [post.owner])
+
   const handleLike = () => {
     setIsLiked(!isLiked)
     setLikes((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1))
@@ -376,15 +385,26 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose, pallate, currentUs
   }
   const infoSection = (
     <div className="mb-4">
+      {poster && (
+        <div className="flex items-center mb-4">
+          <Avatar icon={poster.icon} className="w-10 h-10 rounded-full mr-2" />
+          <div>
+            <p className="font-semibold" style={{ color: pallate.text }}>{poster.name}</p>
+            <p className="text-xs" style={{ color: pallate.text }}>
+              {post.timestamp.toDate().toLocaleString()}
+            </p>
+          </div>
+        </div>
+      )}
       {post.content && post.content.trim() !== "" && (
-        <h2 className="text-lg font-semibold" style={{ color: pallate.text }}>
+        <h2 className="text-lg font-medium" style={{ color: pallate.text }}>
           {post.content}
         </h2>
       )}
       <div className="flex items-center mt-2">
         <button onClick={handleLike} className="flex items-center transition-colors duration-200">
           <Heart className="w-6 h-6" fill={isLiked ? "currentColor" : "none"} style={{ color: isLiked ? "red" : pallate.text }} />
-          <span className="ml-2" style={{ color: pallate.text }}>
+          <span className="mr-1" style={{ color: pallate.text }}>
             {likes}
           </span>
         </button>
@@ -819,11 +839,8 @@ const CreatePost = ({
       <form onSubmit={handleSubmit}>
         <div className="flex items-start space-x-3 space-x-reverse">
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white shadow-md">
-
-          <Avatar icon={user.icon} className="w-full h-full"></Avatar>
-            
+            <Avatar icon={user.icon} className="w-full h-full" />
           </div>
-    
           <div className="flex-grow relative">
             <textarea
               className="w-full rounded-xl p-4 pr-12 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none transition-all duration-200 ease-in-out min-h-[100px]"
