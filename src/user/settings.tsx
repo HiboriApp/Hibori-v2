@@ -41,7 +41,7 @@ function VideoSettings({ onVideoUpload, colors }: { onVideoUpload: (file: File) 
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm text-white font-medium mb-1">
+      <label className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
         העלאת וידאו
       </label>
       {/* Dropzone Area */}
@@ -67,8 +67,8 @@ function VideoSettings({ onVideoUpload, colors }: { onVideoUpload: (file: File) 
       {selectedFile && (
         <button
           onClick={handleUpload}
-          className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200"
-          style={{ backgroundColor: colors.primary, color: colors.text }}
+          className="mt-2 text-white flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200"
+          style={{ backgroundColor: colors.primary }}
         >
           <UploadCloud size={16} />
           העלה וידאו
