@@ -129,6 +129,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 }) => {
   const [newComment, setNewComment] = useState("")
   const [replyingTo, setReplyingTo] = useState<{ id: string; content: string; name: string } | null>(null)
+  const [expanded, setExpanded] = useState(false)
   const commentInputRef = useRef<HTMLTextAreaElement>(null)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -144,6 +145,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       handleSubmit(e)
     }
   }
+
+  // Show only 5 comments if not expanded
+  const visibleComments = expanded ? comments : comments.slice(0, 5)
+
   return (
     <div className="mt-6 rounded-lg p-4" style={{ color: pallate.text, backgroundColor: pallate.background }}>
       <h3 className="text-lg font-semibold mb-4" style={{ color: pallate.text }}>
@@ -186,7 +191,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {comments.map((comment) => (
+          {visibleComments.map((comment) => (
             <CommentItem
               key={comment.name + comment.timestamp.toString()}
               comment={comment}
@@ -194,6 +199,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               pallate={pallate}
             />
           ))}
+          {comments.length > 5 && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => setExpanded(!expanded)}
+                style={{ backgroundColor: pallate.secondary, color: pallate.text }}
+                className="px-4 py-2 rounded-full text-sm font-semibold"
+              >
+                {expanded ? "הסתר תגובות" : "הצג תגובות נוספות"}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -265,17 +281,19 @@ interface ModalCommentListProps {
   pallate: Pallate
 }
 const ModalCommentList: React.FC<ModalCommentListProps> = ({ comments, currentUser, pallate }) => {
+  const [expanded, setExpanded] = useState(false)
+  const visibleComments = expanded ? comments : comments.slice(0, 5)
   return (
     <div className="space-y-4">
       {comments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-4">
           <MessageSquare size={32} className="text-gray-500" />
           <p className="mt-2 text-sm" style={{ color: pallate.text }}>
-          איפה כל החברים? אין פה שום תגובות!          </p>
+          איפה כל החברים? אין פה שום תגובות!           </p>
         </div>
       ) : (
         <>
-          {comments.map((comment) => (
+          {visibleComments.map((comment) => (
             <CommentItem
               key={comment.name + comment.timestamp.toString()}
               comment={comment}
@@ -283,6 +301,17 @@ const ModalCommentList: React.FC<ModalCommentListProps> = ({ comments, currentUs
               pallate={pallate}
             />
           ))}
+          {comments.length > 5 && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => setExpanded(!expanded)}
+                style={{ backgroundColor: pallate.secondary, color: pallate.text }}
+                className="px-4 py-2 rounded-full text-sm font-semibold"
+              >
+                {expanded ? "הסתר תגובות" : "הצג תגובות נוספות"}
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
@@ -380,7 +409,8 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose, pallate, currentUs
           {infoSection}
           <ModalCommentInput onAddComment={onAddComment} currentUser={currentUser} pallate={pallate} />
           <div className="custom-scrollbar overflow-y-auto" style={{ maxHeight: "calc(80vh - 300px)" }}>
-            <ModalCommentList comments={post.comments.slice(0, 5)} currentUser={currentUser} pallate={pallate} />
+            {/* Pass all comments and let the list handle slicing */}
+            <ModalCommentList comments={post.comments} currentUser={currentUser} pallate={pallate} />
           </div>
         </div>
       </div>
@@ -405,7 +435,7 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose, pallate, currentUs
           <ModalCommentInput onAddComment={onAddComment} currentUser={currentUser} pallate={pallate} />
         </div>
         <div className="flex-1 p-4 custom-scrollbar overflow-y-auto" dir="rtl" style={{ backgroundColor: pallate.background }}>
-          <ModalCommentList comments={post.comments.slice(0, 5)} currentUser={currentUser} pallate={pallate} />
+          <ModalCommentList comments={post.comments} currentUser={currentUser} pallate={pallate} />
         </div>
       </div>
     </div>
@@ -918,7 +948,7 @@ function App() {
       const updatedPost = updatedPosts.find((p) => p.id === post.id)
       if (updatedPost) {
         updatePost(updatedPost)
-        // Update the modal post if it's open for the updated post
+        // If the post is open in the modal, update its state
         if (selectedPost && selectedPost.id === post.id) {
           setSelectedPost(updatedPost)
         }
