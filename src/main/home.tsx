@@ -134,7 +134,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddComment,
                 onKeyPress={handleKeyPress}
                 placeholder={replyingTo ? "הגב לתגובה זו..." : "הוסף תגובה..."}
                 className="w-full rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none min-h-[80px]"
-                style={{ color: pallate.text, backgroundColor: pallate.background }}
+                style={{ color: pallate.text, backgroundColor: pallate.secondary }}
               />
               <button
                 type="submit"

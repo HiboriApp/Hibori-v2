@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Trash2 } from 'lucide-react'
+import { Trash2, UploadCloud, Camera } from "lucide-react"
 import { getUser, type UserData, setUser as setUserInDB } from "../api/db"
 import { Avatar, GenerateIcons, type Icon, IconType } from "../api/icons"
 import Loading from "../components/Loading"
@@ -17,7 +17,7 @@ export interface Pallate {
   main: string
 }
 
-// VideoSettings Component
+// Modernized Video Upload Component with Dropzone
 function VideoSettings({ onVideoUpload, colors }: { onVideoUpload: (file: File) => void; colors: Pallate }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -41,37 +41,44 @@ function VideoSettings({ onVideoUpload, colors }: { onVideoUpload: (file: File) 
 
   return (
     <div className="space-y-4">
-      <div>
-        <label htmlFor="video-upload" className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
-          העלאת וידאו
-        </label>
-        <input
-          id="video-upload"
-          type="file"
-          accept="video/*"
-          onChange={handleFileChange}
-          ref={fileInputRef}
-          className="block w-full text-sm"
-          style={{ color: colors.text }}
-        />
+      <label className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
+        העלאת וידאו
+      </label>
+      {/* Dropzone Area */}
+      <div
+        onClick={() => fileInputRef.current?.click()}
+        className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition-colors duration-200"
+        style={{ borderColor: colors.text, backgroundColor: colors.background }}
+      >
+        {selectedFile ? (
+          <span className="text-sm" style={{ color: colors.text }}>
+            נבחר: {selectedFile.name}
+          </span>
+        ) : (
+          <>
+            <UploadCloud size={32} color={colors.text} />
+            <span className="mt-2 text-sm" style={{ color: colors.text }}>
+              לחץ לבחירת וידאו
+            </span>
+          </>
+        )}
       </div>
+      <input type="file" accept="video/*" onChange={handleFileChange} ref={fileInputRef} className="hidden" />
       {selectedFile && (
-        <div>
-          <p className="text-sm" style={{ color: colors.text }}>נבחר: {selectedFile.name}</p>
-          <button
-            onClick={handleUpload}
-            className="mt-2 px-4 py-2 rounded-lg transition-colors duration-200"
-            style={{ backgroundColor: colors.primary, color: colors.text }}
-          >
-            העלה וידאו
-          </button>
-        </div>
+        <button
+          onClick={handleUpload}
+          className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200"
+          style={{ backgroundColor: colors.primary, color: colors.text }}
+        >
+          <UploadCloud size={16} />
+          העלה וידאו
+        </button>
       )}
     </div>
   )
 }
 
-// ColorPaletteSettings Component
+// Simplified Color Settings – Only Change the Theme Color with Visual Feedback
 function ColorPaletteSettings({
   initialColors,
   onSave,
@@ -79,56 +86,59 @@ function ColorPaletteSettings({
   initialColors: Pallate
   onSave: (colors: Pallate) => void
 }) {
-  const [colors, setColors] = useState(initialColors)
+  // Allow changing only the primary color (labeled "צבע נושא")
+  const [themeColor, setThemeColor] = useState(initialColors.primary)
 
-  const handleColorChange = (colorType: keyof Pallate, value: string) => {
-    setColors((prevColors) => ({
-      ...prevColors,
-      [colorType]: value,
-    }))
+  const handleColorChange = (value: string) => {
+    setThemeColor(value)
+  }
+
+  const handleSave = () => {
+    const newColors = { ...initialColors, primary: themeColor }
+    onSave(newColors)
+  }
+
+  const handleReset = () => {
+    const defaultColors = DefaultPallate()
+    setThemeColor(defaultColors.primary)
+    onSave(defaultColors)
   }
 
   return (
     <div className="space-y-4">
-      {Object.entries(colors).map(([colorType, colorValue]) => {
-        return <div key={colorType}>
-          <label htmlFor={`color-${colorType}`} className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
-            {colorType.charAt(0).toUpperCase() + colorType.slice(1)}
-          </label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="color"
-              id={`color-${colorType}`}
-              value={colorValue}
-              onChange={(e) => handleColorChange(colorType as keyof Pallate, e.target.value)}
-              className="h-8 w-8 rounded-full overflow-hidden"
-            />
-            <input
-              type="text"
-              value={colorValue}
-              onChange={(e) => handleColorChange(colorType as keyof Pallate, e.target.value)}
-              className="flex-grow p-2 border rounded-lg transition-all duration-200"
-              style={{ borderColor: colors.text, color: colors.text, backgroundColor: colors.background }}
-            />
-          </div>
-        </div>
-    })}
-    <div className="h-full flex">
-    <button
-        onClick={() => onSave(colors)}
-        className="px-4 text-white py-2 rounded-lg transition-colors duration-200"
-        style={{ backgroundColor: colors.tertiary,  }}
-      >
-        שמור הגדרות צבעים
-      </button>
-      <button
-        onClick={() => {setColors(DefaultPallate());onSave(DefaultPallate())}}
-        className="px-4 text-white py-2 rounded-lg transition-colors duration-200 mr-auto"
-        style={{ backgroundColor: colors.primary, }}
-      >
-        אתחול הצבעים
-      </button>
-    </div>
+      <div className="flex items-center gap-3">
+        <label htmlFor="theme-color" className="text-sm font-medium" style={{ color: initialColors.text }}>
+          צבע נושא
+        </label>
+        {/* Color Preview Circle */}
+        <div
+          className="w-6 h-6 rounded-xl "
+          style={{ backgroundColor: themeColor }}
+        ></div>
+      </div>
+      <input
+        type="color"
+        id="theme-color"
+        value={themeColor}
+        onChange={(e) => handleColorChange(e.target.value)}
+        className="h-10 rounded-xl cursor-pointer w-full"
+      />
+      <div className="flex gap-4 mt-2">
+        <button
+          onClick={handleSave}
+          className="px-4 py-2 rounded-lg text-white transition-colors duration-200"
+          style={{ backgroundColor: initialColors.primary }}
+        >
+          שמור צבע
+        </button>
+        <button
+          onClick={handleReset}
+          className="px-4 py-2 rounded-lg text-white transition-colors duration-200"
+          style={{ backgroundColor: initialColors.primary }}
+        >
+          אתחול צבע
+        </button>
+      </div>
     </div>
   )
 }
@@ -143,18 +153,12 @@ export default function SettingsPage() {
   const [colors, setColors] = useState(DefaultPallate())
 
   const handleChangePFP = async () => {
-    if (!fileRef.current) {
-      return
-    }
-    fileRef.current?.click()
+    if (!fileRef.current) return
+    fileRef.current.click()
     fileRef.current.onchange = () => {
-      if (!fileRef.current) {
-        return
-      }
+      if (!fileRef.current) return
       const file = fileRef.current.files && fileRef.current.files.length > 0 ? fileRef.current.files[0] : null
-      if (!file) {
-        return
-      }
+      if (!file) return
       const reader = new FileReader()
       reader.onload = async () => {
         const icon = reader.result as string
@@ -166,24 +170,21 @@ export default function SettingsPage() {
   }
 
   const handleVideoUpload = async (file: File) => {
-    if (file && user){
-      const reader = new FileReader();
+    if (file && user) {
+      const reader = new FileReader()
       reader.onload = async () => {
-        const video = reader.result as string;
+        const video = reader.result as string
         setUser({
           ...user,
           background: await uploadString(video),
-        });
+        })
       }
-    }
-    if (user) {
+      reader.readAsDataURL(file)
     }
   }
 
   const handleSave = async () => {
-    if (!user) {
-      return
-    }
+    if (!user) return
     await setUserInDB({
       ...user,
       pallate: colors,
@@ -220,7 +221,6 @@ export default function SettingsPage() {
       <div dir="rtl" className="min-h-screen p-8" style={{ color: colors.text, backgroundColor: colors.background }}>
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8" style={{ color: colors.primary }}>הגדרות</h1>
-
           <div className="space-y-8">
             {/* Profile Settings */}
             <section className="p-6 rounded-xl shadow-md" style={{ backgroundColor: colors.main }}>
@@ -260,13 +260,13 @@ export default function SettingsPage() {
                       </div>
                     )}
                   </div>
-
                   <input type="file" accept="image/*" ref={fileRef} style={{ display: "none" }} />
                   <button
                     onClick={handleChangePFP}
-                    className="px-4 py-2 rounded-lg transition-colors duration-200"
-                    style={{ backgroundColor: colors.primary, color: colors.text }}
+                    className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                    style={{ backgroundColor: colors.primary}}
                   >
+                    <Camera size={16} />
                     {hasProfileImage ? "שנה תמונה" : "הוסף תמונה"}
                   </button>
                 </div>
@@ -322,7 +322,9 @@ export default function SettingsPage() {
               <h2 className="text-xl font-semibold mb-4" style={{ color: colors.primary }}>העדפות התראות</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium" style={{ color: colors.text }}>התראות דחיפה</span>
+                  <span className="text-sm font-medium" style={{ color: colors.text }}>
+                    התראות דחיפה
+                  </span>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       checked={user.wantsNotifications}
@@ -344,8 +346,13 @@ export default function SettingsPage() {
 
             {/* Color Palette Settings */}
             <section className="p-6 rounded-xl shadow-md" style={{ backgroundColor: colors.main }}>
-              <h2 className="text-xl font-semibold mb-4" style={{ color: colors.primary }}>הגדרות צבעים</h2>
-              <ColorPaletteSettings initialColors={colors} onSave={(newColors) => {console.log(newColors);setColors(newColors)}} />
+              <h2 className="text-xl font-semibold mb-4" style={{ color: colors.primary }}>הגדרות צבע</h2>
+              <ColorPaletteSettings
+                initialColors={colors}
+                onSave={(newColors) => {
+                  setColors(newColors)
+                }}
+              />
             </section>
 
             {/* Save Button */}
@@ -353,8 +360,8 @@ export default function SettingsPage() {
               <button
                 onClick={handleSave}
                 type="button"
-                className="px-6  text-white py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 text-lg font-semibold"
-                style={{ backgroundColor: colors.primary,  }}
+                className="px-6 text-white py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 text-lg font-semibold"
+                style={{ backgroundColor: colors.primary }}
               >
                 שמור שינויים
               </button>
