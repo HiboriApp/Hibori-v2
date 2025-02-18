@@ -167,24 +167,13 @@ export default function Home() {
                     {found.name}
                   </h3>
                 </div>
-                <div className="flex flex-col space-y-2">
+                <div className="flex flex-col ">
+                
                   <button
                     className="p-2 rounded-full transition-colors duration-300 hover:bg-opacity-80"
-                    onClick={() =>
-                      navigate("/messages/" + openChatName(user.id, found.id))
-                    }
                     style={{
                       color: pallate.primary,
                       backgroundColor: `${pallate.primary}20`,
-                    }}
-                  >
-                    <MessageCircle size={24} />
-                  </button>
-                  <button
-                    className="p-2 rounded-full transition-colors duration-300 hover:bg-opacity-80"
-                    style={{
-                      color: pallate.secondary,
-                      backgroundColor: `${pallate.secondary}20`,
                     }}
                   >
                     <UserPlus size={24} />
