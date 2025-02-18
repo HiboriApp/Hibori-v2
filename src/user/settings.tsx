@@ -41,7 +41,7 @@ function VideoSettings({ onVideoUpload, colors }: { onVideoUpload: (file: File) 
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
+      <label className="block text-sm text-white font-medium mb-1">
         העלאת וידאו
       </label>
       {/* Dropzone Area */}
