@@ -1,5 +1,5 @@
-import type React from "react"
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
+import ReactDOM from "react-dom"
 import {
   Loader2,
   Heart,
@@ -16,6 +16,7 @@ import {
   Trash2,
   MoreVertical,
   Smile,
+  Search,
 } from "lucide-react"
 import { Layout } from "../components/layout"
 import {
@@ -44,6 +45,30 @@ import { Timestamp } from "firebase/firestore"
 import { type Pallate, DefaultPallate, GetPallate } from "../api/settings"
 import { uploadString } from "../api/cloudinary"
 
+// Custom scrollbar CSS – inject into document head (or include in your stylesheet)
+const customScrollbarStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 10px;
+    border: 2px solid #f1f1f1;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #a8a8a8;
+  }
+`
+if (typeof document !== "undefined") {
+  const style = document.createElement("style")
+  style.innerHTML = customScrollbarStyles
+  document.head.appendChild(style)
+}
+
 function LoadingSpinner() {
   return (
     <div className="flex justify-center items-center h-24">
@@ -61,7 +86,10 @@ interface CommentProps {
 const CommentItem: React.FC<CommentProps> = ({ comment, pallate }) => {
   return (
     <div className="mt-4" style={{ color: pallate.text, backgroundColor: pallate.background }}>
-      <div className="bg-white rounded-lg shadow-sm p-4 transition-all duration-300 hover:shadow-md" style={{ backgroundColor: pallate.background }}>
+      <div
+        className="bg-white rounded-lg shadow-sm p-4 transition-all duration-300 hover:shadow-md"
+        style={{ backgroundColor: pallate.background }}
+      >
         <div className="flex items-start space-x-3 space-x-reverse">
           <Avatar
             icon={comment.icon}
@@ -75,7 +103,9 @@ const CommentItem: React.FC<CommentProps> = ({ comment, pallate }) => {
               {comment.message}
             </p>
             <div className="flex items-center mt-3 space-x-4 space-x-reverse text-xs text-gray-500">
-              <span style={{ color: pallate.text }}>{comment.timestamp.toDate().toLocaleString()}</span>
+              <span style={{ color: pallate.text }}>
+                {comment.timestamp.toDate().toLocaleString()}
+              </span>
             </div>
           </div>
         </div>
@@ -91,15 +121,16 @@ interface CommentSectionProps {
   pallate: Pallate
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddComment, currentUser, pallate }) => {
+// CommentSection for use outside the modal.
+const CommentSection: React.FC<CommentSectionProps> = ({
+  comments,
+  onAddComment,
+  currentUser,
+  pallate,
+}) => {
   const [newComment, setNewComment] = useState("")
-  const [replyingTo, setReplyingTo] = useState<{
-    id: string
-    content: string
-    name: string
-  } | null>(null)
+  const [replyingTo, setReplyingTo] = useState<{ id: string; content: string; name: string } | null>(null)
   const commentInputRef = useRef<HTMLTextAreaElement>(null)
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (newComment.trim()) {
@@ -108,17 +139,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddComment,
       setReplyingTo(null)
     }
   }
-
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       handleSubmit(e)
     }
   }
-
   return (
     <div className="mt-6 rounded-lg p-4" style={{ color: pallate.text, backgroundColor: pallate.background }}>
-      <h3 className="text-lg font-semibold mb-4" style={{ color: pallate.text }}>תגובות</h3>
+      <h3 className="text-lg font-semibold mb-4" style={{ color: pallate.text }}>
+        תגובות
+      </h3>
       <form onSubmit={handleSubmit} className="mb-6">
         <div className="flex items-start space-x-2 space-x-reverse">
           <Avatar
@@ -147,16 +178,117 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments, onAddComment,
           </div>
         </div>
       </form>
-      <div className="space-y-4">
-        {comments.map((comment) => (
-          <CommentItem
-            key={comment.name + comment.timestamp.toString()}
-            comment={comment}
-            currentUser={currentUser}
-            pallate={pallate}
-          />
-        ))}
+      {comments.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-4">
+          <MessageSquare size={32} className="text-gray-500" />
+          <p className="mt-2 text-sm" style={{ color: pallate.text }}>
+            אין תגובות, היה הראשון להגיב!
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {comments.map((comment) => (
+            <CommentItem
+              key={comment.name + comment.timestamp.toString()}
+              comment={comment}
+              currentUser={currentUser}
+              pallate={pallate}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ModalCommentInput: Fixed comment input inside the modal.
+interface ModalCommentInputProps {
+  onAddComment: (content: string, replyTo?: { id: string; content: string; name: string }) => void
+  currentUser: UserData
+  pallate: Pallate
+}
+const ModalCommentInput: React.FC<ModalCommentInputProps> = ({
+  onAddComment,
+  currentUser,
+  pallate,
+}) => {
+  const [newComment, setNewComment] = useState("")
+  const [replyingTo, setReplyingTo] = useState<{ id: string; content: string; name: string } | null>(null)
+  const commentInputRef = useRef<HTMLTextAreaElement>(null)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newComment.trim()) {
+      onAddComment(newComment, replyingTo || undefined)
+      setNewComment("")
+      setReplyingTo(null)
+    }
+  }
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit(e)
+    }
+  }
+  return (
+    <form onSubmit={handleSubmit} className="mb-4">
+      <div className="flex items-start space-x-2 space-x-reverse">
+        <Avatar
+          icon={currentUser.icon}
+          className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm"
+        />
+        <div className="flex-grow relative">
+          <div className="relative">
+            <textarea
+              ref={commentInputRef}
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={replyingTo ? "הגב לתגובה זו..." : "הוסף תגובה..."}
+              className="w-full rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none min-h-[80px]"
+              style={{ color: pallate.text, backgroundColor: pallate.secondary }}
+            />
+            <button
+              type="submit"
+              className="absolute bottom-2 right-2 text-white rounded-full p-2 hover:opacity-90 transition-colors duration-200"
+              style={{ backgroundColor: pallate.primary }}
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
+    </form>
+  )
+}
+
+// ModalCommentList: Scrollable list of comments inside the modal.
+interface ModalCommentListProps {
+  comments: Comment[]
+  currentUser: UserData
+  pallate: Pallate
+}
+const ModalCommentList: React.FC<ModalCommentListProps> = ({ comments, currentUser, pallate }) => {
+  return (
+    <div className="space-y-4">
+      {comments.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-4">
+          <MessageSquare size={32} className="text-gray-500" />
+          <p className="mt-2 text-sm" style={{ color: pallate.text }}>
+            אין תגובות, היה הראשון להגיב!
+          </p>
+        </div>
+      ) : (
+        <>
+          {comments.map((comment) => (
+            <CommentItem
+              key={comment.name + comment.timestamp.toString()}
+              comment={comment}
+              currentUser={currentUser}
+              pallate={pallate}
+            />
+          ))}
+        </>
+      )}
     </div>
   )
 }
@@ -166,12 +298,13 @@ interface DeleteModalProps {
   onClose: () => void
   onConfirm: () => void
 }
-
 const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center" onClick={onClose}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
+      onClick={onClose}
+    >
       <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">מחיקת פוסט</h2>
@@ -187,10 +320,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm })
           >
             ביטול
           </button>
-          <button
-            onClick={onConfirm}
-            className="flex items-center bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-200"
-          >
+          <button className="flex items-center bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-200" onClick={onConfirm}>
             <Trash2 className="w-4 h-4 ml-2" />
             אישור
           </button>
@@ -200,34 +330,132 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onConfirm })
   )
 }
 
-const ContentCard: React.FC<{
+// PostModal Component: Renders a single post modal. This is rendered via a portal.
+interface PostModalProps {
+  post: Post
+  onClose: () => void
+  pallate: Pallate
+  currentUser: UserData
+  onAddComment: (content: string, replyTo?: { id: string; content: string; name: string }) => void
+}
+const PostModal: React.FC<PostModalProps> = ({ post, onClose, pallate, currentUser, onAddComment }) => {
+  const [isLiked, setIsLiked] = useState(currentUser.likes.includes(post.id))
+  const [likes, setLikes] = useState(post.likes)
+  useEffect(() => {
+    setIsLiked(currentUser.likes.includes(post.id))
+    setLikes(post.likes)
+  }, [post, currentUser])
+  const handleLike = () => {
+    setIsLiked(!isLiked)
+    setLikes((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1))
+    likePost(post, currentUser, !isLiked)
+  }
+  const infoSection = (
+    <div className="mb-4">
+      {post.content && post.content.trim() !== "" && (
+        <h2 className="text-lg font-semibold" style={{ color: pallate.text }}>
+          {post.content}
+        </h2>
+      )}
+      <div className="flex items-center mt-2">
+        <button onClick={handleLike} className="flex items-center transition-colors duration-200">
+          <Heart className="w-6 h-6" fill={isLiked ? "currentColor" : "none"} style={{ color: isLiked ? "red" : pallate.text }} />
+          <span className="ml-2" style={{ color: pallate.text }}>
+            {likes}
+          </span>
+        </button>
+      </div>
+    </div>
+  )
+  const desktopModal = (
+    <div
+      className="hidden md:flex fixed inset-0 z-50 bg-black bg-opacity-75 items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <button onClick={onClose} className="absolute top-4 right-4 text-white z-50">
+        <X size={32} />
+      </button>
+      <div className="relative w-full max-w-5xl bg-white rounded-lg overflow-hidden flex flex-row" onClick={(e) => e.stopPropagation()}>
+        <div className="flex-1 bg-black flex items-center justify-center">
+          {post.file && post.file.type === fileType.image && (
+            <img src={post.file.content} alt={post.content} className="w-full h-full object-contain" />
+          )}
+        </div>
+        <div className="w-full md:w-[400px] p-4" dir="rtl" style={{ backgroundColor: pallate.background }}>
+          {infoSection}
+          <ModalCommentInput onAddComment={onAddComment} currentUser={currentUser} pallate={pallate} />
+          <div className="custom-scrollbar overflow-y-auto" style={{ maxHeight: "calc(80vh - 300px)" }}>
+            <ModalCommentList comments={post.comments.slice(0, 5)} currentUser={currentUser} pallate={pallate} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+  const mobileModal = (
+    <div
+      className="flex md:hidden fixed inset-0 z-50 bg-black"
+      onClick={onClose}
+    >
+      <button onClick={onClose} className="absolute top-4 right-4 text-white z-50">
+        <X size={32} />
+      </button>
+      <div className="flex flex-col h-screen bg-white" onClick={(e) => e.stopPropagation()}>
+        <div className="w-full h-1/2 bg-black flex items-center justify-center">
+          {post.file && post.file.type === fileType.image && (
+            <img src={post.file.content} alt={post.content} className="w-full h-full object-contain" />
+          )}
+        </div>
+        <div className="flex-none p-4" dir="rtl" style={{ backgroundColor: pallate.background }}>
+          {infoSection}
+          <ModalCommentInput onAddComment={onAddComment} currentUser={currentUser} pallate={pallate} />
+        </div>
+        <div className="flex-1 p-4 custom-scrollbar overflow-y-auto" dir="rtl" style={{ backgroundColor: pallate.background }}>
+          <ModalCommentList comments={post.comments.slice(0, 5)} currentUser={currentUser} pallate={pallate} />
+        </div>
+      </div>
+    </div>
+  )
+  return ReactDOM.createPortal(
+    <>
+      {desktopModal}
+      {mobileModal}
+    </>,
+    document.body
+  )
+}
+
+interface ContentCardProps {
   item: Post
   userLiked: boolean
   handleComment: (content: string, post: Post, replyTo?: { id: string; content: string; name: string }) => void
   user: UserData
   deletePost: (post: string) => void
   pallate: Pallate
-}> = ({ item, deletePost, user, userLiked, handleComment, pallate }) => {
+  onImageClick?: (post: Post) => void
+}
+const ContentCard: React.FC<ContentCardProps> = ({
+  item,
+  deletePost,
+  user,
+  userLiked,
+  handleComment,
+  pallate,
+  onImageClick,
+}) => {
   const [isLiked, setIsLiked] = useState(userLiked)
   const [likes, setLikes] = useState(item.likes)
   const [poster, setPoster] = useState<UserData | undefined>()
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-
   useEffect(() => {
     getUserById(item.owner).then((user) => setPoster(user))
   }, [item.owner])
-
-  if (!poster) {
-    return null
-  }
-
+  if (!poster) return null
   const handleLike = () => {
     setIsLiked(!isLiked)
     setLikes((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1))
     likePost(item, user, !isLiked)
   }
-
   const handleShare = () => {
     if (navigator.share) {
       navigator
@@ -235,31 +463,19 @@ const ContentCard: React.FC<{
           title: `פוסט מאת ${poster.name}`,
           text: item.content,
         })
-        .then(() => {
-          console.log("Successfully shared")
-        })
-        .catch((error) => {
-          console.log("Error sharing:", error)
-        })
+        .then(() => console.log("Successfully shared"))
+        .catch((error) => console.log("Error sharing:", error))
     } else {
       alert("שיתוף לא נתמך בדפדפן זה")
     }
   }
-
-  const handleDeleteClick = () => {
-    setIsDeleteModalOpen(true)
-  }
-
+  const handleDeleteClick = () => setIsDeleteModalOpen(true)
   const handleDeleteConfirm = () => {
     deletePost(item.id)
     setIsDeleteModalOpen(false)
   }
-
   return (
-    <div
-      className="shadow-lg rounded-xl overflow-hidden transition-all duration-300"
-      style={{ backgroundColor: pallate.main }}
-    >
+    <div className="shadow-lg rounded-xl overflow-hidden transition-all duration-300" style={{ backgroundColor: pallate.main }}>
       <div className="p-4 sm:p-6">
         <div className="flex items-center mb-4">
           <Avatar
@@ -275,30 +491,19 @@ const ContentCard: React.FC<{
             </p>
           </div>
           <div className="relative">
-            <button
-              className="hover:bg-gray-100 rounded-full p-2 transition-colors duration-200"
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
+            <button className="hover:bg-gray-100 rounded-full p-2 transition-colors duration-200" onClick={() => setIsExpanded(!isExpanded)}>
               <MoreVertical className="w-5 h-5 text-gray-500" />
             </button>
             {isExpanded && (
               <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                 <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                   {item.owner === user.id && (
-                    <button
-                      onClick={handleDeleteClick}
-                      className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100 hover:text-red-700 flex items-center justify-center"
-                      role="menuitem"
-                    >
+                    <button onClick={handleDeleteClick} className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-100 hover:text-red-700 flex items-center justify-center" role="menuitem">
                       <Trash2 className="w-4 h-4 ml-2" />
                       מחק פוסט
                     </button>
                   )}
-                  <button
-                    onClick={handleShare}
-                    className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center justify-center"
-                    role="menuitem"
-                  >
+                  <button onClick={handleShare} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center justify-center" role="menuitem">
                     <Share2 className="w-4 h-4 ml-2" />
                     שתף פוסט
                   </button>
@@ -310,9 +515,13 @@ const ContentCard: React.FC<{
         <p className="text-sm sm:text-base text-gray-700 mb-4" style={{ color: pallate.text }}>
           {item.content}
         </p>
-        {item.file && (
-          <FileDisplay file={item.file} className="rounded-xl w-full object-cover max-h-96 mb-4"></FileDisplay>
-        )}
+        {item.file && item.file.type === fileType.image ? (
+          <div onClick={() => onImageClick && onImageClick(item)} className="cursor-pointer">
+            <FileDisplay file={item.file} className="rounded-xl w-full object-cover max-h-96 mb-4" />
+          </div>
+        ) : item.file ? (
+          <FileDisplay file={item.file} className="rounded-xl w-full object-cover max-h-96 mb-4" />
+        ) : null}
         <div className="flex justify-between items-center text-gray-600 mb-4">
           <button className="flex items-center hover:text-primary transition-colors duration-200" onClick={() => {}}>
             <MessageSquare className="w-5 h-5 ml-1" style={{ color: pallate.primary }} />
@@ -320,12 +529,7 @@ const ContentCard: React.FC<{
               {item.comments.length} תגובות
             </span>
           </button>
-          <button
-            className={`flex items-center transition-colors duration-200 ${
-              isLiked ? "text-red-500" : "hover:text-red-500"
-            }`}
-            onClick={handleLike}
-          >
+          <button className={`flex items-center transition-colors duration-200 ${isLiked ? "text-red-500" : "hover:text-red-500"}`} onClick={handleLike}>
             <Heart className="w-5 h-5 ml-1" fill={isLiked ? "currentColor" : "none"} />
             <span className="text-sm" style={{ color: pallate.text }}>
               {likes}
@@ -339,35 +543,37 @@ const ContentCard: React.FC<{
           pallate={pallate}
         />
       </div>
-      <DeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-      />
+      <DeleteModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDeleteConfirm} />
     </div>
   )
 }
 
-function NewContentFeed({
-  content,
-  handleDelete,
-  handleComment,
-  user,
-  pallate,
-  handleBottom
-}: {
+interface NewContentFeedProps {
   content: Post[]
   user: UserData
   handleComment: (content: string, post: Post, replyTo?: { id: string; content: string; name: string }) => void
   handleDelete: (post: string) => void
   pallate: Pallate
   handleBottom: () => void
-}) {
-  if (content.length === 0) {
-    return <LoadingSpinner />
-  }
+  onImageClick: (post: Post) => void
+}
+function NewContentFeed({
+  content,
+  handleDelete,
+  handleComment,
+  user,
+  pallate,
+  handleBottom,
+  onImageClick,
+}: NewContentFeedProps) {
+  if (content.length === 0) return <LoadingSpinner />
   return (
-    <div className="space-y-6" ref={(node) => {if (node) node.onscrollend = () => handleBottom()}}>
+    <div
+      className="space-y-6"
+      ref={(node) => {
+        if (node) node.onscrollend = () => handleBottom()
+      }}
+    >
       {content.map((item) => (
         <ContentCard
           handleComment={handleComment}
@@ -377,6 +583,7 @@ function NewContentFeed({
           key={item.id}
           item={item}
           pallate={pallate}
+          onImageClick={onImageClick}
         />
       ))}
     </div>
@@ -396,7 +603,6 @@ function TopPanel({
 }) {
   const navigate = useNavigate()
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null)
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: pallate.main }}>
@@ -430,15 +636,15 @@ function TopPanel({
             useEffect(() => {
               getUserById(message.user).then((u) => setMessageUser(u))
             }, [message.user])
-            if (!messageUser) {
-              return null
-            }
+            if (!messageUser) return null
             return (
               <li
                 key={message.chat.id}
                 className="bg-white rounded-lg shadow-sm p-2 transition-all duration-300 ease-in-out cursor-pointer hover:bg-gray-50"
                 style={{ backgroundColor: pallate.background }}
-                onClick={() => setExpandedMessage(message.chat.id === expandedMessage ? null : message.chat.id)}
+                onClick={() =>
+                  setExpandedMessage(message.chat.id === expandedMessage ? null : message.chat.id)
+                }
               >
                 <div className="flex items-center">
                   <Avatar className="w-8 h-8 rounded-full ml-2" icon={messageUser.icon} />
@@ -457,12 +663,12 @@ function TopPanel({
                   />
                 </div>
                 {expandedMessage === message.chat.id && (
-                  <div className="mt-2 p-2  rounded-md">
+                  <div className="mt-2 p-2 rounded-md">
                     <p className="text-sm text-gray-700" style={{ color: pallate.text }}>
                       {message.chat.lastMessage && message.chat.lastMessage.content}
                     </p>
                     <button
-                      className=" text-sm bg-white text-black font-semibold hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center rounded-full px-4 py-2 w-full"
+                      className="text-sm bg-white text-black font-semibold hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center rounded-full px-4 py-2 w-full"
                       onClick={(e) => {
                         e.stopPropagation()
                         navigate(`/messages/${message.chat.id}`)
@@ -489,8 +695,9 @@ function TopPanel({
             <li
               key={notification.timestamp.toDate().getTime() + i}
               className="flex items-center bg-white rounded-lg p-2 shadow-sm hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+              style={{ backgroundColor: pallate.background }}
             >
-              <Avatar icon={notification.icon} className="w-8 h-8 rounded-full ml-2"></Avatar>
+              <Avatar icon={notification.icon} className="w-8 h-8 rounded-full ml-2" />
               <div className="flex-grow">
                 <p className="text-xs text-gray-700" style={{ color: pallate.text }}>
                   {notification.content}
@@ -517,37 +724,29 @@ const CreatePost = ({
   pallate,
 }: {
   pallate: Pallate
-  onPostSubmit: (newPost: {
-    content: string
-    file: UploadedFile | undefined
-  }) => void
+  onPostSubmit: (newPost: { content: string; file: UploadedFile | undefined }) => void
 }) => {
   const [content, setContent] = useState("")
   const [file, setFile] = useState<UploadedFile | undefined>()
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (content.trim() === "" && !file) return
-
     onPostSubmit({ content, file })
     setContent("")
     setFile(undefined)
   }
-  
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: fileType) => {
     const file = e.target.files?.[0]
     if (file) {
       const fileName = file.name
       const reader = new FileReader()
       reader.onloadend = async () => {
-        const file = reader.result as string
-        setFile({ type, content: await uploadString(file), name: fileName } as UploadedFile)
+        const fileContent = reader.result as string
+        setFile({ type, content: await uploadString(fileContent), name: fileName } as UploadedFile)
       }
       reader.readAsDataURL(file)
     }
   }
-
   return (
     <div className="shadow-lg rounded-xl p-4 sm:p-6 mb-6" style={{ backgroundColor: pallate.main }}>
       <form onSubmit={handleSubmit}>
@@ -572,10 +771,7 @@ const CreatePost = ({
                 <input type="file" accept="video/*" className="hidden" onChange={(file) => handleImageUpload(file, fileType.video)} />
                 <Video size={20} />
               </label>
-              <button
-                type="button"
-                className="text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2"
-              >
+              <button type="button" className="text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2">
                 <Smile size={20} />
               </button>
             </div>
@@ -601,7 +797,7 @@ const CreatePost = ({
           <button
             type="submit"
             className="text-white font-bold px-6 py-2 rounded-full hover:opacity-90 transition-opacity duration-200 text-sm flex items-center shadow-md"
-            style={{ backgroundColor: pallate.primary}}
+            style={{ backgroundColor: pallate.primary }}
           >
             <Send className="w-4 h-4 ml-2" />
             פרסם
@@ -620,7 +816,7 @@ function App() {
   const [posts, setPosts] = useState<Post[] | undefined>()
   const postsLimit = 10
   const navigate = useNavigate()
-
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   useEffect(() => {
     const fetchData = async () => {
       const userData = await getUser()
@@ -648,20 +844,12 @@ function App() {
     return unsubscribe
   }, [navigate])
   const handleDelete = (id: string) => {
-    if (!user) {
-      return
-    }
+    if (!user) return
     deletePost(id)
     setPosts(posts?.filter((post) => post.id !== id))
   }
-
-  const handlePostSubmit = (newPost: {
-    content: string
-    file: UploadedFile | undefined
-  }) => {
-    if (!user) {
-      return
-    }
+  const handlePostSubmit = (newPost: { content: string; file: UploadedFile | undefined }) => {
+    if (!user) return
     const post: Post = {
       id: user.id + Date.now(),
       timestamp: Timestamp.fromDate(new Date()),
@@ -674,36 +862,26 @@ function App() {
     postStuff(post)
     setPosts([...(posts || []), post])
   }
-
-  const handleComment = (message: string, post: Post) => {
-    if (!user) {
-      return
-    }
+  const handleComment = (message: string, post: Post, replyTo?: { id: string; content: string; name: string }) => {
+    if (!user) return
     const newComment: Comment = {
       message,
       name: user.name,
       icon: user.icon,
       timestamp: Timestamp.now(),
     }
-
     const updatedPosts = posts?.map((p) => {
-      if (p.id === post.id) {
-        return { ...p, comments: [...p.comments, newComment] }
-      }
+      if (p.id === post.id) return { ...p, comments: [...p.comments, newComment] }
       return p
     })
-
     setPosts(updatedPosts)
     if (updatedPosts) {
       const updatedPost = updatedPosts.find((p) => p.id === post.id)
-      if (updatedPost) {
-        updatePost(updatedPost)
-      }
+      if (updatedPost) updatePost(updatedPost)
     }
   }
-
-  if (!user || !posts || !pallate) return <SuperSillyLoading></SuperSillyLoading>
-
+  const openModalForPost = (post: Post) => setSelectedPost(post)
+  if (!user || !posts || !pallate) return <SuperSillyLoading />
   return (
     <Layout>
       <div className="min-h-screen" style={{ backgroundColor: pallate.background }}>
@@ -718,13 +896,24 @@ function App() {
               user={user}
               handleDelete={handleDelete}
               content={posts.sort((a, b) => b.timestamp.toDate().getTime() - a.timestamp.toDate().getTime())}
+              onImageClick={openModalForPost}
             />
           </div>
         </div>
       </div>
+      {selectedPost && (
+        <PostModal
+          post={selectedPost}
+          onClose={() => setSelectedPost(null)}
+          pallate={pallate}
+          currentUser={user}
+          onAddComment={(content, replyTo) => {
+            handleComment(content, selectedPost, replyTo)
+          }}
+        />
+      )}
     </Layout>
   )
 }
 
 export default App
-
