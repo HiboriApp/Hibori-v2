@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Trash2, Camera, Palette } from "lucide-react"
+import { Trash2, Camera } from "lucide-react"
 import { getUser, type UserData, setUser as setUserInDB } from "../api/db"
 import { Avatar, GenerateIcons, type Icon, IconType } from "../api/icons"
 import Loading from "../components/Loading"

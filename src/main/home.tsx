@@ -15,7 +15,6 @@ import {
   ChevronDown,
   Trash2,
   MoreVertical,
-  Smile,
 } from "lucide-react"
 import { Layout } from "../components/layout"
 import {
