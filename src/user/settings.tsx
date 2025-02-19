@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Trash2, UploadCloud, Camera } from "lucide-react"
+import { Trash2, Camera } from "lucide-react"
 import { getUser, type UserData, setUser as setUserInDB } from "../api/db"
 import { Avatar, GenerateIcons, type Icon, IconType } from "../api/icons"
 import Loading from "../components/Loading"
@@ -17,66 +17,6 @@ export interface Pallate {
   main: string
 }
 
-// Modernized Video Upload Component with Dropzone
-function VideoSettings({ onVideoUpload, colors }: { onVideoUpload: (file: File) => void; colors: Pallate }) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-    }
-  }
-
-  const handleUpload = () => {
-    if (selectedFile) {
-      onVideoUpload(selectedFile)
-      setSelectedFile(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""
-      }
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      <label className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
-        העלאת וידאו
-      </label>
-      {/* Dropzone Area */}
-      <div
-        onClick={() => fileInputRef.current?.click()}
-        className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition-colors duration-200"
-        style={{ borderColor: colors.text, backgroundColor: colors.background }}
-      >
-        {selectedFile ? (
-          <span className="text-sm" style={{ color: colors.text }}>
-            נבחר: {selectedFile.name}
-          </span>
-        ) : (
-          <>
-            <UploadCloud size={32} color={colors.text} />
-            <span className="mt-2 text-sm" style={{ color: colors.text }}>
-              לחץ לבחירת וידאו
-            </span>
-          </>
-        )}
-      </div>
-      <input type="file" accept="video/*" onChange={handleFileChange} ref={fileInputRef} className="hidden" />
-      {selectedFile && (
-        <button
-          onClick={handleUpload}
-          className="mt-2 text-white flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200"
-          style={{ backgroundColor: colors.primary }}
-        >
-          <UploadCloud size={16} />
-          העלה וידאו
-        </button>
-      )}
-    </div>
-  )
-}
 
 // Simplified Color Settings – Only Change the Theme Color with Visual Feedback
 function ColorPaletteSettings({
@@ -164,20 +104,6 @@ export default function SettingsPage() {
         const icon = reader.result as string
         setPFP({ type: IconType.image, content: await uploadString(icon) })
         setHasProfileImage(true)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleVideoUpload = async (file: File) => {
-    if (file && user) {
-      const reader = new FileReader()
-      reader.onload = async () => {
-        const video = reader.result as string
-        setUser({
-          ...user,
-          background: await uploadString(video),
-        })
       }
       reader.readAsDataURL(file)
     }

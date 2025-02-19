@@ -952,7 +952,6 @@ function App() {
   const handleComment = (
     message: string,
     post: Post,
-    replyTo?: { id: string; content: string; name: string }
   ) => {
     if (!user) return
     const newComment: Comment = {
@@ -1004,8 +1003,8 @@ function App() {
           onClose={() => setSelectedPost(null)}
           pallate={pallate}
           currentUser={user}
-          onAddComment={(content, replyTo) => {
-            handleComment(content, selectedPost, replyTo)
+          onAddComment={(content) => {
+            handleComment(content, selectedPost)
           }}
         />
       )}

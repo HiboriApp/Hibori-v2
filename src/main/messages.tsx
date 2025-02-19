@@ -369,7 +369,7 @@ const ProfileInfo: React.FC<{
   chatter: UserData | undefined
   onClose: () => void
   pallate: Pallate
-}> = ({ chat, onClose, chatter, pallate }) => {
+}> = ({ chat, onClose, chatter }) => {
   const [showAllMembers, setShowAllMembers] = useState(false)
   const [members, setMembers] = useState<UserData[] | UserData | undefined>()
   if (!chatter) return null

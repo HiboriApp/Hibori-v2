@@ -1,7 +1,6 @@
 import { createAvatar } from '@dicebear/core';
 import { lorelei } from '@dicebear/collection';
 import { UserData } from './db';
-import { uploadString } from './cloudinary';
 
 export enum IconType{
     svg = "svg",
