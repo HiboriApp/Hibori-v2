@@ -82,12 +82,13 @@ const ChatList: React.FC<{
         return (
           <div
             key={chat.id}
-            className={`p-4 flex items-center space-x-4 cursor-pointer transition-colors duration-200 hover:bg-opacity-30 ${
+            className={`p-4 flex items-center space-x-4 cursor-pointer transition-colors duration-200 hover:bg-opacity-30 border-b-2   ${
               selectedChat === chat.id ? "bg-opacity-20" : ""
             }`}
             style={{
               backgroundColor: selectedChat === chat.id ? `${pallate.primary}20` : "transparent",
               color: pallate.text,
+              borderBottomColor: pallate.secondary
             }}
             onClick={() => onSelectChat(chat.id)}
           >
@@ -689,7 +690,6 @@ const App: React.FC = () => {
       >
         <div className="flex flex-col h-full min-h-0">
           <div className="p-4 border-b flex-shrink-0" style={{ borderColor: pallate.secondary }}>
-            <h1 className="text-2xl font-bold">הודעות</h1>
             <div className="mt-4 relative">
               <input
                 type="text"
