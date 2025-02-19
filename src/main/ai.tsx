@@ -1,71 +1,90 @@
-import Layout from "../components/layout"
-import { useEffect, useRef, useState } from "react"
-import { UserPlus, Frown, Search } from "lucide-react"
-import Predict from "../api/ai"
-import { findNonFriends, getUser, getUserById, type UserData } from "../api/db"
-import { Avatar } from "../api/icons"
-import { useNavigate } from "react-router-dom"
-import { DefaultPallate, GetPallate, type Pallate } from "../api/settings"
-import Loading from "../components/Loading"
+import Layout from "../components/layout";
+import { useEffect, useRef, useState } from "react";
+import { UserPlus, Frown, Search, CheckCircle } from "lucide-react";
+import Predict from "../api/ai";
+import {
+  findNonFriends,
+  getUser,
+  getUserById,
+  addFriend,
+  type UserData,
+} from "../api/db";
+import { Avatar } from "../api/icons";
+import { useNavigate } from "react-router-dom";
+import { DefaultPallate, GetPallate, type Pallate } from "../api/settings";
+import Loading from "../components/Loading";
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [showResult, setShowResult] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
-  const [found, setFound] = useState<UserData | null>(null)
-  const [user, setUser] = useState<UserData | null>(null)
-  const [pallate, setPallate] = useState<Pallate>(DefaultPallate())
-  const navigate = useNavigate()
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showResult, setShowResult] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [found, setFound] = useState<UserData | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
+  const [pallate, setPallate] = useState<Pallate>(DefaultPallate());
+  const navigate = useNavigate();
+
   // Ref for the auto-resizing textarea
-  const searchRef = useRef<HTMLTextAreaElement>(null)
+  const searchRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const user = await getUser()
-      if (!user) {
-        navigate("/")
-        return
+      const userData = await getUser();
+      if (!userData) {
+        navigate("/");
+        return;
       }
-      setUser(user)
-      setPallate(GetPallate(user))
-    }
-    fetchData()
-  }, [navigate])
-  
+      setUser(userData);
+      setPallate(GetPallate(userData));
+    };
+    fetchData();
+  }, [navigate]);
+
   if (!user) {
-    return <Loading />
+    return <Loading />;
   }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     // Auto-resize the textarea
     if (searchRef.current) {
-      searchRef.current.style.height = "auto"
-      searchRef.current.style.height = `${searchRef.current.scrollHeight}px`
+      searchRef.current.style.height = "auto";
+      searchRef.current.style.height = `${searchRef.current.scrollHeight}px`;
     }
-    setSearchQuery(e.target.value)
-  }
+    setSearchQuery(e.target.value);
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSearching(true)
-    const others = (await findNonFriends(user, 20)).filter((u) => u.id !== user.id)
-    const result = await Predict(user, others, searchQuery)
+    e.preventDefault();
+    setIsSearching(true);
+    const others = (await findNonFriends(user, 20)).filter(
+      (u) => u.id !== user.id
+    );
+    const result = await Predict(user, others, searchQuery);
     if (result === "null") {
-      setShowResult(true)
-      setIsSearching(false)
-      return
+      setShowResult(true);
+      setIsSearching(false);
+      return;
     }
-    const foundUser = await getUserById(result.trim())
+    const foundUser = await getUserById(result.trim());
     if (!foundUser) {
-      setShowResult(true)
-      setIsSearching(false)
-      return
+      setShowResult(true);
+      setIsSearching(false);
+      return;
     }
-    setFound(foundUser)
-    setShowResult(true)
-    setIsSearching(false)
-  }
+    setFound(foundUser);
+    setShowResult(true);
+    setIsSearching(false);
+  };
+
+  const handleAddFriend = async (friendId: string) => {
+    if (!user) return;
+    // Persist the friend addition
+    await addFriend(user, friendId);
+    // Re-fetch the current user to update the friend list
+    const updatedUser = await getUser();
+    if (updatedUser) {
+      setUser(updatedUser);
+    }
+  };
 
   return (
     <Layout>
@@ -167,16 +186,21 @@ export default function Home() {
                     {found.name}
                   </h3>
                 </div>
-                <div className="flex flex-col ">
-                
+                <div className="flex flex-col">
                   <button
-                    className="p-2 rounded-full transition-colors duration-300 hover:bg-opacity-80"
+                    onClick={() => handleAddFriend(found.id)}
+                    disabled={user.friends.includes(found.id)}
+                    className="p-2 rounded-full transition transform duration-150 ease-out hover:scale-105 active:scale-90"
                     style={{
                       color: pallate.primary,
                       backgroundColor: `${pallate.primary}20`,
                     }}
                   >
-                    <UserPlus size={24} />
+                    {user.friends.includes(found.id) ? (
+                      <CheckCircle size={24} className="text-green-500" />
+                    ) : (
+                      <UserPlus size={24} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -200,9 +224,9 @@ export default function Home() {
               </p>
               <button
                 onClick={() => {
-                  setShowResult(false)
-                  setFound(null)
-                  setSearchQuery("")
+                  setShowResult(false);
+                  setFound(null);
+                  setSearchQuery("");
                 }}
                 className="flex items-center gap-2 px-6 py-3 rounded-lg text-lg font-semibold transition-colors duration-300 hover:bg-opacity-80"
                 style={{
@@ -218,5 +242,5 @@ export default function Home() {
         </main>
       </div>
     </Layout>
-  )
+  );
 }

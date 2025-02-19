@@ -1,26 +1,29 @@
-import type React from "react"
-import { useEffect, useState } from "react"
-import { ArrowLeft, Search, UserPlus } from "lucide-react"
-import { Link, useNavigate } from "react-router-dom"
-import SuperSillyLoading from "../components/Loading"
-import { addFriend, findNonFriends, getUser, type UserData } from "../api/db"
-import Layout from "../components/layout"
-import { Avatar } from "../api/icons"
-import { DefaultPallate, GetPallate, type Pallate } from "../api/settings"
+import React, { useEffect, useState } from "react";
+import { ArrowLeft, Search, UserPlus, CheckCircle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import SuperSillyLoading from "../components/Loading";
+import { addFriend, getUser, getUsersById, type UserData } from "../api/db";
+import Layout from "../components/layout";
+import { Avatar } from "../api/icons";
+import { DefaultPallate, GetPallate, type Pallate } from "../api/settings";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../api/firebase";
 
 const UserCard: React.FC<{
-  otherUser: UserData
-  user: UserData
-  onAddFriend: (id: string) => void
-  pallate: Pallate
+  otherUser: UserData;
+  user: UserData;
+  onAddFriend: (id: string) => void;
+  pallate: Pallate;
 }> = ({ otherUser, onAddFriend, user, pallate }) => {
-  const mutualFriends = user.friends.filter((f) => otherUser.friends.includes(f)).length
+  const mutualFriends = user.friends.filter((f) => otherUser.friends.includes(f)).length;
+  const isFriend = user.friends.includes(otherUser.id);
+
   return (
     <div
       className="rounded-lg shadow-md p-4 flex items-center justify-between"
       style={{ backgroundColor: pallate.main, color: pallate.text }}
     >
-      <div className="flex items-center space-x-4 gap-4">
+      <div className="flex items-center gap-4">
         <Avatar icon={otherUser.icon} className="w-12 h-12 rounded-full object-cover" />
         <div className="mr-4">
           <h3 className="font-semibold text-lg">{otherUser.name}</h3>
@@ -31,51 +34,73 @@ const UserCard: React.FC<{
       </div>
       <button
         onClick={() => onAddFriend(otherUser.id)}
-        className="p-2 rounded-full"
+        className="p-2 rounded-full transition transform duration-150 ease-out hover:scale-105 active:scale-90"
         style={{ color: pallate.primary, backgroundColor: `${pallate.primary}20` }}
+        disabled={isFriend}
       >
-        <UserPlus size={20} />
+        {isFriend ? <CheckCircle size={20} className="text-green-500" /> : <UserPlus size={20} />}
       </button>
     </div>
-  )
-}
+  );
+};
 
 const AddFriendsPage: React.FC = () => {
-  const [users, setUsers] = useState<UserData[] | undefined>()
-  const [user, setUser] = useState<UserData | undefined>()
-  const [pallate, setPallate] = useState<Pallate>(DefaultPallate())
-  const navigate = useNavigate()
+  const [users, setUsers] = useState<UserData[] | undefined>();
+  const [user, setUser] = useState<UserData | undefined>();
+  const [pallate, setPallate] = useState<Pallate>(DefaultPallate());
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
-  const [searchTerm, setSearchTerm] = useState("")
+  // Helper function to fetch all users using getUsersById.
+  const fetchAllUsers = async (): Promise<UserData[]> => {
+    // Get all documents from the "users" collection
+    const snapshot = await getDocs(collection(db, "users"));
+    // Extract all user IDs
+    const allUserIds = snapshot.docs.map((doc) => doc.id);
+    // Fetch full user data for all IDs using your API function
+    const allUsers = await getUsersById(allUserIds);
+    return allUsers;
+  };
+
+  const fetchUsers = async () => {
+    const userData = await getUser();
+    if (!userData) {
+      navigate("/");
+      return;
+    }
+    setPallate(GetPallate(userData));
+    setUser(userData);
+
+    const allUsers = await fetchAllUsers();
+    // Filter out the current user from the list
+    const potentialUsers = allUsers.filter((u) => u.id !== userData.id);
+    setUsers(potentialUsers);
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      const userData = await getUser()
-      if (!userData) {
-        navigate("/")
-        return
-      }
-      setPallate(GetPallate(userData))
-      setUser(userData)
-      const users = await findNonFriends(userData, 20)
-      setUsers(users.filter((u) => u.id !== userData.id))
-    }
-    fetchUsers()
-  }, [navigate]) // Added navigate to the dependency array
+    fetchUsers();
+  }, [navigate]);
 
-  const handleAddFriend = (id: string) => {
-    if (!user) {
-      return
+  const handleAddFriend = async (id: string) => {
+    if (!user) return;
+    // Persist the friend addition on the backend
+    await addFriend(user, id);
+    // Re-fetch the current user's data to update the friend list
+    const updatedUser = await getUser();
+    if (updatedUser) {
+      setUser(updatedUser);
     }
-    setUser({ ...user, friends: [...user.friends.filter((f) => f !== id), id] })
-    addFriend(user, id)
-  }
-  if (!users || !user) return <SuperSillyLoading></SuperSillyLoading>
+  };
+
+  if (!users || !user) return <SuperSillyLoading />;
+
   const filteredUsers = users
-    .filter((user) => user.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((u) => u.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort(
       (a, b) =>
-        b.friends.filter((f) => a.friends.includes(f)).length - a.friends.filter((f) => b.friends.includes(f)).length,
-    )
+        b.friends.filter((f) => a.friends.includes(f)).length -
+        a.friends.filter((f) => b.friends.includes(f)).length
+    );
 
   return (
     <Layout>
@@ -132,8 +157,7 @@ const AddFriendsPage: React.FC = () => {
         </div>
       </div>
     </Layout>
-  )
-}
+  );
+};
 
-export default AddFriendsPage
-
+export default AddFriendsPage;

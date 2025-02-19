@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Trash2, Camera } from "lucide-react"
+import { Trash2, Camera, Palette } from "lucide-react"
 import { getUser, type UserData, setUser as setUserInDB } from "../api/db"
 import { Avatar, GenerateIcons, type Icon, IconType } from "../api/icons"
 import Loading from "../components/Loading"
@@ -252,14 +252,25 @@ export default function SettingsPage() {
                     התראות דחיפה
                   </span>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      checked={user.wantsNotifications}
-                      onChange={(e) => setUser({ ...user, wantsNotifications: e.target.checked })}
-                      type="checkbox"
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
-                  </label>
+  <input
+    checked={user.wantsNotifications}
+    onChange={(e) =>
+      setUser({ ...user, wantsNotifications: e.target.checked })
+    }
+    type="checkbox"
+    className="sr-only peer"
+  />
+  <div
+    style={{
+      backgroundColor: user.wantsNotifications ? colors.primary : "#e5e7eb",
+    }}
+    className="w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer 
+      peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute 
+      after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full 
+      after:h-5 after:w-5 after:transition-all"
+  />
+</label>
+
                 </div>
               </div>
             </section>

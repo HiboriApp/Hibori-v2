@@ -183,7 +183,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       </form>
       {comments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-4">
-          <MessageSquare size={32} className="text-gray-500" />
+          <MessageSquare size={32} className=""  style={{ color: pallate.primary}}
+ />
           <p className="mt-2 text-sm" style={{ color: pallate.text }}>
             איפה כל החברים? אין אף תגובות פה!
           </p>
@@ -835,36 +836,70 @@ const CreatePost = ({
     }
   }
   return (
-    <div className="shadow-lg rounded-xl p-4 sm:p-6 mb-6" style={{ backgroundColor: pallate.main }}>
+    <div
+      className="shadow-lg rounded-xl p-4 sm:p-6 mb-6"
+      style={{ backgroundColor: pallate.main }}
+    >
       <form onSubmit={handleSubmit}>
-        <div className="flex items-start space-x-3 space-x-reverse">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white shadow-md">
-            <Avatar icon={user.icon} className="w-full h-full" />
+        <div className="flex flex-col sm:flex-row sm:space-x-3">
+          {/* Avatar */}
+          <div className="flex-shrink-0 flex justify-start mb-2">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md">
+              <Avatar icon={user.icon} className="w-full h-full rounded-full" />
+            </div>
           </div>
-          <div className="flex-grow relative">
+  
+          {/* Textarea and Action Buttons */}
+          <div className="flex-grow">
             <textarea
-              className="w-full rounded-xl p-4 pr-12 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none transition-all duration-200 ease-in-out min-h-[100px]"
+              className="w-full rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none transition-all duration-200 ease-in-out min-h-[100px]"
               placeholder="מה בראש שלך?"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               style={{ color: pallate.text, backgroundColor: pallate.background }}
             ></textarea>
-            <div className="absolute bottom-3 right-3 flex space-x-2 space-x-reverse">
-              <label className="cursor-pointer text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100  rounded-full p-2" style={{backgroundColor: `${pallate.primary}20`, }}>
-                <input type="file" className="hidden" onChange={(file) => handleImageUpload(file, fileType.image)} />
-                <ImageIcon size={20} style={{ color: pallate.primary }}/>
-              </label>
-              <label className="cursor-pointer text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2" style={{backgroundColor: `${pallate.primary}20`, }}>
-                <input type="file" accept="video/*" className="hidden" onChange={(file) => handleImageUpload(file, fileType.video)} />
-                <Video size={20}  style={{ color: pallate.primary }}/>
-              </label>
-              <button type="button" className="text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2" style={{backgroundColor: `${pallate.primary}20`, }}>
-                <Smile size={20} style={{ color: pallate.primary }}/>
+  
+            {/* Action Row: Upload & Emoji Buttons + Submit */}
+            <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex space-x-2">
+                <label
+                  className="cursor-pointer text-gray-500 hover:text-primary ml-2 transition-colors duration-200 bg-gray-100 rounded-full p-2"
+                  style={{ backgroundColor: `${pallate.primary}20` }}
+                >
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={(file) => handleImageUpload(file, fileType.image)}
+                  />
+                  <ImageIcon size={20} style={{ color: pallate.primary }} />
+                </label>
+                <label
+                  className="cursor-pointer text-gray-500 hover:text-primary transition-colors duration-200 bg-gray-100 rounded-full p-2"
+                  style={{ backgroundColor: `${pallate.primary}20` }}
+                >
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(file) => handleImageUpload(file, fileType.video)}
+                  />
+                  <Video size={20} style={{ color: pallate.primary }} />
+                </label>
+              </div>
+  
+              <button
+                type="submit"
+                className="mt-3 sm:mt-0 font-bold px-6 py-2 justify-center rounded-full transition-opacity duration-200 flex items-center shadow-md text-sm text-white" style={{ backgroundColor: `${pallate.primary}` }}
+              >
+                פרסם
+                <Send className="w-4 h-4 mr-2" />
               </button>
             </div>
           </div>
         </div>
-        {file?.type == fileType.image && (
+  
+        {/* Image Preview */}
+        {file?.type === fileType.image && (
           <div className="relative mt-4">
             <img
               src={file.content || "/placeholder.svg"}
@@ -880,21 +915,11 @@ const CreatePost = ({
             </button>
           </div>
         )}
-        <div className="mt-4 flex justify-end">
-          <button
-            type="submit"
-            className="text-white font-bold px-6 py-2 rounded-full hover:opacity-90 transition-opacity duration-200 text-sm flex items-center shadow-md"
-            style={{ backgroundColor: pallate.primary }}
-          >
-            <Send className="w-4 h-4 ml-2" />
-            פרסם
-          </button>
-        </div>
       </form>
     </div>
   )
 }
-
+  
 function App() {
   const [user, setUser] = useState<UserData | null>(null)
   const [friends, setFriends] = useState<UserData[]>([])

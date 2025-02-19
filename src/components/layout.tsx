@@ -72,11 +72,13 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
             <Link
               key={route.path}
               to={route.path}
-              className={`flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
-                isActive
-                  ? `text-${palette.primary} bg-${palette.background} border-b-2 border-green-600 !important`
-                  : `text-${palette.text} hover:bg-${palette.background}`
-              }`}
+              style={{
+                color: isActive ? palette.primary : palette.text,
+                backgroundColor: palette.main,
+                borderBottomColor: isActive ? palette.primary : 'transparent',
+              }}
+              className="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 border-b-2"
+             
             >
               <Icon className={"ml-2 min-h-6 min-w-6 translate-x-1"} />
               <p className="min-w-16">{isHovering && route.name}</p>
@@ -84,7 +86,9 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
           )
         })}
       </nav>
-      <div className={`p-4 border-t border-${palette.secondary}`}>
+      <div className={`p-4 border-t `  }style={{
+                borderTopColor:  palette.primary
+              }}>
         {isHovering ? (
           <UserProfile user={user} palette={palette} />
         ) : (
@@ -113,11 +117,14 @@ function MobileBottomNav({ palette }: { palette: Pallate }) {
         const isActive = location.pathname === route.path
         return (
           <Link
-            key={route.path}
-            to={route.path}
-            className={`flex flex-col items-center justify-center w-full h-full ${
-              isActive ? `text-${palette.primary} border-t-2 border-green-600` : `text-${palette.text}`
-            }`}
+          key={route.path}
+          to={route.path}
+          style={{
+            color: isActive ? palette.primary : palette.text,
+            backgroundColor: palette.main,
+            borderTopColor: isActive ? palette.primary : 'transparent',
+          }}
+          className="flex flex-col items-center justify-center w-full h-full border-t-2"
           >
             <Icon className="h-6 w-6" />
             <span className="text-xs mt-1">{route.name}</span>
