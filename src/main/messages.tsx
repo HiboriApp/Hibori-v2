@@ -3,7 +3,7 @@ import {
   ChevronRight,
   Send,
   Paperclip,
-  Smile,
+
   Search,
   X,
   ChevronLeft,
@@ -342,9 +342,7 @@ const InputArea: React.FC<{
         </div>
       )}
       <div className="flex items-center p-3" style={{ backgroundColor: pallate.background }}>
-        <button type="button" style={{ color: pallate.primary }} className="mr-2">
-          <Smile size={24} />
-        </button>
+
         <button type="button" style={{ color: pallate.primary }} className="mr-2 ml-2">
           <Paperclip size={24} />
         </button>
@@ -353,7 +351,7 @@ const InputArea: React.FC<{
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={editingMessage ? "ערוך הודעה..." : "הקלד הודעה..."}
-          className="flex-grow p-3 bg-gray-100 rounded-xl text-right focus:outline-none resize-none overflow-hidden"
+          className="flex-grow p-3 bg-gray-100 rounded-xl text-right focus:outline-none resize-none overflow-hidden max-h-[40dvh] overflow-y-auto"
           style={{ color: pallate.text }}
         />
         <button type="submit" style={{ color: pallate.primary }} className="ml-2 mr-2">
