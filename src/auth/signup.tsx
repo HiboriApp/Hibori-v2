@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SignUp } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -11,9 +11,9 @@ export function SignUpPage(){
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
 
-  onAuthStateChanged(auth, (user) => {
+  useEffect(() => onAuthStateChanged(auth, (user) => {
     if (user){navigate('/home');}
-  })
+  }), [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,7 +118,7 @@ export function SignUpPage(){
           </form>
           <div className="mt-6 text-center">
             <p className="text-[#115614]">כבר יש לך חשבון?</p>
-            <a href="/" className="text-[#06AA06] font-bold hover:underline">התחבר עכשיו</a>
+            <a href="/login" className="text-[#06AA06] font-bold hover:underline">התחבר עכשיו</a>
           </div>
         </div>
       </div>

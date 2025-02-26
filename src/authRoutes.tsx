@@ -5,11 +5,11 @@ import Signup  from "./auth/signup";
 export default function Routes() : RouteObject[]{
   return [
     {
-      path: "/",
+      path: "/login",
       element: <Login></Login>
     },
     {
-      path: '/signup',
+      path: '/',
       element: <Signup></Signup>
     }
   ];
