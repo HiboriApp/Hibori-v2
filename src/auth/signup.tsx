@@ -22,7 +22,7 @@ export function SignUpPage(){
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen justify-center bg-white" dir="rtl">
+    <div className="flex flex-col md:flex-row h-[100dvh] justify-center bg-white" dir="rtl">
       {/* Mobile and Tablet View */}
       <div className="w-full md:w-1/2 flex flex-col items-center justify-center  px-4 rounded-bl-lg rounded-tr-3xl ">
         {/* Wave design for mobile */}
