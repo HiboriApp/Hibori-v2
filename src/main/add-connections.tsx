@@ -110,24 +110,8 @@ const AddFriendsPage: React.FC = () => {
         style={{ backgroundColor: pallate.background, color: pallate.text }}
       >
         <div className="max-w-3xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold">הוסף חברים</h1>
-            <button
-              className="group relative overflow-hidden rounded-full shadow-md transition-all duration-300 hover:shadow-lg"
-              style={{ backgroundColor: pallate.primary }}
-            >
-              <Link
-                to="/connections"
-                className="relative z-10 flex items-center space-x-2 px-6 py-3 text-white transition-colors duration-300 group-hover:text-white"
-              >
-                <ArrowLeft size={20} className="ml-2" />
-                <span className="font-bold">חזרה</span>
-              </Link>
-              <div className="absolute inset-0 z-0 opacity-80 transition-opacity duration-300 group-hover:opacity-100"></div>
-            </button>
-          </div>
 
-          <div className="mb-6 relative">
+        <div className="mb-6 relative">
             <input
               type="text"
               placeholder="חפש משתמשים..."
@@ -141,6 +125,22 @@ const AddFriendsPage: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <Search className="absolute left-3 top-3" style={{ color: pallate.secondary }} size={20} />
+          </div>
+
+          <div className="flex justify-center items-center mb-8">
+            <button
+              className="group relative overflow-hidden rounded-full shadow-md transition-all duration-300 hover:shadow-lg"
+              style={{ backgroundColor: pallate.primary }}
+            >
+              <Link
+                to="/connections"
+                className="relative z-10 flex items-center space-x-2 px-6 py-3 text-white transition-colors duration-300 group-hover:text-white"
+              >
+                <ArrowLeft size={20} className="ml-2" />
+                <span className="font-bold">חזרה</span>
+              </Link>
+              <div className="absolute inset-0 z-0 opacity-80 transition-opacity duration-300 group-hover:opacity-100"></div>
+            </button>
           </div>
 
           <div className="space-y-4">

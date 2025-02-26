@@ -146,7 +146,6 @@ export default function SettingsPage() {
     <Layout>
       <div dir="rtl" className="min-h-screen p-8" style={{ color: colors.text, backgroundColor: colors.background }}>
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8" style={{ color: colors.primary }}>הגדרות</h1>
           <div className="space-y-8">
             {/* Profile Settings */}
             <section className="p-6 rounded-xl shadow-md" style={{ backgroundColor: colors.main }}>

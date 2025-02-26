@@ -3,7 +3,7 @@ import {
   ChevronRight,
   Send,
   Paperclip,
-  Smile,
+
   Search,
   X,
   ChevronLeft,
@@ -82,12 +82,13 @@ const ChatList: React.FC<{
         return (
           <div
             key={chat.id}
-            className={`p-4 flex items-center space-x-4 cursor-pointer transition-colors duration-200 hover:bg-opacity-30 ${
+            className={`p-4 flex items-center space-x-4 cursor-pointer transition-colors duration-200 hover:bg-opacity-30 border-b-2   ${
               selectedChat === chat.id ? "bg-opacity-20" : ""
             }`}
             style={{
               backgroundColor: selectedChat === chat.id ? `${pallate.primary}20` : "transparent",
               color: pallate.text,
+              borderBottomColor: pallate.secondary
             }}
             onClick={() => onSelectChat(chat.id)}
           >
@@ -342,9 +343,7 @@ const InputArea: React.FC<{
         </div>
       )}
       <div className="flex items-center p-3" style={{ backgroundColor: pallate.background }}>
-        <button type="button" style={{ color: pallate.primary }} className="mr-2">
-          <Smile size={24} />
-        </button>
+
         <button type="button" style={{ color: pallate.primary }} className="mr-2 ml-2">
           <Paperclip size={24} />
         </button>
@@ -353,7 +352,7 @@ const InputArea: React.FC<{
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={editingMessage ? "ערוך הודעה..." : "הקלד הודעה..."}
-          className="flex-grow p-3 bg-gray-100 rounded-xl text-right focus:outline-none resize-none overflow-hidden"
+          className="flex-grow p-3 bg-gray-100 rounded-xl text-right focus:outline-none resize-none overflow-hidden max-h-[40dvh] overflow-y-auto"
           style={{ color: pallate.text }}
         />
         <button type="submit" style={{ color: pallate.primary }} className="ml-2 mr-2">
@@ -691,7 +690,6 @@ const App: React.FC = () => {
       >
         <div className="flex flex-col h-full min-h-0">
           <div className="p-4 border-b flex-shrink-0" style={{ borderColor: pallate.secondary }}>
-            <h1 className="text-2xl font-bold">הודעות</h1>
             <div className="mt-4 relative">
               <input
                 type="text"

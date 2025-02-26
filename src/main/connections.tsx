@@ -150,10 +150,25 @@ const FriendsPage: React.FC = () => {
         style={{ color: pallate.text, backgroundColor: pallate.background }}
       >
         <div className="max-w-3xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-800">החברים שלי</h1>
+        <div className="mb-6 relative">
+            <input
+              type="text"
+              placeholder="חפש חברים..."
+              className="w-full p-3 pr-10 rounded-full border focus:outline-none focus:ring-2"
+              style={{
+                backgroundColor: pallate.main,
+                color: pallate.text,
+                borderColor: pallate.secondary,
+              }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+          </div>
+
+          <div className="flex justify-center items-center mb-8">
             <button
-              className="group relative overflow-hidden rounded-full shadow-md transition-all duration-300 hover:shadow-lg"
+              className="group  relative overflow-hidden rounded-full shadow-md transition-all duration-300 hover:shadow-lg"
               style={{ backgroundColor: pallate.primary }}
             >
               <Link
@@ -183,22 +198,7 @@ const FriendsPage: React.FC = () => {
             </button>
           </div>
 
-          <div className="mb-6 relative">
-            <input
-              type="text"
-              placeholder="חפש חברים..."
-              className="w-full p-3 pr-10 rounded-full border focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: pallate.main,
-                color: pallate.text,
-                borderColor: pallate.secondary,
-              }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-          </div>
-
+        
           <div className="space-y-4">
             {filteredFriends.map((friend) => (
               <FriendCard
