@@ -4,12 +4,17 @@ import Connections from "./main/connections";
 import Messages from "./main/messages";
 import AddFriendsPage from "./main/add-connections";
 import AiFriends from './main/ai';
+import Login from "./auth/login";
 
 export default function Routes() : RouteObject[]{
   return [
     {
       path: "/home",
       element: <Home></Home>
+    },
+    {
+      path: "/login",
+      element: <Login></Login>
     },
     {
       path: '/connections',
