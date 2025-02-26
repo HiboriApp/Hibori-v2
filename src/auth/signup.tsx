@@ -17,10 +17,8 @@ export function SignUpPage(){
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await SignUp(email, password, fullName);
-    if (res) {
-        navigate('/home');
-    }
+    await SignUp(email, password, fullName);
+    navigate('/home');
   };
 
   return (
