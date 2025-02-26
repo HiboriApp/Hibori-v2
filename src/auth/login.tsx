@@ -92,7 +92,7 @@
             </div>
             <div className="mt-6 text-center">
               <p className="text-[#115614]">אין לך חשבון?</p>
-              <a href="/signup" className="text-green-500 font-bold hover:underline">הירשם עכשיו</a>
+              <button onClick={() => navigate('/signup')} className="text-green-500 font-bold hover:underline">הירשם עכשיו</button>
             </div>
           </div>
         </div>
