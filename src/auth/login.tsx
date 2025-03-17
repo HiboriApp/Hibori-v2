@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Login } from '../api/auth';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../api/firebase';
 
@@ -103,7 +103,7 @@ const LoginForm: React.FC = () => {
           </div>
           <div className="mt-6 text-center">
             <p className="text-[#115614]">אין לך חשבון?</p>
-            <button onClick={() => navigate('/signup')} className="text-green-500 font-bold hover:underline">הירשם עכשיו</button>
+            <Link to="/signup" className="text-green-500 font-bold hover:underline">הירשם עכשיו</Link>
           </div>
         </div>
       </div>
