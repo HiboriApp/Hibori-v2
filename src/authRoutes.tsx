@@ -12,7 +12,7 @@ export default function Routes() : RouteObject[]{
           element: <Signup />
         },
         {
-          path: 'login',
+          path: 'loginnew',
           element: <Login />
         }
       ]
