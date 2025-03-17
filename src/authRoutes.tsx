@@ -6,11 +6,16 @@ export default function Routes() : RouteObject[]{
   return [
     {
       path: '/',
-      element: <Signup></Signup>
-    },
-    {
-      path: "/login",
-      element: <Login></Login>
+      children: [
+        { 
+          index: true,
+          element: <Signup />
+        },
+        {
+          path: 'login',
+          element: <Login />
+        }
+      ]
     }
   ];
 }
