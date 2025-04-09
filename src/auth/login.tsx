@@ -103,7 +103,7 @@ const LoginForm: React.FC = () => {
           </div>
           <div className="mt-6 text-center">
             <p className="text-[#115614]">אין לך חשבון?</p>
-            <Link to="/signup" className="text-green-500 font-bold hover:underline">הירשם עכשיו</Link>
+            <Link to="/" className="text-green-500 font-bold hover:underline">הירשם עכשיו</Link>
           </div>
         </div>
       </div>
