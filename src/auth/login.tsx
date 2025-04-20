@@ -98,9 +98,6 @@ const LoginForm: React.FC = () => {
             {/* Display error message if login fails */}
             {error && <p className="mt-2 text-center text-red-500">{error}</p>}
           </form>
-          <div className="mt-4 text-center">
-            <a href="#" className="text-[#0A810B] hover:underline">שכחת סיסמה?</a>
-          </div>
           <div className="mt-6 text-center">
             <p className="text-[#115614]">אין לך חשבון?</p>
             <Link to="/" className="text-green-500 font-bold hover:underline">הירשם עכשיו</Link>
