@@ -91,6 +91,7 @@ const CommentItem: React.FC<CommentProps> = ({ comment, pallate }) => {
         <div className="flex items-start space-x-3 space-x-reverse">
           <Avatar
             icon={comment.icon}
+            userID={comment.name}
             className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm"
           />
           <div className="flex-1 min-w-0">
@@ -156,6 +157,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <div className="flex items-start space-x-2 space-x-reverse">
           <Avatar
             icon={currentUser.icon}
+            userID={currentUser.id}
             className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm"
           />
           <div className="flex-grow relative">
@@ -247,6 +249,7 @@ const ModalCommentInput: React.FC<ModalCommentInputProps> = ({
       <div className="flex items-start space-x-2 space-x-reverse">
         <Avatar
           icon={currentUser.icon}
+          userID={currentUser.id}
           className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm"
         />
         <div className="flex-grow relative">
@@ -387,7 +390,7 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose, pallate, currentUs
     <div className="mb-4">
       {poster && (
         <div className="flex items-center mb-4">
-          <Avatar icon={poster.icon} className="w-10 h-10 rounded-full ml-2" />
+          <Avatar icon={poster.icon} userID={poster.id} className="w-10 h-10 rounded-full ml-2" />
           <div>
             <p className="font-semibold" style={{ color: pallate.text }}>{poster.name}</p>
             <p className="text-xs" style={{ color: pallate.text }}>
@@ -525,6 +528,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
         <div className="flex items-center mb-4">
           <Avatar
             icon={poster.icon}
+            userID={poster.id}
             className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl ml-3"
           />
           <div className="flex-grow">
@@ -656,7 +660,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, pallate, expandedMes
       onClick={() => setExpandedMessage(message.chat.id === expandedMessage ? null : message.chat.id)}
     >
       <div className="flex items-center">
-        <Avatar className="w-8 h-8 rounded-full ml-2" icon={messageUser.icon} />
+        <Avatar className="w-8 h-8 rounded-full ml-2" icon={messageUser.icon} userID={messageUser.id} />
         <div className="flex-grow">
           <p className="font-medium text-sm text-gray-800" style={{ color: pallate.text }}>
             {messageUser.name}
@@ -729,6 +733,7 @@ function TopPanel({
               <div key={friend.id} className="flex flex-col items-center">
                 <Avatar
                   icon={friend.icon}
+                  userID={friend.id}
                   isOnline={friend.lastOnline.toDate() > new Date()}
                   className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm"
                 />
@@ -781,7 +786,7 @@ function TopPanel({
                 className="flex items-center bg-white rounded-lg p-2 shadow-sm hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
                 style={{ backgroundColor: pallate.background }}
               >
-                <Avatar icon={notification.icon} className="w-8 h-8 rounded-full ml-2" />
+                <Avatar userID={notification.senderId} icon={notification.icon} className="w-8 h-8 rounded-full ml-2" />
                 <div className="flex-grow">
                   <p className="text-xs text-gray-700" style={{ color: pallate.text }}>
                     {notification.content}
@@ -844,7 +849,7 @@ const CreatePost = ({
           {/* Avatar */}
           <div className="flex-shrink-0 flex justify-start mb-2">
             <div className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md">
-              <Avatar icon={user.icon} className="w-full h-full rounded-full" />
+              <Avatar userID={user.id} icon={user.icon} className="w-full h-full rounded-full" />
             </div>
           </div>
   

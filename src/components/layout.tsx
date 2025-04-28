@@ -30,11 +30,12 @@ function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
       className="flex items-center justify-around space-x-4 space-x-reverse"
       style={{ color: palette.text, backgroundColor: palette.main }}
     >
-      <Avatar
-        icon={user.icon}
-        isOnline={user.lastOnline.toDate() > new Date()}
-        className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
-      ></Avatar>
+        <Avatar
+          icon={user.icon}
+          userID={user.id}
+          isOnline={user.lastOnline.toDate() > new Date()}
+          className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
+        ></Avatar>
       <p className="text-sm font-medium">{user.name}</p>
       <Link
         to={"/settings"}
@@ -92,11 +93,14 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
         {isHovering ? (
           <UserProfile user={user} palette={palette} />
         ) : (
-          <Avatar
-            icon={user.icon}
-            isOnline={user.lastOnline.toDate() > new Date()}
-            className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg"
-          ></Avatar>
+          <Link to={`/user/${user.id}`}>
+            <Avatar
+              icon={user.icon}
+              userID={user.id}
+              isOnline={user.lastOnline.toDate() > new Date()}
+              className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg"
+            ></Avatar>
+          </Link>
         )}
       </div>
     </aside>
@@ -203,11 +207,14 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
     >
       {!hideLayoutOnMobile && (
         <div className="md:hidden flex flex-row justify-between items-center border-b-2 shadow-md shadow-slate-50  p-4 ">
-          <Avatar
-            icon={user.icon}
-            isOnline={user.lastOnline.toDate() > new Date()}
-            className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg"
-          ></Avatar>
+          <Link to={`/user/${user.id}`}>
+            <Avatar
+              icon={user.icon}
+              userID={user.id}
+              isOnline={user.lastOnline.toDate() > new Date()}
+              className="w-10 h-10 rounded-full bg-background flex items-center justify-center text-secondary font-bold text-lg"
+            ></Avatar>
+          </Link>
           <Link to={"/settings"}>
             <div>
               <Settings className={`h-7 w-7 ml-3 text-${palette.text}`} />

@@ -1,6 +1,7 @@
 import { createAvatar } from '@dicebear/core';
 import { lorelei } from '@dicebear/collection';
 import { UserData } from './db';
+import { Link } from 'react-router-dom';
 
 export enum IconType{
     svg = "svg",
@@ -30,7 +31,7 @@ export async function GenerateIcons(seed: string) : Promise<Icon> {
     return {type: IconType.svg, content: await createAvatar(lorelei, { seed: seed }).toString()};
 }
 
-export function Avatar({icon, className, isOnline} : {icon: Icon, className?: string, isOnline?: boolean}){
+export function Avatar({icon, className, isOnline, userID} : {icon: Icon, className?: string, isOnline?: boolean, userID: string}){
     if (isOnline == false || isOnline){
         if (icon.type === IconType.svg){
             return <div className="relative">
@@ -45,8 +46,8 @@ export function Avatar({icon, className, isOnline} : {icon: Icon, className?: st
           </div>;
         }
     }
-    if (icon.type === IconType.image){return <img src={icon.content} alt="icon" className={className} />;} 
-    else {return <div dangerouslySetInnerHTML={{ __html: icon.content }} className={className} />}
+    if (icon.type === IconType.image){return <Link to={`/user/${userID}`}><img src={icon.content} alt="icon" className={className} /></Link>;} 
+    else {return <Link to={`/user/${userID}`}><div dangerouslySetInnerHTML={{ __html: icon.content }} className={className} /></Link>}
 }
 
 export function unknownIcon() : Icon{

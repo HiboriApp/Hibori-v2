@@ -93,7 +93,7 @@ const ChatList: React.FC<{
             onClick={() => onSelectChat(chat.id)}
           >
             <div className="flex-shrink-0">
-              <Avatar icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className="w-12 h-12 rounded-full object-cover" />
+              <Avatar userID={chatter.id} icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className="w-12 h-12 rounded-full object-cover" />
             </div>
             <div className="flex-grow min-w-0">
               <div className="flex justify-between items-baseline">
@@ -125,7 +125,7 @@ const ChatList: React.FC<{
             onClick={() => onSelectChat(chatter.id)}
           >
             <div className="flex-shrink-0">
-              <Avatar icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className="w-12 h-12 rounded-full object-cover" />
+              <Avatar userID={chatter.id} icon={chatter.icon} isOnline={chatter.lastOnline.toDate() > new Date()} className="w-12 h-12 rounded-full object-cover" />
             </div>
             <div className="flex-grow min-w-0">
               <div className="flex justify-between items-baseline">
@@ -189,7 +189,7 @@ const MessageComponent: React.FC<{
         onMouseLeave={clearTimer}
         style={showOptions ? { animation: "shake 0.5s" } : undefined}
       >
-        <Avatar icon={chatter ? chatter.icon : unknownIcon()} className={`w-10 h-10 ${isSent ? "ml-3" : "mr-3"}`} />
+        <Avatar userID={chatter ? chatter.id : "abc"} icon={chatter ? chatter.icon : unknownIcon()} className={`w-10 h-10 ${isSent ? "ml-3" : "mr-3"}`} />
         <div className={`flex flex-col ${isSent ? "items-end" : "items-start"}`}>
           <span className="text-xs font-semibold mb-1" style={{ color: pallate.text }}>
             {chatter?.name}
@@ -311,7 +311,7 @@ const InputArea: React.FC<{
             border: `1px solid ${pallate.secondary}`,
           }}
         >
-          <Avatar icon={replyingToUser.icon} className="w-8 h-8 mr-2" />
+          <Avatar userID={replyingToUser.id} icon={replyingToUser.icon} className="w-8 h-8 mr-2" />
           <div>
             <div className="text-sm font-semibold" style={{ color: pallate.text }}>
               {replyingToUser.name}
@@ -387,7 +387,7 @@ const ProfileInfo: React.FC<{
           </button>
         </div>
         <div className="flex flex-col items-center mb-4">
-          <Avatar className="w-24 h-24 rounded-full mb-2" icon={chatter.icon} />
+          <Avatar userID={chatter.id} className="w-24 h-24 rounded-full mb-2" icon={chatter.icon} />
           <h3 className="text-xl font-semibold">{chatter.name}</h3>
           <p className="text-gray-600">
             {chatter.lastOnline.toDate() > new Date() ? "מחובר" : "לא מחובר"}
@@ -404,7 +404,7 @@ const ProfileInfo: React.FC<{
               <div className="flex overflow-x-auto pb-2 mb-2">
                 {members.slice(0, showAllMembers ? undefined : 3).map((member) => (
                   <div key={member.id} className="flex-shrink-0 ml-2 text-center">
-                    <Avatar icon={member.icon} className="w-8 h-8" />
+                    <Avatar userID={member.id} icon={member.icon} className="w-8 h-8" />
                     <p className="text-xs mt-1">{member.name}</p>
                   </div>
                 ))}
@@ -490,7 +490,7 @@ const ChatArea: React.FC<{
           </button>
           {selectedChat && (
             <div className="flex items-center cursor-pointer" onClick={() => onProfileClick(selectedChat.id)}>
-              <Avatar className="w-10 h-10" icon={selectedChat.icon || otherUser.icon} isOnline={otherUser.lastOnline.toDate() > new Date()} />
+              <Avatar userID={selectedChat.id || otherUser.id} className="w-10 h-10" icon={selectedChat.icon || otherUser.icon} isOnline={otherUser.lastOnline.toDate() > new Date()} />
               <div className="mr-3">
                 <h2 className="font-semibold" style={{ color: pallate.text }}>
                   {selectedChat.name}
