@@ -31,7 +31,7 @@ export async function GenerateIcons(seed: string) : Promise<Icon> {
     return {type: IconType.svg, content: await createAvatar(lorelei, { seed: seed }).toString()};
 }
 
-export function Avatar({icon, className, isOnline, userID} : {icon: Icon, className?: string, isOnline?: boolean, userID: string}){
+export function Avatar({icon, className, isOnline, userID} : {icon: Icon, className?: string, isOnline?: boolean, userID?: string}){
     if (isOnline == false || isOnline){
         if (icon.type === IconType.svg){
             return <div className="relative">

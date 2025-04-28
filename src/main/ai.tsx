@@ -175,6 +175,7 @@ export default function Home() {
               </h2>
               <div className="flex items-center space-x-6 space-x-reverse">
                 <Avatar
+                userID={found.id}
                   className="w-24 h-24 rounded-full object-cover shadow-md"
                   icon={found.icon}
                 />

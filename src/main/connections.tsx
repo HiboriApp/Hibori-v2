@@ -22,7 +22,7 @@ const FriendCard: React.FC<{
       style={{ backgroundColor: pallate.main }}
     >
       <div className="flex items-center space-x-4 gap-3">
-        <Avatar icon={friend.icon} className="w-12 h-12 rounded-full object-cover" />
+        <Avatar userID={friend.id} icon={friend.icon} className="w-12 h-12 rounded-full object-cover" />
         <div className="ml-4">
           <h3 className="font-semibold text-lg" style={{ color: pallate.text }}>
             {friend.name}

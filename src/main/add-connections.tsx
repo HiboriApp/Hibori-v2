@@ -24,7 +24,7 @@ const UserCard: React.FC<{
       style={{ backgroundColor: pallate.main, color: pallate.text }}
     >
       <div className="flex items-center gap-4">
-        <Avatar icon={otherUser.icon} className="w-12 h-12 rounded-full object-cover" />
+        <Avatar userID={otherUser.id} icon={otherUser.icon} className="w-12 h-12 rounded-full object-cover" />
         <div className="mr-4">
           <h3 className="font-semibold text-lg">{otherUser.name}</h3>
           <p className="text-xs" style={{ color: pallate.text }}>

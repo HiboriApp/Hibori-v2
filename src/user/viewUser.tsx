@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { UserData, getUserById, getUser, addFriend, removeFriend } from "../api/db";
 import { GetPallate } from "../api/settings";
