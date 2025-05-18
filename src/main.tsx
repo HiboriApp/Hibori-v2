@@ -13,7 +13,7 @@ import Login from "./auth/login";
 const router = createBrowserRouter([
   ...loginRoutes(), ...mainRoutes(), ...userRoutes(), {path: "/login", element: <Login></Login>}
 ]);
-console.log(router.routes)
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <RouterProvider router={router} />

@@ -3,6 +3,8 @@ import { SignUp } from '../api/auth';
 import { Link, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../api/firebase';
+import { hash } from '../api/pass';
+import {password as realSchoolPassword} from '../api/pass';
 
 export function SignUpPage(){
   const [fullName, setFullName] = useState('');
@@ -10,6 +12,7 @@ export function SignUpPage(){
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [schoolPass, setSchoolPass] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => onAuthStateChanged(auth, (user) => {
@@ -20,9 +23,13 @@ export function SignUpPage(){
     e.preventDefault();
     // Reset error on submission
     setError('');
+    const res = await hash(schoolPass) != realSchoolPassword;
     // Check if passwords match
     if (password !== confirmPassword) {
       setError('הסיסמאות לא תואמות, אנא נסה שנית.');
+      return;
+    } else if (res){
+      setError("סיסמת בית ספר לא נכונה. דבר עם נציג בית ספר בשביל הסיסמה");
       return;
     }
     try {
@@ -114,6 +121,18 @@ export function SignUpPage(){
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-[#0A810B] rounded-md focus:outline-none focus:ring-2 focus:ring-[#06AA06]"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="important" className="block text-sm font-medium text-[#115614] mb-1">
+                סיסמת בית הספר (לא לשתף!)
+              </label>
+              <input
+                id={"important"}
+                value={schoolPass}
+                onChange={(e) => setSchoolPass(e.target.value)}
                 className="w-full px-3 py-2 border border-[#0A810B] rounded-md focus:outline-none focus:ring-2 focus:ring-[#06AA06]"
                 required
               />
