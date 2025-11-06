@@ -23,6 +23,7 @@ export function SignUpPage(){
     e.preventDefault();
     // Reset error on submission
     setError('');
+    /*
     const res = await hash(schoolPass) != realSchoolPassword;
     // Check if passwords match
     if (password !== confirmPassword) {
@@ -31,7 +32,7 @@ export function SignUpPage(){
     } else if (res){
       setError("סיסמת בית ספר לא נכונה. דבר עם נציג בית ספר בשביל הסיסמה");
       return;
-    }
+    }*/
     try {
       await SignUp(email, password, fullName);
       navigate('/home');
