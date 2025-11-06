@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../api/firebase';
 import { hash } from '../api/pass';
-import {password as realSchoolPassword} from '../api/pass';
 
 export function SignUpPage(){
   const [fullName, setFullName] = useState('');
