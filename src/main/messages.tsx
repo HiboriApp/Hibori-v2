@@ -3,7 +3,7 @@ import {
   ChevronRight,
   Send,
   Paperclip,
-
+  MessageSquare,
   Search,
   X,
   ChevronLeft,
@@ -11,6 +11,7 @@ import {
   Trash,
   Reply,
   Copy,
+  Users,
 } from "lucide-react"
 import "@szhsin/react-menu/dist/index.css"
 import { Layout } from "../components/layout"
@@ -66,8 +67,12 @@ const ChatList: React.FC<{
   pallate: Pallate
   user: UserData
 }> = ({ chats, onSelectChat, selectedChat, pallate, user }) => {
+  const hasChatsOrFriends = chats.length > 0 || user.friends.length > 0
+
   return (
-    <div className="flex-grow overflow-y-auto  custom-scrollbar" style={{ backgroundColor: pallate.background, color: pallate.text }}>
+    <div className="flex flex-col flex-grow" style={{ backgroundColor: pallate.background, color: pallate.text }}>
+      {hasChatsOrFriends ? (
+        <div className="flex-grow overflow-y-auto custom-scrollbar" style={{ backgroundColor: pallate.background, color: pallate.text }}>
       {chats.map((chat) => {
         const [chatter, setChatter] = useState<UserData | null>(null)
         useEffect(() => {
@@ -138,6 +143,16 @@ const ChatList: React.FC<{
           </div>
         )
       })}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center p-4 text-center">
+          <div>
+            <Users className="mx-auto h-16 w-16 mb-4" style={{ color: pallate.primary }} />
+            <p className="text-lg font-semibold" style={{ color: pallate.text }}>אין חברים או הודעות</p>
+            <p className="text-sm opacity-70 mt-2" style={{ color: pallate.text }}>התחל בהוספת חברים או שלח הודעה</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -725,6 +740,14 @@ const App: React.FC = () => {
               onProfileClick={(profile) => setShowProfile(profile)}
               pallate={pallate}
             />
+          </div>
+        ) : chatsWrapper.length === 0 ? (
+          <div className="h-full flex items-center justify-center p-4">
+            <div className="text-center">
+              <MessageSquare className="mx-auto h-16 w-16 mb-4" style={{ color: pallate.primary }} />
+              <p className="text-lg font-semibold" style={{ color: pallate.text }}>אין הודעות עדיין</p>
+              <p className="text-sm opacity-70 mt-2" style={{ color: pallate.text }}>התחל שיחה עם חבר כדי להתחיל להודיע</p>
+            </div>
           </div>
         ) : (
           <div className="h-full flex items-center justify-center" style={{ color: pallate.secondary }}>
