@@ -1,6 +1,6 @@
 import type React from "react"
 import { useEffect, useState } from "react"
-import { Search, MessageSquare, UserMinus } from "lucide-react"
+import { Search, MessageSquare, UserMinus, Users } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Layout } from "../components/layout"
 import { getUser, getUsersById, openChatName, removeFriend, type UserData } from "../api/db"
@@ -145,11 +145,45 @@ const FriendsPage: React.FC = () => {
   return (
     <Layout>
       <div
-        className="min-h-screen mb-14 md:mb-0 p-8 rtl"
+        className="min-h-screen mb-14 md:mb-0 p-8 rtl connections-page"
         dir="rtl"
-        style={{ color: pallate.text, backgroundColor: pallate.background }}
+        style={{ 
+          color: pallate.text, 
+          backgroundColor: pallate.background,
+          backgroundImage: `radial-gradient(circle at top right, ${pallate.primary}20 0%, transparent 50%)`
+        }}
       >
         <div className="max-w-3xl mx-auto">
+        {friends.length === 0 ? (
+          <div className="rounded-[32px] border border-dashed px-6 py-16 text-center" style={{ backgroundColor: pallate.main, borderColor: `${pallate.primary}25`, color: pallate.text }}>
+            <Users className="mx-auto h-16 w-16" style={{ color: pallate.primary }} />
+            <h2 className="mt-4 text-2xl font-semibold">עדיין אין חברים</h2>
+            <p className="mt-2 text-sm opacity-75">התחל להוסיף חברים כדי להרחיב את הרשת החברתית שלך.</p>
+            <Link
+              to="/addfriends"
+              className="mt-6 inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold transition hover:opacity-90"
+              style={{ backgroundColor: pallate.primary }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="22" y1="11" x2="16" y2="11" />
+              </svg>
+              הוסף חברים
+            </Link>
+          </div>
+        ) : null}
         <div className="mb-6 relative">
             <input
               type="text"
@@ -166,6 +200,7 @@ const FriendsPage: React.FC = () => {
             <Search className="absolute left-3 top-3 text-gray-400" size={20} />
           </div>
 
+          {friends.length > 0 && (
           <div className="flex justify-center items-center mb-8">
             <button
               className="group  relative overflow-hidden rounded-full shadow-md transition-all duration-300 hover:shadow-lg"
@@ -197,8 +232,16 @@ const FriendsPage: React.FC = () => {
               <div className="absolute inset-0 z-0  opacity-80 transition-opacity duration-300 group-hover:opacity-100"></div>
             </button>
           </div>
+          )}
 
         
+          {filteredFriends.length === 0 && friends.length > 0 ? (
+            <div className="rounded-[28px] border border-dashed px-6 py-12 text-center" style={{ backgroundColor: pallate.background, borderColor: `${pallate.primary}25` }}>
+              <Search className="mx-auto h-12 w-12" style={{ color: pallate.primary }} />
+              <p className="mt-4 text-base font-medium">לא נמצאו תוצאות חיפוש</p>
+              <p className="mt-1 text-sm opacity-70">נסה לחפש עם טקסט אחר</p>
+            </div>
+          ) : (
           <div className="space-y-4">
             {filteredFriends.map((friend) => (
               <FriendCard
@@ -211,6 +254,7 @@ const FriendsPage: React.FC = () => {
               />
             ))}
           </div>
+          )}
         </div>
 
         <ConfirmationPopup

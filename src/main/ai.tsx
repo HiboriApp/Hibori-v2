@@ -89,9 +89,12 @@ export default function Home() {
   return (
     <Layout>
       <div
-        className="h-[92vh] relative overflow-hidden"
+        className="h-[92vh] relative overflow-hidden ai-page"
         dir="rtl"
-        style={{ backgroundColor: pallate.background }}
+        style={{ 
+          backgroundColor: pallate.background,
+          backgroundImage: `radial-gradient(circle at top right, ${pallate.primary}20 0%, transparent 50%)`
+        }}
       >
         <main className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
           <h1
