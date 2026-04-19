@@ -24,4 +24,9 @@ dist-ssr
 *.sw?
 .env
 
+# Python and model cache
 initializers/.venv
+ai_server/model_cache/
+*__pycache__/
+*.pyc
+*.pyo
