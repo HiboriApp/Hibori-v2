@@ -11,6 +11,9 @@ class GenerateRequest(BaseModel):
     request: str
     friends: list[User]
 
+@app.get("/")
+async def root():
+    return {"message": "The server is running!!! go to /generate to generate a response."}
 
 @app.post("/generate")
 async def generate(payload: GenerateRequest) -> PlainTextResponse:
