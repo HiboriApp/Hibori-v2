@@ -221,7 +221,7 @@ export default function Home() {
                   onChange={handleSearchChange}
                   placeholder="חפש חבר..."
                   rows={1}
-                  className="w-full py-4 px-6 text-xl text-right bg-transparent rounded-lg focus:outline-none relative z-10 placeholder:text-gray-400 resize-none overflow-hidden"
+                  className="w-full py-4 pr-6 pl-6 md:pl-40 text-xl text-right bg-transparent rounded-lg focus:outline-none relative z-10 placeholder:text-gray-400 resize-none overflow-hidden"
                   style={{ color: pallate.text, backgroundColor: pallate.background }}
                 />
                 <button
