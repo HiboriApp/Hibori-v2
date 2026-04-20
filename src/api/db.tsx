@@ -37,6 +37,7 @@ export interface UserData{
     id: string,
     pallate: Pallate
     icon: Icon
+    classroomId?: string
     name: string
     lastSeen: string
     bio: string
@@ -168,13 +169,14 @@ export async function setUser(user: UserData){
 }
 
 
-export async function CreateUser(name: string, user: User, email: string){
+export async function CreateUser(name: string, user: User, email: string, classroomId: string, bio: string, pallate?: Pallate){
     const data: UserData = {
         id: user.uid,
         name: name,
-        pallate: DefaultPallate(),
+        pallate: pallate || DefaultPallate(),
         icon: await GenerateIcons(user.uid),
-        bio: "",
+        bio: bio,
+        classroomId,
         lastSeen: new Date().toString(),
         email: email,
         notifications: [],

@@ -8,6 +8,7 @@ import { getUser, type UserData, setUser as setUserInDB } from "../api/db"
 import Loading from "./Loading"
 import { Avatar } from "../api/icons"
 import { Timestamp } from "firebase/firestore"
+import LeafLogo from "./LeafLogo"
 
 // Routes
 const routes = [
@@ -52,6 +53,7 @@ function UserProfile({ palette, user }: { palette: Pallate; user: UserData }) {
 function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
   const location = useLocation()
   const [isHovering, setIsHovering] = useState(false)
+  const [hoveredPath, setHoveredPath] = useState<string | null>(null)
 
   return (
     <aside
@@ -62,27 +64,86 @@ function Sidebar({ palette, user }: { palette: Pallate; user: UserData }) {
     >
       <a href="/" className="self-start">
         <div className="p-4 self-end">
-          <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
+          <LeafLogo color={palette.primary} className="h-8 w-8" />
         </div>
       </a>
       <nav className="flex-1 px-2 py-4 space-y-2">
         {routes.map((route) => {
           const Icon = route.icon
           const isActive = location.pathname === route.path
+          const isHovered = hoveredPath === route.path
           return (
             <Link
               key={route.path}
               to={route.path}
+              onMouseEnter={() => setHoveredPath(route.path)}
+              onMouseLeave={() => setHoveredPath((current) => (current === route.path ? null : current))}
               style={{
                 color: isActive ? palette.primary : palette.text,
-                backgroundColor: palette.main,
+                backgroundColor: isActive
+                  ? isHovered
+                    ? `${palette.primary}18`
+                    : `${palette.primary}12`
+                  : isHovered
+                    ? `${palette.primary}08`
+                    : palette.main,
                 borderBottomColor: isActive ? palette.primary : 'transparent',
               }}
-              className="flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-200 border-b-2"
-             
+              className="group relative flex items-center overflow-hidden rounded-2xl border-b-2 px-3 py-2.5 text-sm transition-all duration-200"
             >
-              <Icon className={"ml-2 min-h-6 min-w-6 translate-x-1"} />
-              <p className="min-w-16">{isHovering && route.name}</p>
+              <motion.span
+                className="absolute inset-0 rounded-2xl"
+                aria-hidden="true"
+                animate={{
+                  opacity: isHovered ? 1 : 0,
+                  scale: isHovered ? 1 : 0.99,
+                }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                style={{
+                  background: isActive
+                    ? `linear-gradient(90deg, ${palette.primary}10 0%, transparent 100%)`
+                    : `linear-gradient(90deg, ${palette.primary}06 0%, transparent 100%)`,
+                }}
+              />
+
+              <motion.span
+                aria-hidden="true"
+                className={`absolute rounded-full ${isHovering ? "inset-y-2 right-1 w-0.5" : "bottom-1 left-1/2 h-0.5 w-5 -translate-x-1/2"}`}
+                animate={{
+                  opacity: isHovering && (isActive || isHovered) ? 1 : 0,
+                  scaleY: isHovering ? (isActive ? (isHovered ? 1.02 : 0.92) : isHovered ? 0.62 : 0.3) : 1,
+                  scaleX: isHovering ? 1 : isActive ? (isHovered ? 1.05 : 0.92) : isHovered ? 0.75 : 0.35,
+                }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                style={{ backgroundColor: palette.primary }}
+              />
+
+              <motion.span
+                className="relative z-10 ml-3 flex h-10 w-10 items-center justify-center"
+                animate={{
+                  scale: isActive ? (isHovered ? 1.03 : 1) : isHovered ? 1.02 : 1,
+                  x: isHovered ? -1 : 0,
+                  rotate: isHovered ? -1 : 0,
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 26 }}
+                style={{
+                  color: isActive ? palette.primary : palette.text,
+                }}
+              >
+                <Icon className="min-h-5 min-w-5" />
+              </motion.span>
+
+              <motion.p
+                className="relative z-10 min-w-16 whitespace-nowrap text-sm font-medium"
+                animate={{
+                  opacity: isHovering ? 1 : 0,
+                  x: isHovering ? 0 : 8,
+                  scale: isActive && isHovered ? 1.02 : 1,
+                }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                {route.name}
+              </motion.p>
             </Link>
           )
         })}
@@ -179,6 +240,9 @@ export function Layout({ children, hideLayoutOnMobile = false }: LayoutProps) {
       }
       const newPalette = await GetPallate(userData)
       setPalette(newPalette)
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("hibori-theme-primary", newPalette.primary)
+      }
       setUser(userData)
     }
     fetchData()

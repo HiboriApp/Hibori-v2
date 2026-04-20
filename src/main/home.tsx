@@ -58,6 +58,20 @@ function getPreviewComments(comments: Comment[]) {
   return comments.slice(Math.max(0, comments.length - 2)).reverse()
 }
 
+function getTypedDirection(value: string): "rtl" | "ltr" {
+  for (const character of value.trim()) {
+    if (/[\u0590-\u05FF\u0600-\u06FF]/.test(character)) {
+      return "rtl"
+    }
+
+    if (/[A-Za-z\u00C0-\u024F\u0400-\u04FF]/.test(character)) {
+      return "ltr"
+    }
+  }
+
+  return "ltr"
+}
+
 interface CommentItemProps {
   comment: Comment
   pallate: Pallate
@@ -685,7 +699,7 @@ function TopPanel({
               Alpha
             </div>
             <h3 className="mt-3 text-lg font-semibold">Hibori</h3>
-            <p className="text-xs opacity-70 mt-1">v0.1.0</p>
+            <p className="text-xs opacity-70 mt-1">v2.3</p>
           </div>
           <p className="text-sm opacity-80 leading-6">הפלטפורמה החדשה שלך לחיבור וחלוקת רעיונות</p>
         </div>
@@ -826,6 +840,8 @@ const CreatePost = ({
   const [content, setContent] = useState("")
   const [file, setFile] = useState<UploadedFile | undefined>()
   const [isUploading, setIsUploading] = useState(false)
+  const contentDirection = getTypedDirection(content)
+  const composerDirection = content.trim() ? contentDirection : "rtl"
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -867,11 +883,17 @@ const CreatePost = ({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <textarea
+          dir={composerDirection}
           className="w-full resize-none rounded-[28px] border px-5 py-4 text-[15px] leading-8 outline-none transition"
           placeholder="על מה בא לך לשתף היום?"
           value={content}
           onChange={(event) => setContent(event.target.value)}
-          style={{ backgroundColor: pallate.background, borderColor: `${pallate.primary}18`, color: pallate.text }}
+          style={{
+            backgroundColor: pallate.background,
+            borderColor: `${pallate.primary}18`,
+            color: pallate.text,
+            textAlign: composerDirection === "rtl" ? "right" : "left",
+          }}
         />
 
         {file && (

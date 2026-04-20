@@ -1,62 +1,42 @@
 import { UserData } from "./db";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+function tokenize(value: string) {
+    return value
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, " ")
+        .split(/\s+/)
+        .filter(Boolean);
+}
 
-export default async function Predict(user: UserData, students: UserData[], query: string){
-    const prompt = `
-    Your job is finding friends for a Certain user. You're given a user, a query, and a list of possible friends.
-    Select the best option for a friend from the following options, according to the query and the user.
-    Respond with the ID of the ID of the best possible friend. If there are no possible friends, respond with "null".
-    If you find no one that fits the query, respond with a random user's ID.
+function scoreUserMatch(currentUser: UserData, candidate: UserData, queryTokens: string[]) {
+    const currentUserTokens = tokenize(`${currentUser.name} ${currentUser.bio}`);
+    const candidateTokens = tokenize(`${candidate.name} ${candidate.bio}`);
 
-    Example:
-    User: אביב,
-    Bio: אני אוהב כדורגל
-    Query: אני מחפש משהו שאוהב כדורגל
+    const overlapWithQuery = queryTokens.filter((token) => candidateTokens.includes(token)).length;
+    const overlapWithUser = currentUserTokens.filter((token) => candidateTokens.includes(token)).length;
 
-    Options:
-    1.
-    User: אליהו,
-    Bio: אני שונא כדורגל,
-    ID: A12fFAS23rcw
+    return overlapWithQuery * 3 + overlapWithUser;
+}
 
-    2.
-    User: חורחה
-    Bio: אני אוהב כדורגל,
-    ID: I43OpNw34d
+export default async function Predict(user: UserData, students: UserData[], query: string) {
+    if (!students.length) {
+        return "null";
+    }
 
-    Best response: I43OpNw34d
+    const queryTokens = tokenize(query);
+    const scoredCandidates = students.map((candidate) => ({
+        id: candidate.id,
+        score: scoreUserMatch(user, candidate, queryTokens),
+    }));
 
-    example 2:
-    User: אביב,
-    Bio: אני אוהב כדורגל
-    Query: אני מחפש משהו שאוהב כדורגל
+    scoredCandidates.sort((a, b) => b.score - a.score);
+    const bestCandidate = scoredCandidates[0];
 
-    Options:
-    1.
-    User: אליהו,
-    Bio:
-    ID: A12fFAS23rcw
+    if (!bestCandidate || bestCandidate.score <= 0) {
+        const seed = tokenize(`${user.id} ${query}`).join("").length;
+        const randomIndex = seed % students.length;
+        return students[randomIndex]?.id ?? "null";
+    }
 
-    Best response: A12fFAS23rcw
-
-    Your turn:
-
-    User: ${user.name}
-    Bio: ${user.bio}
-    Query: ${query}
-    Options:
-    ${students.map((student) => `User: ${student.name}
-    Bio: ${student.bio}
-    ID: ${student.id}`).join('\n')}
-
-    Your response:
-
-    `;
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    const response = await model.generateContent(prompt);
-
-    return response.response.text();
+    return bestCandidate.id;
 }

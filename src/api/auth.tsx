@@ -2,11 +2,12 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { CreateUser } from "./db";
+import type { Pallate } from "./settings";
 
 
-export async function SignUp(email: string, password: string, name: string) {
+export async function SignUp(email: string, password: string, name: string, classroomId: string, bio: string, pallate: Pallate) {
     const user = await createUserWithEmailAndPassword(auth, email, password);
-    CreateUser(name, user.user, email);
+    CreateUser(name, user.user, email, classroomId, bio, pallate);
 }
 
 export async function Login(email: string, password: string) {

@@ -145,3 +145,24 @@
     pointer-events: none;
     z-index: 0;
   }
+
+  .auth-modern-input {
+    caret-color: currentColor;
+    background-color: transparent !important;
+  }
+
+  .auth-modern-input:hover,
+  .auth-modern-input:focus,
+  .auth-modern-input:active {
+    background-color: transparent !important;
+  }
+
+  .auth-modern-input:-webkit-autofill,
+  .auth-modern-input:-webkit-autofill:hover,
+  .auth-modern-input:-webkit-autofill:focus,
+  .auth-modern-input:-webkit-autofill:active {
+    -webkit-text-fill-color: currentColor;
+    -webkit-box-shadow: 0 0 0 1000px transparent inset;
+    box-shadow: 0 0 0 1000px transparent inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }

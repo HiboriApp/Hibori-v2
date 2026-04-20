@@ -1,35 +1,42 @@
+import { lazy, Suspense } from "react"
 import { RouteObject } from "react-router-dom"
-import Home from "./main/home";
-import Connections from "./main/connections";
-import Messages from "./main/messages";
-import AddFriendsPage from "./main/add-connections";
-import AiFriends from './main/ai';
+import Loading from "./components/Loading"
+
+const Home = lazy(() => import("./main/home"))
+const Connections = lazy(() => import("./main/connections"))
+const Messages = lazy(() => import("./main/messages"))
+const AddFriendsPage = lazy(() => import("./main/add-connections"))
+const AiFriends = lazy(() => import("./main/ai"))
+
+function withLoader(element: React.ReactNode) {
+  return <Suspense fallback={<Loading />}>{element}</Suspense>
+}
 
 export default function Routes() : RouteObject[]{
   return [
     {
       path: "/home",
-      element: <Home></Home>
+      element: withLoader(<Home />)
     },
     {
       path: '/connections',
-      element: <Connections></Connections>
+      element: withLoader(<Connections />)
     },
     {
       path: '/messages',
-      element: <Messages></Messages>
+      element: withLoader(<Messages />)
     },
     {
       path: '/addfriends',
-      element: <AddFriendsPage></AddFriendsPage>
+      element: withLoader(<AddFriendsPage />)
     },
     {
       path: '/messages/:id',
-      element: <Messages></Messages>
+      element: withLoader(<Messages />)
     },
     {
       path: '/ai',
-      element: <AiFriends></AiFriends>
+      element: withLoader(<AiFriends />)
     }
 
   ];

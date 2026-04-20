@@ -1,9 +1,9 @@
 import type React from "react"
 import { useEffect, useState } from "react"
-import { Search, MessageSquare, UserMinus, Users } from "lucide-react"
+import { Search, MessageSquare, UserMinus, UserPlus } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Layout } from "../components/layout"
-import { getUser, getUsersById, openChatName, removeFriend, type UserData } from "../api/db"
+import { addFriend, findNonFriends, getUser, getUsersById, openChatName, removeFriend, type UserData } from "../api/db"
 import SuperSillyLoading from "../components/Loading"
 import { Avatar } from "../api/icons"
 import { DefaultPallate, GetPallate, type Pallate } from "../api/settings"
@@ -82,6 +82,7 @@ const ConfirmationPopup: React.FC<{
 const FriendsPage: React.FC = () => {
   const [user, setUser] = useState<UserData | null>(null)
   const [friends, setFriends] = useState<UserData[]>()
+  const [suggestedFriends, setSuggestedFriends] = useState<UserData[]>([])
   const [pallate, setPallate] = useState<Pallate>(DefaultPallate())
   const navigate = useNavigate()
 
@@ -95,6 +96,8 @@ const FriendsPage: React.FC = () => {
       setUser(userData)
       setPallate(GetPallate(userData))
       setFriends(await getUsersById(userData.friends))
+      const suggestions = (await findNonFriends(userData, 8)).filter((person) => person.id !== userData.id)
+      setSuggestedFriends(suggestions)
     }
     fetchData()
   }, [navigate])
@@ -115,6 +118,18 @@ const FriendsPage: React.FC = () => {
       return
     }
     navigate("/messages/" + openChatName(user.id, person.id))
+  }
+
+  const handleAddSuggestedFriend = async (id: string) => {
+    if (!user) return
+
+    await addFriend(user, id)
+    const updatedUser = await getUser()
+    if (!updatedUser) return
+
+    setUser(updatedUser)
+    setFriends(await getUsersById(updatedUser.friends))
+    setSuggestedFriends((current) => current.filter((person) => person.id !== id))
   }
 
   if (!user || !friends) {
@@ -154,36 +169,6 @@ const FriendsPage: React.FC = () => {
         }}
       >
         <div className="max-w-3xl mx-auto">
-        {friends.length === 0 ? (
-          <div className="rounded-[32px] border border-dashed px-6 py-16 text-center" style={{ backgroundColor: pallate.main, borderColor: `${pallate.primary}25`, color: pallate.text }}>
-            <Users className="mx-auto h-16 w-16" style={{ color: pallate.primary }} />
-            <h2 className="mt-4 text-2xl font-semibold">עדיין אין חברים</h2>
-            <p className="mt-2 text-sm opacity-75">התחל להוסיף חברים כדי להרחיב את הרשת החברתית שלך.</p>
-            <Link
-              to="/addfriends"
-              className="mt-6 inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold transition hover:opacity-90"
-              style={{ backgroundColor: pallate.primary }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <line x1="19" y1="8" x2="19" y2="14" />
-                <line x1="22" y1="11" x2="16" y2="11" />
-              </svg>
-              הוסף חברים
-            </Link>
-          </div>
-        ) : null}
         <div className="mb-6 relative">
             <input
               type="text"
@@ -199,6 +184,53 @@ const FriendsPage: React.FC = () => {
             />
             <Search className="absolute left-3 top-3 text-gray-400" size={20} />
           </div>
+
+          {friends.length === 0 && (
+            <section className="mb-8 rounded-[28px] border p-4 sm:p-5" style={{ backgroundColor: pallate.main, borderColor: `${pallate.primary}22` }}>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold" style={{ color: pallate.text }}>חברים מומלצים</h2>
+                <Link to="/addfriends" className="text-xs font-semibold opacity-80 hover:opacity-100" style={{ color: pallate.primary }}>
+                  עוד הצעות
+                </Link>
+              </div>
+
+              {suggestedFriends.length === 0 ? (
+                <div className="rounded-2xl border border-dashed px-4 py-8 text-center text-sm opacity-75" style={{ borderColor: `${pallate.primary}22` }}>
+                  אין כרגע הצעות חדשות
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {suggestedFriends.slice(0, 5).map((person) => (
+                    <div
+                      key={person.id}
+                      className="flex items-center justify-between rounded-2xl border px-3 py-3"
+                      style={{ backgroundColor: pallate.background, borderColor: `${pallate.primary}18` }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar userID={person.id} icon={person.icon} className="h-11 w-11 rounded-full object-cover" />
+                        <div>
+                          <p className="text-sm font-semibold" style={{ color: pallate.text }}>{person.name}</p>
+                          <p className="text-xs opacity-70" style={{ color: pallate.text }}>
+                            {person.bio?.trim() ? person.bio.slice(0, 42) : "ללא תיאור"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddSuggestedFriend(person.id)}
+                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                        style={{ backgroundColor: pallate.primary }}
+                      >
+                        <UserPlus size={14} />
+                        הוסף
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {friends.length > 0 && (
           <div className="flex justify-center items-center mb-8">

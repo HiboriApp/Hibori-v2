@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react"
-import { Bell, Camera, Check, Palette, RefreshCw, Trash2, UserRound } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { Bell, BellOff, Camera, Check, Palette, Paintbrush, RefreshCw, Save, Trash2, Type, UserRound } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { getUser, type UserData, setUser as setUserInDB } from "../api/db"
 import { Avatar, GenerateIcons, type Icon, IconType } from "../api/icons"
@@ -7,58 +7,17 @@ import { DefaultPallate, type Pallate } from "../api/settings"
 import { uploadString } from "../api/cloudinary"
 import Loading from "../components/Loading"
 import Layout from "../components/layout"
+import Toast from "../components/Toast"
 
-const paletteFields: Array<{ key: keyof Pallate; label: string; hint: string }> = [
-  { key: "primary", label: "צבע ראשי", hint: "כפתורים והדגשות" },
-  { key: "tertiary", label: "צבע משני", hint: "אלמנטים משלימים" },
-  { key: "secondary", label: "משטח רך", hint: "קלטים וכרטיסים פנימיים" },
-  { key: "background", label: "רקע עמוד", hint: "הרקע הכללי של המסך" },
-  { key: "main", label: "כרטיסים", hint: "משטחים ראשיים" },
-  { key: "text", label: "טקסט", hint: "כותרות ותוכן" },
+const paletteFields: Array<{
+  key: "primary" | "text"
+  label: string
+  hint: string
+  icon: typeof Paintbrush
+}> = [
+  { key: "primary", label: "צבע ראשי", hint: "כפתורים והדגשות", icon: Paintbrush },
+  { key: "text", label: "צבע טקסט", hint: "כותרות ותוכן", icon: Type },
 ]
-
-function ThemePreview({ palette, userName }: { palette: Pallate; userName: string }) {
-  return (
-    <div
-      className="overflow-hidden rounded-[30px] border shadow-[0_24px_70px_rgba(15,23,42,0.12)]"
-      style={{ backgroundColor: palette.main, borderColor: `${palette.primary}20`, color: palette.text }}
-    >
-      <div
-        className="relative h-36"
-        style={{
-          background: `linear-gradient(140deg, ${palette.primary}32 0%, ${palette.tertiary}26 50%, ${palette.secondary}90 100%)`,
-        }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.45),transparent_55%)]" />
-      </div>
-
-      <div className="px-5 pb-5 pt-4">
-        <div className="-mt-12 flex items-end gap-4">
-          <div className="flex h-20 w-20 items-center justify-center rounded-[26px] border-4 bg-white shadow-lg" style={{ borderColor: palette.main }}>
-            <UserRound size={34} style={{ color: palette.primary }} />
-          </div>
-          <div className="pb-2">
-            <p className="text-lg font-semibold">{userName}</p>
-            <p className="text-sm opacity-75">תצוגה מקדימה</p>
-          </div>
-        </div>
-
-        <div className="mt-5 rounded-[22px] border p-4" style={{ backgroundColor: palette.background, borderColor: `${palette.primary}18` }}>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex gap-2">
-              <span className="h-8 w-8 rounded-full border" style={{ backgroundColor: palette.primary, borderColor: `${palette.text}12` }} />
-              <span className="h-8 w-8 rounded-full border" style={{ backgroundColor: palette.tertiary, borderColor: `${palette.text}12` }} />
-              <span className="h-8 w-8 rounded-full border" style={{ backgroundColor: palette.secondary, borderColor: `${palette.text}12` }} />
-            </div>
-            <button type="button" className="rounded-full px-4 py-2 text-sm font-semibold text-white" style={{ backgroundColor: palette.primary }}>
-              שמור
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 function PaletteLab({
   colors,
@@ -69,10 +28,13 @@ function PaletteLab({
   onChange: (colors: Pallate) => void
   onReset: () => void
 }) {
-  const [selectedKey, setSelectedKey] = useState<keyof Pallate>("primary")
+  const [selectedKey, setSelectedKey] = useState<"primary" | "text">("primary")
 
   const selectedField = paletteFields.find((field) => field.key === selectedKey) ?? paletteFields[0]
-  const swatches = ["#4caf50", "#22c55e", "#0ea5e9", "#6366f1", "#f97316", "#f43f5e", "#111827", "#f8fafc"]
+  const swatches = {
+    primary: ["#4caf50", "#22c55e", "#0ea5e9", "#0047AB", "#f97316", "#FF0000"],
+    text: ["#000000", "#0f172a", "#1f2937", "#334155", "#ffffff", "#f8fafc"],
+  }
 
   const updateColor = (key: keyof Pallate, value: string) => {
     onChange({ ...colors, [key]: value })
@@ -93,7 +55,8 @@ function PaletteLab({
               color: colors.text,
             }}
           >
-            <span className="h-4 w-4 rounded-full" style={{ backgroundColor: colors[field.key] }} />
+            <field.icon className="h-4 w-4" style={{ color: selectedKey === field.key ? colors.primary : colors.text }} />
+            <span className="h-4 w-4 rounded-full border" style={{ backgroundColor: colors[field.key], borderColor: `${colors.text}14` }} />
             {field.label}
           </button>
         ))}
@@ -133,7 +96,7 @@ function PaletteLab({
               style={{ backgroundColor: colors.background, borderColor: `${colors.primary}18`, color: colors.text }}
             />
             <div className="mt-3 flex flex-wrap gap-2">
-              {swatches.map((swatch) => (
+              {swatches[selectedKey].map((swatch) => (
                 <button
                   key={swatch}
                   type="button"
@@ -146,9 +109,45 @@ function PaletteLab({
             </div>
           </div>
         </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border px-4 py-3" style={{ backgroundColor: colors.background, borderColor: `${colors.primary}14` }}>
+            <div className="flex items-center gap-2 text-sm font-medium" style={{ color: colors.text }}>
+              <Paintbrush className="h-4 w-4" style={{ color: colors.primary }} />
+              צבע ראשי
+            </div>
+            <p className="mt-2 text-xs opacity-70" style={{ color: colors.text }}>{colors.primary}</p>
+          </div>
+          <div className="rounded-2xl border px-4 py-3" style={{ backgroundColor: colors.background, borderColor: `${colors.primary}14` }}>
+            <div className="flex items-center gap-2 text-sm font-medium" style={{ color: colors.text }}>
+              <Type className="h-4 w-4" style={{ color: colors.primary }} />
+              צבע טקסט
+            </div>
+            <p className="mt-2 text-xs opacity-70" style={{ color: colors.text }}>{colors.text}</p>
+          </div>
+        </div>
       </div>
     </div>
   )
+}
+
+function getIconSnapshot(icon: Icon | null) {
+  if (!icon) {
+    return null
+  }
+
+  return `${icon.type}:${icon.content}`
+}
+
+function getSettingsSnapshot(user: UserData, colors: Pallate, pfp: Icon | null, profileRemoved: boolean) {
+  return JSON.stringify({
+    name: user.name,
+    email: user.email,
+    bio: user.bio,
+    wantsNotifications: user.wantsNotifications,
+    colors,
+    icon: profileRemoved ? null : getIconSnapshot(pfp),
+  })
 }
 
 export default function SettingsPage() {
@@ -157,8 +156,20 @@ export default function SettingsPage() {
   const [profileRemoved, setProfileRemoved] = useState(false)
   const [colors, setColors] = useState(DefaultPallate())
   const [isSaving, setIsSaving] = useState(false)
+  const [initialSnapshot, setInitialSnapshot] = useState("")
+  const [showSavedState, setShowSavedState] = useState(false)
+  const [toastState, setToastState] = useState<{ open: boolean; message: string; variant: "notifications-on" | "notifications-off" }>({
+    open: false,
+    message: "",
+    variant: "notifications-on",
+  })
   const fileRef = useRef<HTMLInputElement>(null)
+  const savedStateTimeout = useRef<number | null>(null)
   const navigate = useNavigate()
+
+  const closeToast = useCallback(() => {
+    setToastState((current) => ({ ...current, open: false }))
+  }, [])
 
   const handleChangePFP = async () => {
     if (!fileRef.current) return
@@ -183,20 +194,53 @@ export default function SettingsPage() {
     setProfileRemoved(true)
   }
 
+  const handleToggleNotifications = () => {
+    if (!user) return
+
+    const wantsNotifications = !user.wantsNotifications
+    setUser({ ...user, wantsNotifications })
+    setToastState({
+      open: true,
+      message: wantsNotifications ? "ההתראות הופעלו" : "ההתראות כובו",
+      variant: wantsNotifications ? "notifications-on" : "notifications-off",
+    })
+  }
+
   const handleSave = async () => {
     if (!user) return
+
+    const hasChanges = getSettingsSnapshot(user, colors, pfp, profileRemoved) !== initialSnapshot
+    if (!hasChanges) return
 
     setIsSaving(true)
     const nextIcon = pfp ?? (profileRemoved ? await GenerateIcons(user.id) : user.icon ?? await GenerateIcons(user.id))
 
-    await setUserInDB({
+    const nextUser = {
       ...user,
       pallate: colors,
       icon: nextIcon,
-    })
+    }
 
+    await setUserInDB(nextUser)
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("hibori-theme-primary", colors.primary)
+    }
+
+    if (savedStateTimeout.current) {
+      window.clearTimeout(savedStateTimeout.current)
+    }
+
+    setUser(nextUser)
+    setPFP(nextIcon)
+    setProfileRemoved(false)
+    setInitialSnapshot(getSettingsSnapshot(nextUser, colors, nextIcon, false))
     setIsSaving(false)
-    navigate("/home")
+    setShowSavedState(true)
+    savedStateTimeout.current = window.setTimeout(() => {
+      setShowSavedState(false)
+      savedStateTimeout.current = null
+    }, 1800)
   }
 
   useEffect(() => {
@@ -209,20 +253,40 @@ export default function SettingsPage() {
 
       setUser(userData)
       setPFP(userData.icon ?? null)
-      if (userData.pallate) {
-        setColors(userData.pallate)
-      }
+      const nextColors = userData.pallate ?? DefaultPallate()
+      setColors(nextColors)
+      setInitialSnapshot(getSettingsSnapshot(userData, nextColors, userData.icon ?? null, false))
     }
 
     fetchData()
   }, [navigate])
 
+  useEffect(() => {
+    return () => {
+      if (savedStateTimeout.current) {
+        window.clearTimeout(savedStateTimeout.current)
+      }
+    }
+  }, [])
+
   if (!user) {
     return <Loading />
   }
 
+  const hasChanges = getSettingsSnapshot(user, colors, pfp, profileRemoved) !== initialSnapshot
+  const saveLabel = isSaving ? "שומר" : showSavedState ? "נשמר" : hasChanges ? "שמור" : "ללא שינוי"
+  const saveIcon = isSaving ? <RefreshCw className="h-4 w-4 animate-spin" /> : showSavedState ? <Check className="h-4 w-4 animate-pulse" /> : hasChanges ? <Save className="h-4 w-4" /> : <Check className="h-4 w-4" />
+  const saveStyles = isSaving
+    ? { backgroundColor: colors.text, borderColor: colors.text, color: colors.main }
+    : showSavedState
+      ? { backgroundColor: "#22c55e", borderColor: "#16a34a", color: "#ffffff" }
+      : hasChanges
+        ? { backgroundColor: "#ef4444", borderColor: "#dc2626", color: "#ffffff" }
+        : { backgroundColor: `${colors.primary}10`, borderColor: `${colors.primary}18`, color: colors.text }
+
   return (
     <Layout>
+      <Toast open={toastState.open} message={toastState.message} variant={toastState.variant} tone="success" onClose={closeToast} />
       <div
         dir="rtl"
         className="min-h-screen px-4 py-8 sm:px-6 lg:px-8"
@@ -234,43 +298,50 @@ export default function SettingsPage() {
       >
         <div className="mx-auto max-w-6xl space-y-6">
           <section
-            className="overflow-hidden rounded-[34px] border shadow-[0_24px_80px_rgba(15,23,42,0.1)]"
-            style={{ backgroundColor: colors.main, borderColor: `${colors.primary}16` }}
+            className="overflow-hidden rounded-[34px] border shadow-[0_18px_50px_rgba(15,23,42,0.08)]"
+            style={{ backgroundColor: colors.main, borderColor: `${colors.primary}14` }}
           >
             <div
-              className="relative px-5 pb-8 pt-8 sm:px-8"
+              className="relative px-5 py-6 sm:px-8"
               style={{
-                background: `linear-gradient(135deg, ${colors.primary}22 0%, ${colors.tertiary}16 40%, ${colors.main} 100%)`,
+                background: `linear-gradient(135deg, ${colors.primary}16 0%, ${colors.background} 60%, ${colors.main} 100%)`,
               }}
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.45),transparent_55%)]" />
-              <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style={{ backgroundColor: `${colors.primary}16`, color: colors.primary }}>
-                    <Palette className="h-4 w-4" />
-                    הגדרות מותאמות אישית
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.38),transparent_55%)]" />
+              <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: `${colors.primary}14`, color: colors.primary }}>
+                    <Palette className="h-5 w-5" />
                   </div>
-                  <h1 className="mt-4 text-3xl font-semibold sm:text-4xl">בנה פרופיל שנראה כמו שלך</h1>
-                  <p className="mt-3 max-w-2xl text-sm leading-7 opacity-80 sm:text-base">
-                    שדרג את הפרופיל, התמונה והצבעים במקום אחד. כל שינוי כאן ישפיע על האווירה של כל האפליקציה.
-                  </p>
+                  <div>
+                    <h1 className="text-2xl font-semibold sm:text-3xl">הגדרות פרופיל</h1>
+                    <p className="mt-1 text-sm opacity-70">ערוך פרטים, תמונה וצבעים.</p>
+                  </div>
                 </div>
 
-                <div className="rounded-[28px] border p-4" style={{ backgroundColor: `${colors.main}cc`, borderColor: `${colors.primary}16` }}>
-                  <div className="flex items-center gap-3">
-                    <Bell className="h-5 w-5" style={{ color: colors.primary }} />
-                    <div>
-                      <p className="text-sm font-semibold">התראות</p>
-                      <p className="text-xs opacity-75">{user.wantsNotifications ? "פעילות" : "כבויות כרגע"}</p>
-                    </div>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleToggleNotifications}
+                  className="inline-flex items-center justify-center rounded-[20px] border px-4 py-3 transition hover:-translate-y-0.5"
+                  style={{
+                    backgroundColor: user.wantsNotifications ? "#22c55e" : "#9ca3af",
+                    borderColor: user.wantsNotifications ? "#16a34a" : "#9ca3af",
+                    color: "#ffffff",
+                  }}
+                  aria-label={user.wantsNotifications ? "כבה התראות" : "הפעל התראות"}
+                >
+                  {user.wantsNotifications ? (
+                    <Bell className="h-5 w-5 shrink-0" />
+                  ) : (
+                    <BellOff className="h-5 w-5 shrink-0" />
+                  )}
+                </button>
               </div>
             </div>
           </section>
 
-          <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-            <aside className="space-y-6">
+          <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)] xl:items-start">
+            <aside className="space-y-6 xl:sticky xl:top-6 self-start">
               <section className="rounded-[30px] border p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)]" style={{ backgroundColor: colors.main, borderColor: `${colors.primary}16` }}>
                 <div className="flex flex-col items-center text-center">
                   <div className="relative">
@@ -312,7 +383,20 @@ export default function SettingsPage() {
                 </div>
               </section>
 
-              <ThemePreview palette={colors} userName={user.name || "השם שלך"} />
+              <section className="rounded-[26px] border p-3 shadow-[0_14px_36px_rgba(15,23,42,0.08)]" style={{ backgroundColor: colors.main, borderColor: `${colors.primary}16` }}>
+                <button
+                  onClick={handleSave}
+                  type="button"
+                  disabled={isSaving || !hasChanges}
+                  className="flex w-full items-center justify-center gap-2 rounded-[20px] border px-4 py-3 text-sm font-semibold transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  style={saveStyles}
+                  aria-label={hasChanges ? "שמור שינויים" : "אין שינויים לשמירה"}
+                >
+                  {saveIcon}
+                  {saveLabel}
+                </button>
+              </section>
+
             </aside>
 
             <main className="space-y-6">
@@ -360,52 +444,18 @@ export default function SettingsPage() {
               </section>
 
               <section className="rounded-[30px] border p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)]" style={{ backgroundColor: colors.main, borderColor: `${colors.primary}16` }}>
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-semibold" style={{ color: colors.primary }}>התראות</h2>
-                    <p className="mt-2 text-sm opacity-75">קבע אם לקבל התראות על הודעות ופעילות חדשה.</p>
-                  </div>
-                  <label className="relative inline-flex cursor-pointer items-center">
-                    <input
-                      checked={user.wantsNotifications}
-                      onChange={(event) => setUser({ ...user, wantsNotifications: event.target.checked })}
-                      type="checkbox"
-                      className="peer sr-only"
-                    />
-                    <div
-                      className="h-7 w-14 rounded-full after:absolute after:right-[3px] after:top-[3px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:-translate-x-7"
-                      style={{ backgroundColor: user.wantsNotifications ? colors.primary : "#d1d5db" }}
-                    />
-                  </label>
-                </div>
-              </section>
-
-              <section className="rounded-[30px] border p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)]" style={{ backgroundColor: colors.main, borderColor: `${colors.primary}16` }}>
                 <div className="flex items-center gap-2">
                   <Palette className="h-5 w-5" style={{ color: colors.primary }} />
-                  <h2 className="text-2xl font-semibold" style={{ color: colors.primary }}>סטודיו צבעים</h2>
+                  <h2 className="text-2xl font-semibold" style={{ color: colors.primary }}>צבעים</h2>
                 </div>
                 <p className="mt-2 text-sm leading-6 opacity-75">
-                  ערוך כל צבע בנפרד, נסה ערכות מוכנות, וראה את התוצאה בזמן אמת לפני השמירה.
+                  שנה את הצבע הראשי ואת צבע הטקסט, ראה את התוצאה מיד, ואם צריך אפשר לאפס בלחיצה אחת.
                 </p>
 
                 <div className="mt-6">
                   <PaletteLab colors={colors} onChange={setColors} onReset={() => setColors(DefaultPallate())} />
                 </div>
               </section>
-
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSave}
-                  type="button"
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                  style={{ backgroundColor: colors.primary }}
-                >
-                  <Check className="h-4 w-4" />
-                  {isSaving ? "שומר..." : "שמור שינויים"}
-                </button>
-              </div>
             </main>
           </div>
         </div>
